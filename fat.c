@@ -102,7 +102,7 @@ void fat_parse_header(struct fatfile *fat)
 /**
  * Returns the 32-bit fat value for the given cluster number
  */
-int fat_follow(struct fatfile *fat, int cluster)
+int fat_next(struct fatfile *fat, int cluster)
 {
     char buffer[4];
 
@@ -142,21 +142,30 @@ struct fatentry
 #define FAT_FILESIZE            0x1c
 #define FAT_ATTRIBUTES_HIDE     (1<<1)
 #define FAT_ATTRIBUTES_DIR      (1<<4)
+#define FAT_ATTRIBUTES_LONGFILE (0xf)
 
-char is_zero(char *buffer, int n)
+char longFilePos[] = {
+    30, 28, 24, 22, 20, 18, 16, 14, 9, 7, 5, 3, 1
+};
+
+void append_file_name(char *buffer, char *fnBuffer, int *pos)
 {
-    int i;
-    for (i=0; i<n; i++) {
-        if (buffer[i] != 0) {
-            return 0;
+    int i;  
+    for (i=0; i<13; i++) {
+        unsigned char c = buffer[longFilePos[i]];
+        if (c != 0 && c != 0xff) {
+            (*pos)--;
+            fnBuffer[*pos] = c;
         }
     }
-
-    return 1;
 }
 
 void fat_list(struct fatfile *fat, int cluster)
 {
+    char longFileName[256];
+    int longFilePos = 255;
+    longFileName[255] = 0;
+
     do {
         FAT_SEEK(fat_cluster_address(fat, cluster));
         char buffer[FAT_RECORD_SIZE];
@@ -164,11 +173,15 @@ void fat_list(struct fatfile *fat, int cluster)
         int i;
         for (i=0; i<fat->bytesPerSector; i+=sizeof(buffer)) {
             read(fat->file, buffer, sizeof(buffer));
-            if (!is_zero(buffer, sizeof(buffer))) {
-                struct fatentry entry;
+            struct fatentry entry;
+            entry.attributes = buffer[FAT_ATTRIBUTES];
+
+            if (entry.attributes & FAT_ATTRIBUTES_LONGFILE) {
+                append_file_name(buffer, longFileName, &longFilePos);
+                // Long file part
+            } else {
                 memcpy(entry.shortName, buffer, sizeof(entry.shortName)-1);
                 entry.shortName[sizeof(entry.shortName)-1] = '\0';
-                entry.attributes = buffer[FAT_ATTRIBUTES];
                 entry.cluster = READ_SHORT(buffer, FAT_CLUSTER_LOW) | (READ_SHORT(buffer, FAT_CLUSTER_HIGH)<<16);
                 entry.size = READ_LONG(buffer, FAT_FILESIZE);
 
@@ -179,14 +192,36 @@ void fat_list(struct fatfile *fat, int cluster)
                         } else {
                             printf("f");
                         }
-                        printf(" %s [%08x, %08X, %d, %x]\n", entry.shortName, entry.cluster, fat_follow(fat, entry.cluster), entry.size, entry.attributes);
+                        printf(" %s [%s] [%08x, %08X, %d, %x]\n", longFileName+longFilePos, entry.shortName, entry.cluster, fat_next(fat, entry.cluster), entry.size, entry.attributes);
                     }
                 }
+                longFilePos = 255;
             }
         }
 
-        cluster = fat_follow(fat, cluster);
+        cluster = fat_next(fat, cluster);
     } while (cluster != FAT_LAST);
+}
+
+void fat_read_file(struct fatfile *fat, int cluster, int size)
+{
+    while (size) {
+        FAT_SEEK(fat_cluster_address(fat, cluster));
+        int toRead = size;
+        if (toRead > fat->bytesPerSector) {
+            toRead = fat->bytesPerSector;
+        }
+        char buffer[fat->bytesPerSector];
+        read(fat->file, buffer, toRead);
+        size -= toRead;
+
+        int i;
+        for (i=0; i<toRead; i++) {
+            printf("%c", buffer[i]);
+        }
+
+        cluster = fat_next(fat, cluster);
+    }
 }
 
 void fat_scan(struct fatfile *fat)
@@ -204,6 +239,8 @@ void fat_scan(struct fatfile *fat)
         fat->dataStart = fat->fatStart + fat->fats * fat->sectorsPerFat * fat->bytesPerSector;
         printf("Clusters startings @%08X\n", fat->dataStart);
 
-        fat_list(fat, fat->rootDirectory);
+        // fat_list(fat, fat->rootDirectory);
+        // fat_list(fat, 3);
+        fat_read_file(fat, 0x1e, 792);
     }
 }

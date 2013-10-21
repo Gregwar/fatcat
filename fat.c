@@ -143,6 +143,7 @@ struct fatentry
 #define FAT_ATTRIBUTES_HIDE     (1<<1)
 #define FAT_ATTRIBUTES_DIR      (1<<4)
 #define FAT_ATTRIBUTES_LONGFILE (0xf)
+#define FAT_ATTRIBUTES_FILE     (0x20)
 
 char longFilePos[] = {
     30, 28, 24, 22, 20, 18, 16, 14, 9, 7, 5, 3, 1
@@ -186,7 +187,7 @@ void fat_list(struct fatfile *fat, int cluster)
                 entry.size = READ_LONG(buffer, FAT_FILESIZE);
 
                 if (!(entry.attributes & FAT_ATTRIBUTES_HIDE)) {
-                    if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.size) {
+                    if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.attributes&FAT_ATTRIBUTES_FILE) {
                         if (entry.attributes & FAT_ATTRIBUTES_DIR) {
                             printf("d");
                         } else {
@@ -241,6 +242,8 @@ void fat_scan(struct fatfile *fat)
 
         // fat_list(fat, fat->rootDirectory);
         // fat_list(fat, 3);
-        fat_read_file(fat, 0x1e, 792);
+        // fat_read_file(fat, 0x1e, 792);
+        fat_list(fat, 0x20);
+        fat_read_file(fat, 0x000009d4, 5);
     }
 }

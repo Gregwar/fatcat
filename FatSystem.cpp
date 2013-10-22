@@ -181,14 +181,17 @@ void FatSystem::list(int cluster)
 
 void FatSystem::readFile(int cluster, int size)
 {
-    while (size && cluster!=FAT_LAST) {
+    while ((size!=0) && cluster!=FAT_LAST) {
         int toRead = size;
-        if (toRead > bytesPerCluster) {
+        if (toRead > bytesPerCluster || size < 0) {
             toRead = bytesPerCluster;
         }
         char buffer[bytesPerCluster];
         readData(clusterAddress(cluster), buffer, toRead);
-        size -= toRead;
+
+        if (size != -1) {
+            size -= toRead;
+        }
 
         int i;
         for (i=0; i<toRead; i++) {

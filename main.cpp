@@ -13,8 +13,10 @@ void usage()
     cout << "Usage: fatcat [-i] disk.img" << endl;
     cout << "-i: display information about disk" << endl;
     cout << "-l [dir]: list files and directories in the given path" << endl;
-    cout << "-c [cluster]: list files and directories in the given cluster" << endl;
+    cout << "-L [cluster]: list files and directories in the given cluster" << endl;
     cout << "-r [path]: reads the file given by the path" << endl;
+    cout << "-R [cluster]: reads the data from given cluster" << endl;
+    cout << "-s [size]: specify the size of data to read from the cluster" << endl;
     exit(EXIT_FAILURE);
 }
 
@@ -23,6 +25,9 @@ int main(int argc, char *argv[])
     vector<string> arguments;
     char *image = NULL;
     int index;
+
+    // -s, specify the size to be read
+    int size = -1;
 
     // -i, display informations about the disk
     bool infoFlag = false;
@@ -39,8 +44,12 @@ int main(int argc, char *argv[])
     bool readFlag = false;
     string readPath;
 
+    // -t, reads from cluster file
+    bool clusterRead = false;
+    int cluster;
+
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:c:r:")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:")) != -1) {
         switch (index) {
             case 'i':
                 infoFlag = true;
@@ -49,13 +58,20 @@ int main(int argc, char *argv[])
                 listFlag = true;
                 listPath = string(optarg);
                 break;
-            case 'c':
+            case 'L':
                 listClusterFlag = true;
                 listCluster = atoi(optarg);
                 break;
             case 'r':
                 readFlag = true;
                 readPath = string(optarg);
+                break;
+            case 'R':
+                clusterRead = true;
+                cluster = atoi(optarg);
+                break;
+            case 's':
+                size = atoi(optarg);
                 break;
         }
     }
@@ -75,7 +91,7 @@ int main(int argc, char *argv[])
     }
 
     // If the user did not required any actions
-    if (!(infoFlag || listFlag || listClusterFlag || readFlag)) {
+    if (!(infoFlag || listFlag || listClusterFlag || readFlag || clusterRead)) {
         usage();
     }
 
@@ -94,6 +110,8 @@ int main(int argc, char *argv[])
         } else if (readFlag) {
             FatPath path(readPath);
             fat.readFile(path);
+        } else if (clusterRead) {
+            fat.readFile(cluster, size);
         }
     } else {
         cout << "! Failed to init the FAT filesystem" << endl;

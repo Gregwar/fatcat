@@ -24,6 +24,8 @@ using namespace std;
 class FatEntry
 {
     public:
+        string getFilename();
+
         string shortName;
         string longName;
         char attributes;

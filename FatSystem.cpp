@@ -158,7 +158,7 @@ void FatSystem::list(int cluster)
         } else {
             printf("f");
         }
-        printf(" %s [%s] [%08x, %08X, %d, %x]\n", entry.longName.c_str(), entry.shortName.c_str(), entry.cluster, nextCluster(entry.cluster), entry.size, entry.attributes);
+        printf(" %s [%s] [%08x, %08X, %d, %x]\n", entry.getFilename().c_str(), entry.shortName.c_str(), entry.cluster, nextCluster(entry.cluster), entry.size, entry.attributes);
     }
 }
 
@@ -197,12 +197,11 @@ void FatSystem::run()
         dataStart = fatStart + fats*sectorsPerFat*bytesPerSector;
         printf("Clusters startings @%08X\n", dataStart);
 
-        // fat_list(fat, rootDirectory);
-        // fat_list(fat, 3);
+        // list(rootDirectory);
+        list(3);
         // fat_read_file(fat, 0x1e, 792);
         // fat_list(fat, 0x20);
         // fat_read_file(fat, 0x000009d4, 5);
-        list(0x9e6);
         // fat_list(fat, 0x9e6);
         // fat_read_file(fat, 0x000009f0, 1048576);
     }

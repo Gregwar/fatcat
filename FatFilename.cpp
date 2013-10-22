@@ -18,7 +18,11 @@ string FatFilename::getFilename()
 
 void FatFilename::append(char *buffer)
 {
-    int i;  
+    if (buffer[0]&0x40) {
+        data = "";
+    }
+
+    int i;
     for (i=0; i<sizeof(longFilePos); i++) {
         unsigned char c = buffer[longFilePos[i]];
         if (c != 0 && c != 0xff) {

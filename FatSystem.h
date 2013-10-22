@@ -31,9 +31,12 @@ class FatSystem
         FatSystem(string filename);
         ~FatSystem();
 
-        void run();
+        // Initializing the system
+        bool init();
+
         void list(int cluster);
         void list(FatPath &path);
+        void infos();
 
     protected:
         int fd;

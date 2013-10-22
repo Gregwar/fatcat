@@ -20,7 +20,6 @@ using namespace std;
 : strange(0)
 {
     fd = open(filename.c_str(), O_RDONLY);
-    cout << "Hello world!" << endl;
 }
 
 FatSystem::~FatSystem()
@@ -212,20 +211,28 @@ void FatSystem::readFile(int cluster, int size)
     }
 }
 
-void FatSystem::run()
+bool FatSystem::init()
 {
     // Parsing header
     parseHeader();
 
-    if (strange > 0) {
-        printf("* FAT system too strange, aborting\n");
-        return;
-    } else {
-        printf("* FAT system seems OK\n");
-        fatStart = bytesPerSector * reservedSectors;
-        printf("FAT startings @%08X\n", fatStart);
-        dataStart = fatStart + fats*sectorsPerFat*bytesPerSector;
-        printf("Clusters startings @%08X\n", dataStart);
-        bytesPerCluster = bytesPerSector*sectorsPerCluster;
-    }
+    // Computing values
+    fatStart = bytesPerSector * reservedSectors;
+    dataStart = fatStart + fats*sectorsPerFat*bytesPerSector;
+    bytesPerCluster = bytesPerSector*sectorsPerCluster;
+
+    return strange == 0;
+}
+        
+void FatSystem::infos()
+{
+    cout << "FAT Filesystem informations" << endl;
+
+    cout << "Bytes per sector: " << bytesPerSector << endl;
+    cout << "Sectors per cluster: " << sectorsPerCluster << endl;
+    cout << "Bytes per cluster: " << bytesPerCluster << endl;
+    cout << "Reserved sectors: " << reservedSectors << endl;
+    cout << "Sectors per FAT: " << sectorsPerFat << endl;
+    printf("FAT start address: %08x\n", fatStart);
+    printf("Data start address: %08x\n", dataStart);
 }

@@ -21,12 +21,16 @@ using namespace std;
 #define FAT_ATTRIBUTES_LONGFILE (0xf)
 #define FAT_ATTRIBUTES_FILE     (0x20)
 
+// Prefix used for erased files
+#define FAT_ERASED                  0xe5
+
 class FatEntry
 {
     public:
         string getFilename();
         bool isDirectory();
         bool isHidden();
+        bool isErased();
 
         string shortName;
         string longName;

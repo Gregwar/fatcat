@@ -142,7 +142,7 @@ vector<FatEntry> FatSystem::getEntries(int cluster)
                 entry.cluster = FAT_READ_SHORT(buffer, FAT_CLUSTER_LOW) | (FAT_READ_SHORT(buffer, FAT_CLUSTER_HIGH)<<16);
                 entry.size = FAT_READ_LONG(buffer, FAT_FILESIZE);
 
-                if ((entry.shortName[0]&0xff) != FAT_ERASED) {
+                if (!entry.isErased()) {
                     if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.attributes&FAT_ATTRIBUTES_FILE) {
                         entries.push_back(entry);
                     }

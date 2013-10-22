@@ -32,3 +32,8 @@ bool FatEntry::isHidden()
 {
     return attributes&FAT_ATTRIBUTES_HIDE;
 }
+
+bool FatEntry::isErased()
+{
+    return ((shortName[0]&0xff) == FAT_ERASED);
+}

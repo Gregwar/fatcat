@@ -26,9 +26,6 @@ using namespace std;
 #define FAT_DISK_FS                 0x52
 #define FAT_DISK_FS_SIZE            8
 
-// Prefix used for erased files
-#define FAT_ERASED                  0xe5
-
 /**
  * A FAT fileSystem
  */

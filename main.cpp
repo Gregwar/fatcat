@@ -14,6 +14,7 @@ void usage()
     cout << "-i: display information about disk" << endl;
     cout << "-l [dir]: list files and directories in the given path" << endl;
     cout << "-c [cluster]: list files and directories in the given cluster" << endl;
+    cout << "-r [path]: reads the file given by the path" << endl;
     exit(EXIT_FAILURE);
 }
 
@@ -34,8 +35,12 @@ int main(int argc, char *argv[])
     bool listClusterFlag = false;
     int listCluster;
 
+    // -r, reads a file
+    bool readFlag = false;
+    string readPath;
+
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:c:")) != -1) {
+    while ((index = getopt(argc, argv, "il:c:r:")) != -1) {
         switch (index) {
             case 'i':
                 infoFlag = true;
@@ -47,6 +52,10 @@ int main(int argc, char *argv[])
             case 'c':
                 listClusterFlag = true;
                 listCluster = atoi(optarg);
+                break;
+            case 'r':
+                readFlag = true;
+                readPath = string(optarg);
                 break;
         }
     }
@@ -66,7 +75,7 @@ int main(int argc, char *argv[])
     }
 
     // If the user did not required any actions
-    if (!(infoFlag || listFlag || listClusterFlag)) {
+    if (!(infoFlag || listFlag || listClusterFlag || readFlag)) {
         usage();
     }
 
@@ -82,6 +91,9 @@ int main(int argc, char *argv[])
         } else if (listClusterFlag) {
             cout << "Listing cluster " << listCluster << endl;
             fat.list(listCluster);
+        } else if (readFlag) {
+            FatPath path(readPath);
+            fat.readFile(path);
         }
     } else {
         cout << "! Failed to init the FAT filesystem" << endl;

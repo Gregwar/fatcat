@@ -16,6 +16,21 @@ string FatPath::getPath()
     return path;
 }
 
+string FatPath::getDirname()
+{
+    string dirname = "";
+    for (int i=0; i<parts.size()-1; i++) {
+        dirname += parts[i] + "/";
+    }
+
+    return dirname;
+}
+        
+string FatPath::getBasename()
+{
+    return parts[parts.size()-1];
+}
+
 vector<string> FatPath::getParts()
 {
     return parts;

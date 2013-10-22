@@ -156,32 +156,11 @@ vector<FatEntry> FatSystem::getEntries(int cluster)
         
 void FatSystem::list(FatPath &path)
 {
-    vector<string> parts = path.getParts();
-    int cluster = rootDirectory;
+    int cluster;
 
-    for (int i=0; i<parts.size(); i++) {
-        if (parts[i] != "") {
-            vector<FatEntry> entries = getEntries(cluster);
-            vector<FatEntry>::iterator it;
-            bool found = false;
-
-            for (it=entries.begin(); it!=entries.end(); it++) {
-                FatEntry &entry = *it;
-                string name = entry.getFilename();
-                if (name == parts[i]) {
-                    cluster = entry.cluster;
-                    found = true;
-                }
-            }
-
-            if (!found) {
-                cerr << "Error: directory " << path.getPath() << " not found" << endl;
-                return;
-            }
-        }
+    if (findDirectory(path, &cluster)) {
+        list(cluster);
     }
-
-    list(cluster);
 }
 
 void FatSystem::list(int cluster)
@@ -202,7 +181,7 @@ void FatSystem::list(int cluster)
 
 void FatSystem::readFile(int cluster, int size)
 {
-    while (size) {
+    while (size && cluster!=FAT_LAST) {
         int toRead = size;
         if (toRead > bytesPerCluster) {
             toRead = bytesPerCluster;
@@ -213,7 +192,7 @@ void FatSystem::readFile(int cluster, int size)
 
         int i;
         for (i=0; i<toRead; i++) {
-            fprintf(stderr, "%c", buffer[i]);
+            printf("%c", buffer[i]);
         }
 
         cluster = nextCluster(cluster);
@@ -251,4 +230,66 @@ void FatSystem::infos()
     printf("Data start address: %08x\n", dataStart);
     cout << "Root directory cluster: " << rootDirectory << endl;
     cout << "Disk label: " << diskLabel << endl;
+}
+        
+bool FatSystem::findDirectory(FatPath &path, int *cluster)
+{
+    vector<string> parts = path.getParts();
+    *cluster = rootDirectory;
+
+    for (int i=0; i<parts.size(); i++) {
+        if (parts[i] != "") {
+            vector<FatEntry> entries = getEntries(*cluster);
+            vector<FatEntry>::iterator it;
+            bool found = false;
+
+            for (it=entries.begin(); it!=entries.end(); it++) {
+                FatEntry &entry = *it;
+                string name = entry.getFilename();
+                if (name == parts[i]) {
+                    *cluster = entry.cluster;
+                    found = true;
+                }
+            }
+
+            if (!found) {
+                cerr << "Error: directory " << path.getPath() << " not found" << endl;
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+        
+bool FatSystem::findFile(FatPath &path, int *cluster, int *size)
+{
+    string dirname = path.getDirname();
+    string basename = path.getBasename();
+
+    FatPath parent(dirname);
+    int parentCluster;
+    if (findDirectory(parent, &parentCluster)) {
+        vector<FatEntry> entries = getEntries(parentCluster);
+        vector<FatEntry>::iterator it;
+
+        for (it=entries.begin(); it!=entries.end(); it++) {
+            FatEntry &entry = (*it);
+            if (entry.getFilename() == path.getBasename()) {    
+                *cluster = entry.cluster;
+                *size = entry.size;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+        
+void FatSystem::readFile(FatPath &path)
+{
+    int cluster, size;
+    if (findFile(path, &cluster, &size)) {
+        readFile(cluster, size);
+    }
 }

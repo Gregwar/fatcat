@@ -14,7 +14,8 @@ class FatPath
         FatPath(string path);
         
         string getPath();
-
+        string getDirname();
+        string getBasename();
         vector<string> getParts();
 
     protected:

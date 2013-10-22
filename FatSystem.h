@@ -44,6 +44,10 @@ class FatSystem
         void list(int cluster);
         void list(FatPath &path);
         void infos();
+        bool findDirectory(FatPath &path, int *cluster);
+        bool findFile(FatPath &path, int *cluster, int *size);
+        void readFile(FatPath &path);
+        void readFile(int cluster, int size);
 
     protected:
         string diskLabel;
@@ -82,8 +86,6 @@ class FatSystem
          * Get directory entries for a given cluster
          */
         vector<FatEntry> getEntries(int cluster);
-
-        void readFile(int cluster, int size);
 };
 
 #endif // _FATCAT_FATSYSTEM_H

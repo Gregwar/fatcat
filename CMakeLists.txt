@@ -1,8 +1,8 @@
 project(fatscan)
 
 set(SOURCES
-    main.c
-    fat.c
+    main.cpp
+    FatSystem.cpp
     )
 
 add_executable(fatscan ${SOURCES})

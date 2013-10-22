@@ -456,11 +456,10 @@ void FatSystem::computeStats()
     }
 }
 
-void FatSystem::compare()
+bool FatSystem::compare()
 {
     bool diff = false;
-    bool Azero = true;
-    bool Bzero = true;
+    bool mergeable = true;
     cout << "Comparing the FATs" << endl;
 
     for (int cluster=0; cluster<totalClusters; cluster++) {
@@ -470,11 +469,8 @@ void FatSystem::compare()
             diff = true;
             printf("[%08X] 1:%08X 2:%08X\n", cluster, A, B);
 
-            if (A != 0) {
-                Azero = false;
-            }
-            if (B != 0) {
-                Bzero = false;
+            if (A!=0 && B!=0) {
+                mergeable = true;
             }
         }
     }
@@ -483,10 +479,14 @@ void FatSystem::compare()
 
     if (diff) {
         cout << "FATs differs" << endl;
-        if (Azero || Bzero) {
-            cout << (Azero ? "1" : "2") << " seems more wrong" << endl;
+        if (mergeable) {
+            cout << "It seems mergeable" << endl;
+        } else {
+            cout << "It doesn't seems mergeable" << endl;
         }
     } else {
         cout << "FATs are exactly equals" << endl;
     }
+
+    return mergeable;
 }

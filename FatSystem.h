@@ -81,7 +81,7 @@ class FatSystem
         /**
          * Compare the 2 FATs
          */
-        void compare();
+        bool compare();
 
     protected:
         // File descriptor

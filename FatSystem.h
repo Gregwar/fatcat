@@ -1,5 +1,5 @@
-#ifndef _FATSCAN_FAT_H
-#define _FATSCAN_FAT_H
+#ifndef _FATSCAN_FATSYSTEM_H
+#define _FATSCAN_FATSYSTEM_H
 
 #include <string>
 
@@ -7,6 +7,14 @@ using namespace std;
 
 // Last cluster
 #define FAT_LAST (-1)
+
+// Header offsets
+#define FAT_BYTES_PER_SECTOR        0x0b
+#define FAT_SECTORS_PER_CLUSTER     0x0d
+#define FAT_RESERVED_SECTORS        0x0e
+#define FAT_FATS                    0x10
+#define FAT_SECTORS_PER_FAT         0x24
+#define FAT_ROOT_DIRECTORY          0x2C
 
 /**
  * A FAT fileSystem
@@ -50,4 +58,4 @@ class FatSystem
         void readFile(int cluster, int size);
 };
 
-#endif // _FATSCAN_FAT_H
+#endif // _FATSCAN_FATSYSTEM_H

@@ -174,6 +174,8 @@ void FatSystem::list(int cluster)
     vector<FatEntry> entries = getEntries(cluster);
     vector<FatEntry>::iterator it;
 
+    printf("Cluster: %d\n", cluster);
+
     for (it=entries.begin(); it!=entries.end(); it++) {
         FatEntry &entry = *it;
 
@@ -467,7 +469,7 @@ bool FatSystem::compare()
         int B = nextCluster(cluster, 1);
         if (A != B) {
             diff = true;
-            printf("[%08X] 1:%08X 2:%08X\n", cluster, A, B);
+            printf("[%08x] 1:%08x 2:%08x\n", cluster, A, B);
 
             if (A!=0 && B!=0) {
                 mergeable = true;

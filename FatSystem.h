@@ -83,6 +83,11 @@ class FatSystem
          */
         bool compare();
 
+        /**
+         * Returns the cluster offset in the filesystem
+         */
+        int clusterAddress(int cluster);
+
     protected:
         // File descriptor
         int fd;
@@ -124,11 +129,6 @@ class FatSystem
          * If contiguous mode, this will just return cluster+1
          */
         int nextCluster(int cluster, int fat=0);
-
-        /**
-         * Returns the cluster offset in the filesystem
-         */
-        int clusterAddress(int cluster);
 
         /**
          * Read some data from the system

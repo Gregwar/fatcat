@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string>
 #include <iostream>
 #include "FatSystem.h"
@@ -21,6 +22,7 @@ void usage()
     cout << "-c: enable contiguous mode" << endl;
     cout << "-x [directory]: extract all files to a directory" << endl;
     cout << "-2: analysis & compare the 2 FATs" << endl;
+    cout << "-@ [cluster]: Get the cluster address" << endl;
 
     cout << endl;
     exit(EXIT_FAILURE);
@@ -67,9 +69,16 @@ int main(int argc, char *argv[])
     // -2: compare two fats
     bool compare = false;
 
+    // -@: get the cluster address
+    bool address = false;
+
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2@:")) != -1) {
         switch (index) {
+            case '@':
+                address = true;
+                cluster = atoi(optarg);
+                break;
             case 'i':
                 infoFlag = true;
                 break;
@@ -127,7 +136,7 @@ int main(int argc, char *argv[])
 
     // If the user did not required any actions
     if (!(infoFlag || listFlag || listClusterFlag || 
-                readFlag || clusterRead || extract || compare)) {
+                readFlag || clusterRead || extract || compare || address)) {
         usage();
     }
 
@@ -156,6 +165,10 @@ int main(int argc, char *argv[])
             fat.extract(extractDirectory);
         } else if (compare) {
             fat.compare();
+        } else if (address) {
+            cout << "Cluster " << cluster << " address:" << endl;
+            int addr = fat.clusterAddress(cluster);
+            printf("%d (%08x)\n", addr, addr);
         }
     } else {
         cout << "! Failed to init the FAT filesystem" << endl;

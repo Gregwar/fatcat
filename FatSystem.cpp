@@ -16,8 +16,9 @@ using namespace std;
 /**
  * Opens the FAT resource
  */
-    FatSystem::FatSystem(string filename)
-: strange(0)
+FatSystem::FatSystem(string filename)
+    : strange(0),
+    totalSize(-1)
 {
     fd = open(filename.c_str(), O_RDONLY);
 }
@@ -32,6 +33,10 @@ FatSystem::~FatSystem()
  */
 void FatSystem::readData(int address, char *buffer, int size)
 {
+    if (totalSize != -1 && address+size > totalSize) {
+        cout << "! Trying to read outside the disk" << endl;
+    }
+
     lseek(fd, address, SEEK_SET);
     read(fd, buffer, size);
 }
@@ -50,8 +55,10 @@ void FatSystem::parseHeader()
     fats = buffer[FAT_FATS];
     sectorsPerFat = FAT_READ_LONG(buffer, FAT_SECTORS_PER_FAT);
     rootDirectory = FAT_READ_LONG(buffer, FAT_ROOT_DIRECTORY);
+    totalSectors = FAT_READ_LONG(buffer, FAT_TOTAL_SECTORS);
     diskLabel = string(buffer+FAT_DISK_LABEL, FAT_DISK_LABEL_SIZE);
     oemName = string(buffer+FAT_DISK_OEM, FAT_DISK_OEM_SIZE);
+    fsType = string(buffer+FAT_DISK_FS, FAT_DISK_FS_SIZE);
 
     if (bytesPerSector != 512) {
         printf("WARNING: Bytes per sector is not 512 (%d)\n", bytesPerSector);
@@ -219,9 +226,10 @@ bool FatSystem::init()
     parseHeader();
 
     // Computing values
-    fatStart = bytesPerSector * reservedSectors;
+    fatStart = bytesPerSector*reservedSectors;
     dataStart = fatStart + fats*sectorsPerFat*bytesPerSector;
     bytesPerCluster = bytesPerSector*sectorsPerCluster;
+    totalSize = totalSectors*bytesPerSector;
 
     return strange == 0;
 }
@@ -230,7 +238,10 @@ void FatSystem::infos()
 {
     cout << "FAT Filesystem informations" << endl << endl;
 
+    cout << "Filesystem type: " << fsType << endl;
     cout << "OEM name: " << oemName << endl;
+    cout << "Total sectors: " << totalSectors << endl;
+    cout << "Disk size: " << totalSize << endl;
     cout << "Bytes per sector: " << bytesPerSector << endl;
     cout << "Sectors per cluster: " << sectorsPerCluster << endl;
     cout << "Bytes per cluster: " << bytesPerCluster << endl;

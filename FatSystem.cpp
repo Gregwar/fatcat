@@ -26,7 +26,7 @@ FatSystem::FatSystem(string filename)
     statsComputed(false),
     freeClusters(0)
 {
-    fd = open(filename.c_str(), O_RDONLY);
+    fd = open(filename.c_str(), O_RDONLY|O_LARGEFILE);
 }
 
 FatSystem::~FatSystem()

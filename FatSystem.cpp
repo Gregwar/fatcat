@@ -95,11 +95,11 @@ void FatSystem::parseHeader()
 /**
  * Returns the 32-bit fat value for the given cluster number
  */
-int FatSystem::nextCluster(int cluster)
+int FatSystem::nextCluster(int cluster, int fat)
 {
     char buffer[4];
 
-    readData(fatStart+4*cluster, buffer, sizeof(buffer));
+    readData(fatStart+fatSize*fat+4*cluster, buffer, sizeof(buffer));
 
     int next = FAT_READ_LONG(buffer, 0);
 
@@ -258,8 +258,8 @@ bool FatSystem::init()
     dataStart = fatStart + fats*sectorsPerFat*bytesPerSector;
     bytesPerCluster = bytesPerSector*sectorsPerCluster;
     totalSize = totalSectors*bytesPerSector;
-    totalClusters = totalSectors/sectorsPerCluster;
     fatSize = sectorsPerFat*bytesPerSector;
+    totalClusters = fatSize/4;
 
     return strange == 0;
 }
@@ -271,6 +271,7 @@ void FatSystem::infos()
     cout << "Filesystem type: " << fsType << endl;
     cout << "OEM name: " << oemName << endl;
     cout << "Total sectors: " << totalSectors << endl;
+    cout << "Total clusters: " << totalClusters << endl;
     cout << "Disk size: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
     cout << "Bytes per sector: " << bytesPerSector << endl;
     cout << "Sectors per cluster: " << sectorsPerCluster << endl;
@@ -278,7 +279,8 @@ void FatSystem::infos()
     cout << "Reserved sectors: " << reservedSectors << endl;
     cout << "Sectors per FAT: " << sectorsPerFat << endl;
     cout << "Fat size: " << fatSize << endl;
-    printf("FAT start address: %08x\n", fatStart);
+    printf("FAT1 start address: %08x\n", fatStart);
+    printf("FAT2 start address: %08x\n", fatStart+fatSize);
     printf("Data start address: %08x\n", dataStart);
     cout << "Root directory cluster: " << rootDirectory << endl;
     cout << "Disk label: " << diskLabel << endl;
@@ -447,9 +449,44 @@ void FatSystem::computeStats()
     statsComputed = true;
 
     freeClusters = 0;
-    for (int i=0; i<totalClusters; i++) {
-        if (freeCluster(i)) {
+    for (int cluster=0; cluster<totalClusters; cluster++) {
+        if (freeCluster(cluster)) {
             freeClusters++;
         }
+    }
+}
+
+void FatSystem::compare()
+{
+    bool diff = false;
+    bool Azero = true;
+    bool Bzero = true;
+    cout << "Comparing the FATs" << endl;
+
+    for (int cluster=0; cluster<totalClusters; cluster++) {
+        int A = nextCluster(cluster, 0);
+        int B = nextCluster(cluster, 1);
+        if (A != B) {
+            diff = true;
+            printf("[%08X] 1:%08X 2:%08X\n", cluster, A, B);
+
+            if (A != 0) {
+                Azero = false;
+            }
+            if (B != 0) {
+                Bzero = false;
+            }
+        }
+    }
+ 
+    cout << endl;
+
+    if (diff) {
+        cout << "FATs differs" << endl;
+        if (Azero || Bzero) {
+            cout << (Azero ? "1" : "2") << " seems more wrong" << endl;
+        }
+    } else {
+        cout << "FATs are exactly equals" << endl;
     }
 }

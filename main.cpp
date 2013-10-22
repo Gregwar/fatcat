@@ -20,6 +20,8 @@ void usage()
     cout << "-d: enable listing of deleted files" << endl;
     cout << "-c: enable contiguous mode" << endl;
     cout << "-x [directory]: extract all files to a directory" << endl;
+    cout << "-2: analysis & compare the 2 FATs" << endl;
+
     cout << endl;
     exit(EXIT_FAILURE);
 }
@@ -62,8 +64,11 @@ int main(int argc, char *argv[])
     bool extract = false;
     string extractDirectory;
 
+    // -2: compare two fats
+    bool compare = false;
+
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2")) != -1) {
         switch (index) {
             case 'i':
                 infoFlag = true;
@@ -97,6 +102,9 @@ int main(int argc, char *argv[])
                 extract = true;
                 extractDirectory = string(optarg);
                 break;
+            case '2':
+                compare = true;
+                break;
             case 'h':
                 usage();
                 break;
@@ -119,7 +127,7 @@ int main(int argc, char *argv[])
 
     // If the user did not required any actions
     if (!(infoFlag || listFlag || listClusterFlag || 
-                readFlag || clusterRead || extract)) {
+                readFlag || clusterRead || extract || compare)) {
         usage();
     }
 
@@ -146,6 +154,8 @@ int main(int argc, char *argv[])
             fat.readFile(cluster, size);
         } else if (extract) {
             fat.extract(extractDirectory);
+        } else if (compare) {
+            fat.compare();
         }
     } else {
         cout << "! Failed to init the FAT filesystem" << endl;

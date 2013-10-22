@@ -78,6 +78,11 @@ class FatSystem
          */
         void extract(string directory);
 
+        /**
+         * Compare the 2 FATs
+         */
+        void compare();
+
     protected:
         // File descriptor
         int fd;
@@ -118,7 +123,7 @@ class FatSystem
          * Returns the next cluster number
          * If contiguous mode, this will just return cluster+1
          */
-        int nextCluster(int cluster);
+        int nextCluster(int cluster, int fat=0);
 
         /**
          * Returns the cluster offset in the filesystem

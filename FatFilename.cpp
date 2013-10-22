@@ -1,7 +1,10 @@
 #include "FatFilename.h"
+#include "FatEntry.h"
 #include <string>
 
 using namespace std;
+
+#define FAT_LONG_NAME_LAST      0x40
 
 // Offset of letters position in a special "long file name" entry
 static unsigned char longFilePos[] = {
@@ -18,7 +21,11 @@ string FatFilename::getFilename()
 
 void FatFilename::append(char *buffer)
 {
-    if (buffer[0]&0x40) {
+    if (buffer[FAT_ATTRIBUTES] != 0xf) {
+        return;
+    }
+
+    if (buffer[0]&FAT_LONG_NAME_LAST) {
         data = "";
     }
 

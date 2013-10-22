@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "FatSystem.h"
 #include "FatFilename.h"
@@ -186,7 +188,12 @@ void FatSystem::list(int cluster)
         } else {
             printf("f");
         }
-        printf(" %-40s", entry.getFilename().c_str());
+
+        string name = entry.getFilename();
+        if (entry.isDirectory()) {
+            name += "/";
+        }
+        printf(" %-40s", name.c_str());
 
         printf(" c=%d", entry.cluster);
         
@@ -205,8 +212,12 @@ void FatSystem::list(int cluster)
     }
 }
 
-void FatSystem::readFile(int cluster, int size)
+void FatSystem::readFile(int cluster, int size, FILE *f)
 {
+    if (f == NULL) {
+        f = stdout;
+    }
+
     while ((size!=0) && cluster!=FAT_LAST) {
         int toRead = size;
         if (toRead > bytesPerCluster || size < 0) {
@@ -219,10 +230,8 @@ void FatSystem::readFile(int cluster, int size)
             size -= toRead;
         }
 
-        int i;
-        for (i=0; i<toRead; i++) {
-            printf("%c", buffer[i]);
-        }
+        // Write file data to the given file
+        fwrite(buffer, toRead, 1, f);
 
         cluster = nextCluster(cluster);
 
@@ -322,7 +331,7 @@ bool FatSystem::findFile(FatPath &path, int *cluster, int *size, bool *erased)
     return false;
 }
         
-void FatSystem::readFile(FatPath &path)
+void FatSystem::readFile(FatPath &path, FILE *f)
 {
     bool contiguousSave = contiguous;
     contiguous = false;
@@ -334,7 +343,7 @@ void FatSystem::readFile(FatPath &path)
             fprintf(stderr, "! Trying to read a deleted file, auto-enabling contiguous mode\n");
             contiguous = true;
         }
-        readFile(cluster, size);
+        readFile(cluster, size, f);
     }
 }
         
@@ -346,4 +355,56 @@ void FatSystem::setListDeleted(bool listDeleted_)
 void FatSystem::setContiguous(bool contiguous_)
 {
     contiguous = contiguous_;
+}
+        
+void FatSystem::extractEntry(FatEntry &entry, string directory)
+{
+    vector<FatEntry> entries = getEntries(entry.cluster);
+    vector<FatEntry>::iterator it;
+
+    mkdir(directory.c_str(), 0755);
+
+    for (it=entries.begin(); it!=entries.end(); it++) {
+        FatEntry &entry = (*it);
+
+        if (!entry.isErased()) {
+            string name = entry.getFilename();
+
+            if (name == "." || name == "..") {
+                continue;
+            }
+                
+            string fullname = directory + "/" + name;
+
+            if (entry.isDirectory()) {
+                cout << "Entering " << fullname << endl;
+                extractEntry(entry, fullname);
+            } else {
+                cout << "Extracting " << fullname << endl;
+                FILE *output = fopen(fullname.c_str(), "w+");
+                if (output != NULL) {
+                    readFile(entry.cluster, entry.size, output);
+                    fclose(output);
+                } else {
+                    fprintf(stderr, "! Unable to open %s\n", fullname.c_str());
+                }
+            }
+        }
+    }
+}
+        
+void FatSystem::extract(string directory)
+{
+    FatEntry entry = rootEntry();
+    extractEntry(entry, directory);
+}
+        
+FatEntry FatSystem::rootEntry()
+{
+    FatEntry entry;
+    entry.longName = "/";
+    entry.attributes = FAT_ATTRIBUTES_DIR;
+    entry.cluster = rootDirectory;
+
+    return entry;
 }

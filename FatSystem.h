@@ -35,18 +35,48 @@ class FatSystem
         FatSystem(string filename);
         ~FatSystem();
 
-        // Initializing the system
+        /**
+         * Initializes the system
+         */
         bool init();
 
+        /**
+         * Directory listing
+         */
         void list(int cluster);
         void list(FatPath &path);
+
+        /**
+         * Display infos about FAT
+         */
         void infos();
+
+        /**
+         * Find a directory or a file
+         */
         bool findDirectory(FatPath &path, int *cluster);
         bool findFile(FatPath &path, int *cluster, int *size, bool *erased);
-        void readFile(FatPath &path);
-        void readFile(int cluster, int size);
+
+        /**
+         * File reading
+         */
+        void readFile(FatPath &path, FILE *f = NULL);
+        void readFile(int cluster, int size, FILE * f = NULL);
+
+        /**
+         * Showing deleted file in listing
+         */
         void setListDeleted(bool listDeleted);
+
+        /**
+         * Contiguous mode
+         */
         void setContiguous(bool setContiguous);
+
+        /**
+         * Extract all the files to the given directory
+         */
+        void extract(string directory);
 
     protected:
         string diskLabel;
@@ -74,6 +104,7 @@ class FatSystem
 
         /**
          * Returns the next cluster number
+         * If contiguous mode, this will just return cluster+1
          */
         int nextCluster(int cluster);
 
@@ -82,7 +113,20 @@ class FatSystem
          */
         int clusterAddress(int cluster);
 
+        /**
+         * Read some data from the system
+         */
         void readData(int address, char *buffer, int size);
+
+        /**
+         * Extract an entry
+         */
+        void extractEntry(FatEntry &entry, string directory);
+
+        /**
+         * Root directory entry
+         */
+        FatEntry rootEntry();
 
         /**
          * Get directory entries for a given cluster

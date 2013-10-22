@@ -19,6 +19,7 @@ void usage()
     cout << "-s [size]: specify the size of data to read from the cluster" << endl;
     cout << "-d: enable listing of deleted files" << endl;
     cout << "-c: enable contiguous mode" << endl;
+    cout << "-x [directory]: extract all files to a directory" << endl;
     cout << endl;
     exit(EXIT_FAILURE);
 }
@@ -57,8 +58,12 @@ int main(int argc, char *argv[])
     // -c: contiguous mode
     bool contiguous = false;
 
+    // -x: extract
+    bool extract = false;
+    string extractDirectory;
+
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dch")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:")) != -1) {
         switch (index) {
             case 'i':
                 infoFlag = true;
@@ -88,6 +93,10 @@ int main(int argc, char *argv[])
             case 'c':
                 contiguous = true;
                 break;
+            case 'x':
+                extract = true;
+                extractDirectory = string(optarg);
+                break;
             case 'h':
                 usage();
                 break;
@@ -109,7 +118,8 @@ int main(int argc, char *argv[])
     }
 
     // If the user did not required any actions
-    if (!(infoFlag || listFlag || listClusterFlag || readFlag || clusterRead)) {
+    if (!(infoFlag || listFlag || listClusterFlag || 
+                readFlag || clusterRead || extract)) {
         usage();
     }
 
@@ -134,6 +144,8 @@ int main(int argc, char *argv[])
             fat.readFile(path);
         } else if (clusterRead) {
             fat.readFile(cluster, size);
+        } else if (extract) {
+            fat.extract(extractDirectory);
         }
     } else {
         cout << "! Failed to init the FAT filesystem" << endl;

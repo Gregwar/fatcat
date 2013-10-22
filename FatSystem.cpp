@@ -249,5 +249,6 @@ void FatSystem::infos()
     cout << "Sectors per FAT: " << sectorsPerFat << endl;
     printf("FAT start address: %08x\n", fatStart);
     printf("Data start address: %08x\n", dataStart);
+    cout << "Root directory cluster: " << rootDirectory << endl;
     cout << "Disk label: " << diskLabel << endl;
 }

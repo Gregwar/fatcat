@@ -114,6 +114,10 @@ vector<FatEntry> FatSystem::getEntries(int cluster)
     vector<FatEntry> entries;
     FatFilename filename;
 
+    if (cluster == 0) {
+        cluster = rootDirectory;
+    }
+
     do {
         int address = clusterAddress(cluster);
         char buffer[FAT_ENTRY_SIZE];
@@ -170,12 +174,19 @@ void FatSystem::list(int cluster)
 
     for (it=entries.begin(); it!=entries.end(); it++) {
         FatEntry &entry = *it;
-        if (entry.attributes & FAT_ATTRIBUTES_DIR) {
+        if (entry.isDirectory()) {
             printf("d");
         } else {
             printf("f");
         }
-        printf(" %s [%s] [%08x, %08X, %d, %x]\n", entry.getFilename().c_str(), entry.shortName.c_str(), entry.cluster, nextCluster(entry.cluster), entry.size, entry.attributes);
+        printf(" %-40s", entry.getFilename().c_str());
+
+        printf(" c=%d", entry.cluster);
+        
+        if (!entry.isDirectory()) {
+            printf(" s=%d", entry.size);
+        }
+        printf("\n");
     }
 }
 

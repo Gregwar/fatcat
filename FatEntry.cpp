@@ -22,3 +22,8 @@ string FatEntry::getFilename()
         }
     }
 }
+        
+bool FatEntry::isDirectory()
+{
+    return attributes&FAT_ATTRIBUTES_DIR;
+}

@@ -26,6 +26,7 @@ class FatEntry
     public:
         string getFilename();
         bool isDirectory();
+        bool isHidden();
 
         string shortName;
         string longName;

@@ -27,3 +27,8 @@ bool FatEntry::isDirectory()
 {
     return attributes&FAT_ATTRIBUTES_DIR;
 }
+
+bool FatEntry::isHidden()
+{
+    return attributes&FAT_ATTRIBUTES_HIDE;
+}

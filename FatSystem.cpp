@@ -143,10 +143,8 @@ vector<FatEntry> FatSystem::getEntries(int cluster)
                 entry.size = FAT_READ_LONG(buffer, FAT_FILESIZE);
 
                 if ((entry.shortName[0]&0xff) != FAT_ERASED) {
-                    if (!(entry.attributes & FAT_ATTRIBUTES_HIDE)) {
-                        if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.attributes&FAT_ATTRIBUTES_FILE) {
-                            entries.push_back(entry);
-                        }
+                    if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.attributes&FAT_ATTRIBUTES_FILE) {
+                        entries.push_back(entry);
                     }
                 }
             }
@@ -186,6 +184,11 @@ void FatSystem::list(int cluster)
         if (!entry.isDirectory()) {
             printf(" s=%d", entry.size);
         }
+
+        if (entry.isHidden()) {
+            printf(" h");
+        }
+
         printf("\n");
     }
 }

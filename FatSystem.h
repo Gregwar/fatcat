@@ -17,7 +17,11 @@ using namespace std;
 #define FAT_RESERVED_SECTORS        0x0e
 #define FAT_FATS                    0x10
 #define FAT_SECTORS_PER_FAT         0x24
-#define FAT_ROOT_DIRECTORY          0x2C
+#define FAT_ROOT_DIRECTORY          0x2c
+#define FAT_DISK_LABEL              0x47
+#define FAT_DISK_LABEL_SIZE         11
+#define FAT_DISK_OEM                0x3
+#define FAT_DISK_OEM_SIZE           8
 
 // Prefix used for erased files
 #define FAT_ERASED                  0xe5
@@ -39,6 +43,8 @@ class FatSystem
         void infos();
 
     protected:
+        string diskLabel;
+        string oemName;
         int fd;
         int bytesPerSector;
         int sectorsPerCluster;

@@ -50,6 +50,8 @@ void FatSystem::parseHeader()
     fats = buffer[FAT_FATS];
     sectorsPerFat = FAT_READ_LONG(buffer, FAT_SECTORS_PER_FAT);
     rootDirectory = FAT_READ_LONG(buffer, FAT_ROOT_DIRECTORY);
+    diskLabel = string(buffer+FAT_DISK_LABEL, FAT_DISK_LABEL_SIZE);
+    oemName = string(buffer+FAT_DISK_OEM, FAT_DISK_OEM_SIZE);
 
     if (bytesPerSector != 512) {
         printf("WARNING: Bytes per sector is not 512 (%d)\n", bytesPerSector);
@@ -226,8 +228,9 @@ bool FatSystem::init()
         
 void FatSystem::infos()
 {
-    cout << "FAT Filesystem informations" << endl;
+    cout << "FAT Filesystem informations" << endl << endl;
 
+    cout << "OEM name: " << oemName << endl;
     cout << "Bytes per sector: " << bytesPerSector << endl;
     cout << "Sectors per cluster: " << sectorsPerCluster << endl;
     cout << "Bytes per cluster: " << bytesPerCluster << endl;
@@ -235,4 +238,5 @@ void FatSystem::infos()
     cout << "Sectors per FAT: " << sectorsPerFat << endl;
     printf("FAT start address: %08x\n", fatStart);
     printf("Data start address: %08x\n", dataStart);
+    cout << "Disk label: " << diskLabel << endl;
 }

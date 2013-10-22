@@ -1,5 +1,5 @@
-#ifndef _FATSCAN_PATH_H
-#define _FATSCAN_PATH_H
+#ifndef _FATCAT_PATH_H
+#define _FATCAT_PATH_H
 
 #include <vector>
 #include <string>
@@ -22,4 +22,4 @@ class FatPath
         vector<string> parts;
 };
 
-#endif // _FATSCAN_PATH_H
+#endif // _FATCAT_PATH_H

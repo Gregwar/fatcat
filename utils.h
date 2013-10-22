@@ -1,5 +1,5 @@
-#ifndef _FATSCAN_UTILS_H
-#define _FATSCAN_UTILS_H
+#ifndef _FATCAT_UTILS_H
+#define _FATCAT_UTILS_H
 
 #include <vector>
 #include <sstream>
@@ -42,4 +42,4 @@ static inline vector<string> &split(const string &s, char delim, vector<string> 
     return elems;
 }
 
-#endif // _FATSCAN_UTILS_H
+#endif // _FATCAT_UTILS_H

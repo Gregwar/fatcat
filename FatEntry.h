@@ -1,5 +1,5 @@
-#ifndef _FATSCAN_FATENTRY_H
-#define _FATSCAN_FATENTRY_H
+#ifndef _FATCAT_FATENTRY_H
+#define _FATCAT_FATENTRY_H
 
 #include <string>
 
@@ -33,4 +33,4 @@ class FatEntry
         int size;
 };
 
-#endif // _FATSCAN_FATENTRY_H
+#endif // _FATCAT_FATENTRY_H

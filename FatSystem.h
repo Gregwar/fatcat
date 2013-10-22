@@ -1,5 +1,5 @@
-#ifndef _FATSCAN_FATSYSTEM_H
-#define _FATSCAN_FATSYSTEM_H
+#ifndef _FATCAT_FATSYSTEM_H
+#define _FATCAT_FATSYSTEM_H
 
 #include <vector>
 #include <string>
@@ -71,4 +71,4 @@ class FatSystem
         void readFile(int cluster, int size);
 };
 
-#endif // _FATSCAN_FATSYSTEM_H
+#endif // _FATCAT_FATSYSTEM_H

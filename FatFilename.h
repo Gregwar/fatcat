@@ -1,5 +1,5 @@
-#ifndef _FATSCAN_FILENAME_H
-#define _FATSCAN_FILENAME_H
+#ifndef _FATCAT_FILENAME_H
+#define _FATCAT_FILENAME_H
 
 #include <string>
 
@@ -19,4 +19,4 @@ class FatFilename
         string data;
 };
 
-#endif // _FATSCAN_FILENAME_H
+#endif // _FATCAT_FILENAME_H

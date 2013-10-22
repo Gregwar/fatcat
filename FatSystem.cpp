@@ -97,10 +97,6 @@ int FatSystem::nextCluster(int cluster)
 {
     char buffer[4];
 
-    if (contiguous) {
-        return cluster+1;
-    }
-
     readData(fatStart+4*cluster, buffer, sizeof(buffer));
 
     int next = FAT_READ_LONG(buffer, 0);
@@ -214,6 +210,7 @@ void FatSystem::list(int cluster)
 
 void FatSystem::readFile(int cluster, int size, FILE *f)
 {
+    bool warning = false;
     if (f == NULL) {
         f = stdout;
     }
@@ -233,7 +230,15 @@ void FatSystem::readFile(int cluster, int size, FILE *f)
         // Write file data to the given file
         fwrite(buffer, toRead, 1, f);
 
-        cluster = nextCluster(cluster);
+        if (contiguous) {
+            if (!warning && !freeCluster(cluster)) {
+                warning = true;
+                fprintf(stderr, "! Warning: contiguous file contains cluster that seems allocated");
+            }
+            cluster++;
+        } else {
+            cluster = nextCluster(cluster);
+        }
 
         if (cluster == 0) {
             fprintf(stderr, "! One of your file's cluster is 0 (maybe FAT is broken, you should try -c)\n");
@@ -339,7 +344,7 @@ void FatSystem::readFile(FatPath &path, FILE *f)
     bool erased;
     if (findFile(path, &cluster, &size, &erased)) {
         contiguous = contiguousSave;
-        if (erased && nextCluster(cluster)==0) {
+        if (erased && freeCluster(cluster)) {
             fprintf(stderr, "! Trying to read a deleted file, auto-enabling contiguous mode\n");
             contiguous = true;
         }
@@ -384,7 +389,7 @@ void FatSystem::extractEntry(FatEntry &entry, string directory)
                 FILE *output = fopen(fullname.c_str(), "w+");
                 if (output != NULL) {
                     bool contiguousSave = contiguous;
-                    if (entry.isErased() && nextCluster(entry.cluster)==0) {
+                    if (entry.isErased() && freeCluster(entry.cluster)) {
                         fprintf(stderr, "! Trying to read a deleted file, auto-enabling contiguous mode\n");
                         contiguous = true;
                     }
@@ -413,4 +418,9 @@ FatEntry FatSystem::rootEntry()
     entry.cluster = rootDirectory;
 
     return entry;
+}
+
+bool FatSystem::freeCluster(int cluster)
+{
+    return nextCluster(cluster) == 0;
 }

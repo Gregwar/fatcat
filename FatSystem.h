@@ -129,6 +129,11 @@ class FatSystem
         FatEntry rootEntry();
 
         /**
+         * Is the n-th cluster free?
+         */
+        bool freeCluster(int cluster);
+
+        /**
          * Get directory entries for a given cluster
          */
         vector<FatEntry> getEntries(int cluster);

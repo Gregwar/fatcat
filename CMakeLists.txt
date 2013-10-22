@@ -2,9 +2,10 @@ project(fatscan)
 
 set(SOURCES
     main.cpp
-    FatSystem.cpp
     FatEntry.cpp
     FatFilename.cpp
+    FatPath.cpp
+    FatSystem.cpp
     )
 
 add_executable(fatscan ${SOURCES})

@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "FatEntry.h"
+#include "FatPath.h"
 
 using namespace std;
 
@@ -31,6 +32,8 @@ class FatSystem
         ~FatSystem();
 
         void run();
+        void list(int cluster);
+        void list(FatPath &path);
 
     protected:
         int fd;
@@ -44,6 +47,7 @@ class FatSystem
         int strange;
         int fatStart;
         int dataStart;
+        int bytesPerCluster;
 
         void parseHeader();
 
@@ -63,7 +67,7 @@ class FatSystem
          * Get directory entries for a given cluster
          */
         vector<FatEntry> getEntries(int cluster);
-        void list(int cluster);
+
         void readFile(int cluster, int size);
 };
 

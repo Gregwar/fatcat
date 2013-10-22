@@ -111,7 +111,7 @@ vector<FatEntry> FatSystem::getEntries(int cluster)
         char buffer[FAT_ENTRY_SIZE];
 
         int i;
-        for (i=0; i<bytesPerSector; i+=sizeof(buffer)) {
+        for (i=0; i<bytesPerSector*sectorsPerCluster; i+=sizeof(buffer)) {
             // Reading data
             readData(address, buffer, sizeof(buffer));
             address += sizeof(buffer);
@@ -145,6 +145,36 @@ vector<FatEntry> FatSystem::getEntries(int cluster)
 
     return entries;
 }
+        
+void FatSystem::list(FatPath &path)
+{
+    vector<string> parts = path.getParts();
+    int cluster = rootDirectory;
+
+    for (int i=0; i<parts.size(); i++) {
+        if (parts[i] != "") {
+            vector<FatEntry> entries = getEntries(cluster);
+            vector<FatEntry>::iterator it;
+            bool found = false;
+
+            for (it=entries.begin(); it!=entries.end(); it++) {
+                FatEntry &entry = *it;
+                string name = entry.getFilename();
+                if (name == parts[i]) {
+                    cluster = entry.cluster;
+                    found = true;
+                }
+            }
+
+            if (!found) {
+                cerr << "Error: directory " << path.getPath() << " not found" << endl;
+                return;
+            }
+        }
+    }
+
+    list(cluster);
+}
 
 void FatSystem::list(int cluster)
 {
@@ -166,10 +196,10 @@ void FatSystem::readFile(int cluster, int size)
 {
     while (size) {
         int toRead = size;
-        if (toRead > bytesPerSector) {
-            toRead = bytesPerSector;
+        if (toRead > bytesPerCluster) {
+            toRead = bytesPerCluster;
         }
-        char buffer[bytesPerSector];
+        char buffer[bytesPerCluster];
         readData(clusterAddress(cluster), buffer, toRead);
         size -= toRead;
 
@@ -196,13 +226,6 @@ void FatSystem::run()
         printf("FAT startings @%08X\n", fatStart);
         dataStart = fatStart + fats*sectorsPerFat*bytesPerSector;
         printf("Clusters startings @%08X\n", dataStart);
-
-        // list(rootDirectory);
-        list(3);
-        // fat_read_file(fat, 0x1e, 792);
-        // fat_list(fat, 0x20);
-        // fat_read_file(fat, 0x000009d4, 5);
-        // fat_list(fat, 0x9e6);
-        // fat_read_file(fat, 0x000009f0, 1048576);
+        bytesPerCluster = bytesPerSector*sectorsPerCluster;
     }
 }

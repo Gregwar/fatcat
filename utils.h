@@ -1,9 +1,13 @@
 #ifndef _FATSCAN_UTILS_H
 #define _FATSCAN_UTILS_H
 
+#include <vector>
+#include <sstream>
 #include <string>
 #include <algorithm>
 #include <functional>
+
+using namespace std;
 
 // Utils
 #define FAT_READ_SHORT(buffer,x) ((buffer[x]&0xff)|((buffer[x+1]&0xff)<<8))
@@ -26,6 +30,16 @@ static inline std::string rtrim(std::string s) {
 // trim from both ends
 static inline std::string trim(std::string s) {
         return ltrim(rtrim(s));
+}
+
+// split a string into vector
+static inline vector<string> &split(const string &s, char delim, vector<string> &elems) {
+    stringstream ss(s);
+    string item;
+    while(getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
 }
 
 #endif // _FATSCAN_UTILS_H

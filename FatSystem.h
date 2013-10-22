@@ -67,6 +67,7 @@ class FatSystem
         int dataStart;
         int bytesPerCluster;
         int totalSize;
+        int fatSize;
 
         void parseHeader();
 

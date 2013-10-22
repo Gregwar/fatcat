@@ -223,6 +223,7 @@ bool FatSystem::init()
     dataStart = fatStart + fats*sectorsPerFat*bytesPerSector;
     bytesPerCluster = bytesPerSector*sectorsPerCluster;
     totalSize = totalSectors*bytesPerSector;
+    fatSize = sectorsPerFat*bytesPerSector;
 
     return strange == 0;
 }
@@ -240,6 +241,7 @@ void FatSystem::infos()
     cout << "Bytes per cluster: " << bytesPerCluster << endl;
     cout << "Reserved sectors: " << reservedSectors << endl;
     cout << "Sectors per FAT: " << sectorsPerFat << endl;
+    cout << "Fat size: " << fatSize << endl;
     printf("FAT start address: %08x\n", fatStart);
     printf("Data start address: %08x\n", dataStart);
     cout << "Root directory cluster: " << rootDirectory << endl;

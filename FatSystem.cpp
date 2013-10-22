@@ -367,7 +367,7 @@ void FatSystem::extractEntry(FatEntry &entry, string directory)
     for (it=entries.begin(); it!=entries.end(); it++) {
         FatEntry &entry = (*it);
 
-        if (!entry.isErased()) {
+        if (listDeleted || (!entry.isErased())) {
             string name = entry.getFilename();
 
             if (name == "." || name == "..") {
@@ -383,8 +383,14 @@ void FatSystem::extractEntry(FatEntry &entry, string directory)
                 cout << "Extracting " << fullname << endl;
                 FILE *output = fopen(fullname.c_str(), "w+");
                 if (output != NULL) {
+                    bool contiguousSave = contiguous;
+                    if (entry.isErased() && nextCluster(entry.cluster)==0) {
+                        fprintf(stderr, "! Trying to read a deleted file, auto-enabling contiguous mode\n");
+                        contiguous = true;
+                    }
                     readFile(entry.cluster, entry.size, output);
                     fclose(output);
+                    contiguous = contiguousSave;
                 } else {
                     fprintf(stderr, "! Unable to open %s\n", fullname.c_str());
                 }

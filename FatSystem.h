@@ -84,11 +84,15 @@ class FatSystem
         bool compare();
 
         /**
+         * Is the n-th cluster free?
+         */
+        bool freeCluster(int cluster);
+
+        /**
          * Returns the cluster offset in the filesystem
          */
         int clusterAddress(int cluster);
 
-    protected:
         // File descriptor
         int fd;
 
@@ -121,14 +125,15 @@ class FatSystem
         // Flags
         bool listDeleted;
         bool contiguous;
-
-        void parseHeader();
-
+        
         /**
          * Returns the next cluster number
          * If contiguous mode, this will just return cluster+1
          */
         int nextCluster(int cluster, int fat=0);
+    
+    protected:
+        void parseHeader();
 
         /**
          * Read some data from the system
@@ -144,11 +149,6 @@ class FatSystem
          * Root directory entry
          */
         FatEntry rootEntry();
-
-        /**
-         * Is the n-th cluster free?
-         */
-        bool freeCluster(int cluster);
 
         /**
          * Compute the free clusters stats

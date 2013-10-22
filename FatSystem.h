@@ -1,7 +1,9 @@
 #ifndef _FATSCAN_FATSYSTEM_H
 #define _FATSCAN_FATSYSTEM_H
 
+#include <vector>
 #include <string>
+#include "FatEntry.h"
 
 using namespace std;
 
@@ -15,6 +17,9 @@ using namespace std;
 #define FAT_FATS                    0x10
 #define FAT_SECTORS_PER_FAT         0x24
 #define FAT_ROOT_DIRECTORY          0x2C
+
+// Prefix used for erased files
+#define FAT_ERASED                  0xe5
 
 /**
  * A FAT fileSystem
@@ -54,6 +59,10 @@ class FatSystem
 
         void readData(int address, char *buffer, int size);
 
+        /**
+         * Get directory entries for a given cluster
+         */
+        vector<FatEntry> getEntries(int cluster);
         void list(int cluster);
         void readFile(int cluster, int size);
 };

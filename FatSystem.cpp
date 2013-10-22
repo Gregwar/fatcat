@@ -101,8 +101,9 @@ int FatSystem::clusterAddress(int cluster)
     return (dataStart + bytesPerSector*sectorsPerCluster*(cluster-2));
 }
 
-void FatSystem::list(int cluster)
+vector<FatEntry> FatSystem::getEntries(int cluster)
 {
+    vector<FatEntry> entries;
     FatFilename filename;
 
     do {
@@ -129,14 +130,11 @@ void FatSystem::list(int cluster)
                 entry.cluster = FAT_READ_SHORT(buffer, FAT_CLUSTER_LOW) | (FAT_READ_SHORT(buffer, FAT_CLUSTER_HIGH)<<16);
                 entry.size = FAT_READ_LONG(buffer, FAT_FILESIZE);
 
-                if (!(entry.attributes & FAT_ATTRIBUTES_HIDE)) {
-                    if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.attributes&FAT_ATTRIBUTES_FILE) {
-                        if (entry.attributes & FAT_ATTRIBUTES_DIR) {
-                            printf("d");
-                        } else {
-                            printf("f");
+                if ((entry.shortName[0]&0xff) != FAT_ERASED) {
+                    if (!(entry.attributes & FAT_ATTRIBUTES_HIDE)) {
+                        if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.attributes&FAT_ATTRIBUTES_FILE) {
+                            entries.push_back(entry);
                         }
-                        printf(" %s [%s] [%08x, %08X, %d, %x]\n", entry.longName.c_str(), entry.shortName.c_str(), entry.cluster, nextCluster(entry.cluster), entry.size, entry.attributes);
                     }
                 }
             }
@@ -144,6 +142,24 @@ void FatSystem::list(int cluster)
 
         cluster = nextCluster(cluster);
     } while (cluster != FAT_LAST);
+
+    return entries;
+}
+
+void FatSystem::list(int cluster)
+{
+    vector<FatEntry> entries = getEntries(cluster);
+    vector<FatEntry>::iterator it;
+
+    for (it=entries.begin(); it!=entries.end(); it++) {
+        FatEntry &entry = *it;
+        if (entry.attributes & FAT_ATTRIBUTES_DIR) {
+            printf("d");
+        } else {
+            printf("f");
+        }
+        printf(" %s [%s] [%08x, %08X, %d, %x]\n", entry.longName.c_str(), entry.shortName.c_str(), entry.cluster, nextCluster(entry.cluster), entry.size, entry.attributes);
+    }
 }
 
 void FatSystem::readFile(int cluster, int size)

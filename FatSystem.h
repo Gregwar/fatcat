@@ -79,10 +79,13 @@ class FatSystem
         void extract(string directory);
 
     protected:
+        // File descriptor
+        int fd;
+
+        // Header values
         string diskLabel;
         string oemName;
         string fsType;
-        int fd;
         int totalSectors;
         int bytesPerSector;
         int sectorsPerCluster;
@@ -92,11 +95,20 @@ class FatSystem
         int rootDirectory;
         int reserved;
         int strange;
+
+        // Computed values
         int fatStart;
         int dataStart;
         int bytesPerCluster;
         int totalSize;
         int fatSize;
+        int totalClusters;
+
+        // Stats values
+        bool statsComputed;
+        int freeClusters;
+
+        // Flags
         bool listDeleted;
         bool contiguous;
 
@@ -132,6 +144,11 @@ class FatSystem
          * Is the n-th cluster free?
          */
         bool freeCluster(int cluster);
+
+        /**
+         * Compute the free clusters stats
+         */
+        void computeStats();
 
         /**
          * Get directory entries for a given cluster

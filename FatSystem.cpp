@@ -22,7 +22,9 @@ FatSystem::FatSystem(string filename)
     : strange(0),
     totalSize(-1),
     listDeleted(false),
-    contiguous(false)
+    contiguous(false),
+    statsComputed(false),
+    freeClusters(0)
 {
     fd = open(filename.c_str(), O_RDONLY);
 }
@@ -256,6 +258,7 @@ bool FatSystem::init()
     dataStart = fatStart + fats*sectorsPerFat*bytesPerSector;
     bytesPerCluster = bytesPerSector*sectorsPerCluster;
     totalSize = totalSectors*bytesPerSector;
+    totalClusters = totalSectors/sectorsPerCluster;
     fatSize = sectorsPerFat*bytesPerSector;
 
     return strange == 0;
@@ -268,7 +271,7 @@ void FatSystem::infos()
     cout << "Filesystem type: " << fsType << endl;
     cout << "OEM name: " << oemName << endl;
     cout << "Total sectors: " << totalSectors << endl;
-    cout << "Disk size: " << totalSize << endl;
+    cout << "Disk size: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
     cout << "Bytes per sector: " << bytesPerSector << endl;
     cout << "Sectors per cluster: " << sectorsPerCluster << endl;
     cout << "Bytes per cluster: " << bytesPerCluster << endl;
@@ -279,6 +282,16 @@ void FatSystem::infos()
     printf("Data start address: %08x\n", dataStart);
     cout << "Root directory cluster: " << rootDirectory << endl;
     cout << "Disk label: " << diskLabel << endl;
+    cout << endl;
+
+    computeStats();
+    cout << "Free clusters: " << freeClusters << "/" << totalClusters;
+    cout << " (" << (100*freeClusters/(double)totalClusters) << "%)" << endl;
+    cout << "Free space: " << (freeClusters*bytesPerCluster) << 
+        " (" << prettySize(freeClusters*bytesPerCluster) << ")" << endl;
+    cout << "Used space: " << ((totalClusters-freeClusters)*bytesPerCluster) << 
+        " (" << prettySize((totalClusters-freeClusters)*bytesPerCluster) << ")" << endl;
+    cout << endl;
 }
         
 bool FatSystem::findDirectory(FatPath &path, int *cluster)
@@ -423,4 +436,20 @@ FatEntry FatSystem::rootEntry()
 bool FatSystem::freeCluster(int cluster)
 {
     return nextCluster(cluster) == 0;
+}
+        
+void FatSystem::computeStats()
+{
+    if (statsComputed) {
+        return;
+    }
+
+    statsComputed = true;
+
+    freeClusters = 0;
+    for (int i=0; i<totalClusters; i++) {
+        if (freeCluster(i)) {
+            freeClusters++;
+        }
+    }
 }

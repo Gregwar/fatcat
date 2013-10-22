@@ -42,4 +42,23 @@ static inline vector<string> &split(const string &s, char delim, vector<string> 
     return elems;
 }
 
+static char units[] = {'B', 'K', 'M', 'G', 'T', 'P'};
+
+// pretty file size
+static inline string prettySize(int bytes)
+{
+    double size = bytes;
+    int n = 0;
+
+    while (size > 1024) {
+        size /= 1024;
+        n++;
+    }
+
+    ostringstream oss;
+    oss << size << units[n];
+
+    return oss.str();
+}
+
 #endif // _FATCAT_UTILS_H

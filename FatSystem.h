@@ -42,9 +42,11 @@ class FatSystem
         void list(FatPath &path);
         void infos();
         bool findDirectory(FatPath &path, int *cluster);
-        bool findFile(FatPath &path, int *cluster, int *size);
+        bool findFile(FatPath &path, int *cluster, int *size, bool *erased);
         void readFile(FatPath &path);
         void readFile(int cluster, int size);
+        void setListDeleted(bool listDeleted);
+        void setContiguous(bool setContiguous);
 
     protected:
         string diskLabel;
@@ -65,6 +67,8 @@ class FatSystem
         int bytesPerCluster;
         int totalSize;
         int fatSize;
+        bool listDeleted;
+        bool contiguous;
 
         void parseHeader();
 

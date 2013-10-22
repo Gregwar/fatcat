@@ -18,7 +18,9 @@ using namespace std;
  */
 FatSystem::FatSystem(string filename)
     : strange(0),
-    totalSize(-1)
+    totalSize(-1),
+    listDeleted(false),
+    contiguous(false)
 {
     fd = open(filename.c_str(), O_RDONLY);
 }
@@ -93,6 +95,10 @@ int FatSystem::nextCluster(int cluster)
 {
     char buffer[4];
 
+    if (contiguous) {
+        return cluster+1;
+    }
+
     readData(fatStart+4*cluster, buffer, sizeof(buffer));
 
     int next = FAT_READ_LONG(buffer, 0);
@@ -142,10 +148,8 @@ vector<FatEntry> FatSystem::getEntries(int cluster)
                 entry.cluster = FAT_READ_SHORT(buffer, FAT_CLUSTER_LOW) | (FAT_READ_SHORT(buffer, FAT_CLUSTER_HIGH)<<16);
                 entry.size = FAT_READ_LONG(buffer, FAT_FILESIZE);
 
-                if (!entry.isErased()) {
-                    if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.attributes&FAT_ATTRIBUTES_FILE) {
-                        entries.push_back(entry);
-                    }
+                if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.attributes&FAT_ATTRIBUTES_FILE) {
+                    entries.push_back(entry);
                 }
             }
         }
@@ -172,6 +176,11 @@ void FatSystem::list(int cluster)
 
     for (it=entries.begin(); it!=entries.end(); it++) {
         FatEntry &entry = *it;
+
+        if (entry.isErased() && !listDeleted) {
+            continue;
+        }
+
         if (entry.isDirectory()) {
             printf("d");
         } else {
@@ -187,6 +196,9 @@ void FatSystem::list(int cluster)
 
         if (entry.isHidden()) {
             printf(" h");
+        }
+        if (entry.isErased()) {
+            printf(" d");
         }
 
         printf("\n");
@@ -213,6 +225,10 @@ void FatSystem::readFile(int cluster, int size)
         }
 
         cluster = nextCluster(cluster);
+
+        if (cluster == 0) {
+            fprintf(stderr, "! One of your file's cluster is 0 (maybe FAT is broken, you should try -c)\n");
+        }
     }
 }
 
@@ -281,7 +297,7 @@ bool FatSystem::findDirectory(FatPath &path, int *cluster)
     return true;
 }
         
-bool FatSystem::findFile(FatPath &path, int *cluster, int *size)
+bool FatSystem::findFile(FatPath &path, int *cluster, int *size, bool *erased)
 {
     string dirname = path.getDirname();
     string basename = path.getBasename();
@@ -297,6 +313,7 @@ bool FatSystem::findFile(FatPath &path, int *cluster, int *size)
             if (entry.getFilename() == path.getBasename()) {    
                 *cluster = entry.cluster;
                 *size = entry.size;
+                *erased = entry.isErased();
                 return true;
             }
         }
@@ -307,8 +324,26 @@ bool FatSystem::findFile(FatPath &path, int *cluster, int *size)
         
 void FatSystem::readFile(FatPath &path)
 {
+    bool contiguousSave = contiguous;
+    contiguous = false;
     int cluster, size;
-    if (findFile(path, &cluster, &size)) {
+    bool erased;
+    if (findFile(path, &cluster, &size, &erased)) {
+        contiguous = contiguousSave;
+        if (erased && nextCluster(cluster)==0) {
+            fprintf(stderr, "! Trying to read a deleted file, auto-enabling contiguous mode\n");
+            contiguous = true;
+        }
         readFile(cluster, size);
     }
+}
+        
+void FatSystem::setListDeleted(bool listDeleted_)
+{
+    listDeleted = listDeleted_;
+}
+        
+void FatSystem::setContiguous(bool contiguous_)
+{
+    contiguous = contiguous_;
 }

@@ -17,6 +17,9 @@ void usage()
     cout << "-r [path]: reads the file given by the path" << endl;
     cout << "-R [cluster]: reads the data from given cluster" << endl;
     cout << "-s [size]: specify the size of data to read from the cluster" << endl;
+    cout << "-d: enable listing of deleted files" << endl;
+    cout << "-c: enable contiguous mode" << endl;
+    cout << endl;
     exit(EXIT_FAILURE);
 }
 
@@ -48,8 +51,14 @@ int main(int argc, char *argv[])
     bool clusterRead = false;
     int cluster;
 
+    // -d, lists deleted
+    bool listDeleted = false;
+
+    // -c: contiguous mode
+    bool contiguous = false;
+
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dch")) != -1) {
         switch (index) {
             case 'i':
                 infoFlag = true;
@@ -72,6 +81,15 @@ int main(int argc, char *argv[])
                 break;
             case 's':
                 size = atoi(optarg);
+                break;
+            case 'd':
+                listDeleted = true;
+                break;
+            case 'c':
+                contiguous = true;
+                break;
+            case 'h':
+                usage();
                 break;
         }
     }
@@ -97,6 +115,10 @@ int main(int argc, char *argv[])
 
     // Openning the image
     FatSystem fat(image);
+
+    fat.setListDeleted(listDeleted);
+    fat.setContiguous(contiguous);
+
     if (fat.init()) {
         if (infoFlag) {
             fat.infos();

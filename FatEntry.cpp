@@ -15,6 +15,10 @@ string FatEntry::getFilename()
         string ext = trim(shortName.substr(8,3));
         string base = trim(shortName.substr(0,8));
 
+        if (isErased()) {
+            base = base.substr(1);
+        }
+
         if (ext == "") {
             return base;
         } else {

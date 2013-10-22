@@ -1,4 +1,4 @@
-project(fatscan)
+project(fatcat)
 
 set(SOURCES
     main.cpp
@@ -8,4 +8,4 @@ set(SOURCES
     FatSystem.cpp
     )
 
-add_executable(fatscan ${SOURCES})
+add_executable(fatcat ${SOURCES})

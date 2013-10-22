@@ -45,7 +45,7 @@ static inline vector<string> &split(const string &s, char delim, vector<string> 
 static char units[] = {'B', 'K', 'M', 'G', 'T', 'P'};
 
 // pretty file size
-static inline string prettySize(int bytes)
+static inline string prettySize(unsigned long long bytes)
 {
     double size = bytes;
     int n = 0;

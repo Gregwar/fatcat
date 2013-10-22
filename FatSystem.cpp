@@ -37,7 +37,7 @@ FatSystem::~FatSystem()
 /**
  * Reading some data
  */
-void FatSystem::readData(int address, char *buffer, int size)
+void FatSystem::readData(unsigned long long address, char *buffer, int size)
 {
     if (totalSize != -1 && address+size > totalSize) {
         cout << "! Trying to read outside the disk" << endl;
@@ -67,12 +67,12 @@ void FatSystem::parseHeader()
     fsType = string(buffer+FAT_DISK_FS, FAT_DISK_FS_SIZE);
 
     if (bytesPerSector != 512) {
-        printf("WARNING: Bytes per sector is not 512 (%d)\n", bytesPerSector);
+        printf("WARNING: Bytes per sector is not 512 (%llu)\n", bytesPerSector);
         strange++;
     }
 
     if (sectorsPerCluster > 128) {
-        printf("WARNING: Sectors per cluster high (%d)\n", sectorsPerCluster);
+        printf("WARNING: Sectors per cluster high (%llu)\n", sectorsPerCluster);
         strange++;
     }
 
@@ -82,12 +82,12 @@ void FatSystem::parseHeader()
     }
 
     if (fats != 2) {
-        printf("WARNING: Fats number different of 2 (%d)\n", fats);
+        printf("WARNING: Fats number different of 2 (%llu)\n", fats);
         strange++;
     }
 
     if (rootDirectory != 2) {
-        printf("WARNING: Root directory is not 2 (%d)\n", rootDirectory);
+        printf("WARNING: Root directory is not 2 (%llu)\n", rootDirectory);
         strange++;
     }
 }
@@ -110,7 +110,7 @@ int FatSystem::nextCluster(int cluster, int fat)
     }
 }
 
-int FatSystem::clusterAddress(int cluster)
+unsigned long long FatSystem::clusterAddress(int cluster)
 {
     return (dataStart + bytesPerSector*sectorsPerCluster*(cluster-2));
 }
@@ -174,7 +174,7 @@ void FatSystem::list(int cluster)
     vector<FatEntry> entries = getEntries(cluster);
     vector<FatEntry>::iterator it;
 
-    printf("Cluster: %d\n", cluster);
+    printf("Cluster: %llu\n", cluster);
 
     for (it=entries.begin(); it!=entries.end(); it++) {
         FatEntry &entry = *it;
@@ -195,10 +195,10 @@ void FatSystem::list(int cluster)
         }
         printf(" %-40s", name.c_str());
 
-        printf(" c=%d", entry.cluster);
+        printf(" c=%llu", entry.cluster);
         
         if (!entry.isDirectory()) {
-            printf(" s=%d", entry.size);
+            printf(" s=%llu", entry.size);
         }
 
         if (entry.isHidden()) {

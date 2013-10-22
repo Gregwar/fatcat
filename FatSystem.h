@@ -91,7 +91,7 @@ class FatSystem
         /**
          * Returns the cluster offset in the filesystem
          */
-        int clusterAddress(int cluster);
+        unsigned long long clusterAddress(int cluster);
 
         // File descriptor
         int fd;
@@ -100,27 +100,27 @@ class FatSystem
         string diskLabel;
         string oemName;
         string fsType;
-        int totalSectors;
-        int bytesPerSector;
-        int sectorsPerCluster;
-        int reservedSectors;
-        int fats;
-        int sectorsPerFat;
-        int rootDirectory;
-        int reserved;
-        int strange;
+        unsigned long long totalSectors;
+        unsigned long long bytesPerSector;
+        unsigned long long sectorsPerCluster;
+        unsigned long long reservedSectors;
+        unsigned long long fats;
+        unsigned long long sectorsPerFat;
+        unsigned long long rootDirectory;
+        unsigned long long reserved;
+        unsigned long long strange;
 
         // Computed values
-        int fatStart;
-        int dataStart;
-        int bytesPerCluster;
-        int totalSize;
-        int fatSize;
-        int totalClusters;
+        unsigned long long fatStart;
+        unsigned long long dataStart;
+        unsigned long long bytesPerCluster;
+        unsigned long long totalSize;
+        unsigned long long fatSize;
+        unsigned long long totalClusters;
 
         // Stats values
         bool statsComputed;
-        int freeClusters;
+        unsigned long long freeClusters;
 
         // Flags
         bool listDeleted;
@@ -138,7 +138,7 @@ class FatSystem
         /**
          * Read some data from the system
          */
-        void readData(int address, char *buffer, int size);
+        void readData(unsigned long long address, char *buffer, int size);
 
         /**
          * Extract an entry

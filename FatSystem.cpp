@@ -176,6 +176,8 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
     set<unsigned int> visited;
     vector<FatEntry> entries;
     FatFilename filename;
+    int badEntries = 0;
+    int foundEntries = 0;
 
     if (cluster == 0) {
         cluster = rootDirectory;
@@ -208,6 +210,17 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
 
                 if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.attributes&FAT_ATTRIBUTES_FILE) {
                     entries.push_back(entry);
+
+                    foundEntries++;
+                    if (entry.cluster < 0 || entry.cluster > totalClusters) {
+                        badEntries++;
+                    }
+
+                    if (foundEntries >= 1024 && (badEntries/(float)foundEntries)>0.5) {
+                        cerr << "! Entries don't look good, this is maybe not a directory" << endl;
+                        vector<FatEntry> noEntry;
+                        return noEntry;
+                    }
                 }
             }
         }
@@ -533,14 +546,12 @@ void FatSystem::computeStats()
     }
 }
 
-bool FatSystem::isDirectory(unsigned int cluster)
+bool FatSystem::isDirectory(vector<FatEntry> &entries)
 {
     bool hasDotDir = false;
     bool hasDotDotDir = false;
-    vector<FatEntry> entries;
+    int badClusters = 0;
     vector<FatEntry>::iterator it;
-
-    entries = getEntries(cluster);
 
     for (it=entries.begin(); it!=entries.end(); it++) {
         FatEntry &entry = (*it);
@@ -554,9 +565,22 @@ bool FatSystem::isDirectory(unsigned int cluster)
                 hasDotDotDir = true;
             }
         }
+
+        if (entry.cluster > totalClusters) {
+            badClusters++;
+        }
     }
 
-    return hasDotDir && hasDotDotDir;
+    double badClustersRatio = badClusters/(double)entries.size();
+
+    return hasDotDir && hasDotDotDir && badClustersRatio<0.1;
+}
+
+bool FatSystem::isDirectory(unsigned int cluster)
+{
+    vector<FatEntry> entries = getEntries(cluster);
+
+    return isDirectory(entries);
 }
 
 void FatSystem::rewriteUnallocated(bool random)

@@ -179,7 +179,7 @@ vector<FatEntry> FatSystem::getEntries(int cluster)
     }
 
     do {
-        int address = clusterAddress(cluster);
+        unsigned long long address = clusterAddress(cluster);
         char buffer[FAT_ENTRY_SIZE];
 
         int i;

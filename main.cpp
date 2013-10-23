@@ -30,6 +30,7 @@ void usage()
     cout << "  -f [cluster]: define the cluster starting point for the extraction" << endl;
     cout << "  -c: enable contiguous mode" << endl;
     cout << "* -S: write scamble data in unallocated sectors" << endl;
+    cout << "* -z: write scamble data in unallocated sectors" << endl;
     cout << endl;
     cout << "FAT Hacking" << endl;
     cout << "  -@ [cluster]: Get the cluster address and informations" << endl;
@@ -114,10 +115,14 @@ int main(int argc, char *argv[])
 
     // -S: write random data in unallocated sectors
     bool scramble = false;
+    bool zero = false;
 
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2@:ob:p:w:v:mT:f:S")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2@:ob:p:w:v:mT:f:Sz")) != -1) {
         switch (index) {
+            case 'z':
+                zero = true;
+                break;
             case 'S':
                 scramble = true;
                 break;
@@ -211,7 +216,7 @@ int main(int argc, char *argv[])
     // If the user did not required any actions
     if (!(infoFlag || listFlag || listClusterFlag || 
         readFlag || clusterRead || extract || compare || address ||
-        chains || backup || patch || writeNext || merge || scramble)) {
+        chains || backup || patch || writeNext || merge || scramble || zero)) {
         usage();
     }
 
@@ -284,7 +289,10 @@ int main(int argc, char *argv[])
                 diff.merge();
             } else if (scramble) {
                 fat.enableWrite();
-                fat.scramble();
+                fat.rewriteUnallocated(1);
+            } else if (zero) {
+                fat.enableWrite();
+                fat.rewriteUnallocated();
             }
         } else {
             cout << "! Failed to init the FAT filesystem" << endl;

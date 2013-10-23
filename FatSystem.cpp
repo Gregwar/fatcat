@@ -549,7 +549,7 @@ bool FatSystem::isDirectory(unsigned int cluster)
     return hasDotDir && hasDotDotDir;
 }
 
-void FatSystem::scramble()
+void FatSystem::rewriteUnallocated(bool random)
 {
     int total = 0;
     srand(time(NULL));
@@ -557,7 +557,11 @@ void FatSystem::scramble()
         if (freeCluster(cluster)) {
             char buffer[bytesPerCluster];
             for (int i=0; i<sizeof(buffer); i++) {
-                buffer[i] = rand()&0xff;
+                if (random) {
+                    buffer[i] = rand()&0xff;
+                } else {
+                    buffer[i] = 0x0;
+                }
             }
             writeData(clusterAddress(cluster), buffer, sizeof(buffer));
             total++;

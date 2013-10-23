@@ -163,7 +163,7 @@ class FatSystem
         /**
          * Write random data in unallocated sectors
          */
-        void scramble();
+        void rewriteUnallocated(bool random=false);
     
     protected:
         void parseHeader();

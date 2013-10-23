@@ -149,6 +149,11 @@ class FatSystem
          * Write some data to the system, write should be enabled
          */
         int writeData(unsigned long long address, char *buffer, int size);
+
+        /**
+         * Get directory entries for a given cluster
+         */
+        vector<FatEntry> getEntries(int cluster);
     
     protected:
         void parseHeader();
@@ -167,11 +172,6 @@ class FatSystem
          * Compute the free clusters stats
          */
         void computeStats();
-
-        /**
-         * Get directory entries for a given cluster
-         */
-        vector<FatEntry> getEntries(int cluster);
 };
 
 #endif // _FATCAT_FATSYSTEM_H

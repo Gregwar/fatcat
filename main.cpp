@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
                 printf("FAT2: %u (%08x)\n", next2, next2);
             } else if (chains) {
                 FatChains chains(fat);
-                chains.findChains();
+                chains.chainsAnalysis();
             } else if (backup || patch) {
                 FatBackup backupSystem(fat);
                 

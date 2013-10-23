@@ -129,6 +129,10 @@ void FatSystem::parseHeader()
 int FatSystem::nextCluster(int cluster, int fat)
 {
     char buffer[4];
+    
+    if (cluster >= totalClusters || cluster < 0) {
+        return 0;
+    }
 
     readData(fatStart+fatSize*fat+4*cluster, buffer, sizeof(buffer));
 

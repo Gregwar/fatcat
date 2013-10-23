@@ -25,10 +25,12 @@ void usage()
     cout << "-c: enable contiguous mode" << endl;
     cout << "-x [directory]: extract all files to a directory" << endl;
     cout << "-2: analysis & compare the 2 FATs" << endl;
-    cout << "-@ [cluster]: Get the cluster address" << endl;
+    cout << "-@ [cluster]: Get the cluster address and informations" << endl;
     cout << "-k: analysis the chains" << endl;
     cout << "-b [file]: backup the FATs" << endl;
     cout << "-p [file]: restore (patch) the FATs" << endl;
+    cout << "-w [cluster]: write next cluster" << endl;
+    cout << "-v [value]: value to write" << endl;
 
     cout << endl;
     exit(EXIT_FAILURE);
@@ -86,9 +88,24 @@ int main(int argc, char *argv[])
     bool patch = false;
     string backupFile;
 
+    // -w: write next cluster
+    bool writeNext = false;
+
+    // -v: value
+    bool hasValue = false;
+    int value;
+
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2@:kb:p:")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2@:kb:p:w:v:")) != -1) {
         switch (index) {
+            case 'v':
+                hasValue = true;
+                value = atoi(optarg);
+                break;
+            case 'w':
+                writeNext = true;
+                cluster = atoi(optarg);
+                break;
             case '@':
                 address = true;
                 cluster = atoi(optarg);
@@ -162,7 +179,7 @@ int main(int argc, char *argv[])
     // If the user did not required any actions
     if (!(infoFlag || listFlag || listClusterFlag || 
         readFlag || clusterRead || extract || compare || address ||
-        chains || backup || patch)) {
+        chains || backup || patch || writeNext)) {
         usage();
     }
 
@@ -195,7 +212,10 @@ int main(int argc, char *argv[])
             } else if (address) {
                 cout << "Cluster " << cluster << " address:" << endl;
                 int addr = fat.clusterAddress(cluster);
+                int next = fat.nextCluster(cluster);
                 printf("%d (%08x)\n", addr, addr);
+                cout << "Next cluster:" << endl;
+                printf("%u (%08x)\n", next, next);
             } else if (chains) {
                 FatChains chains(fat);
                 chains.findChains();
@@ -207,6 +227,14 @@ int main(int argc, char *argv[])
                 } else {
                     backupSystem.patch(backupFile);
                 }
+            } else if (writeNext) {
+                if (!hasValue) {
+                    throw string("You should provide a value with -v");
+                }
+
+                cout << "Writing next cluster of " << cluster << " to " << value << endl;
+                fat.enableWrite();
+                fat.writeNextCluster(cluster, value);
             }
         } else {
             cout << "! Failed to init the FAT filesystem" << endl;

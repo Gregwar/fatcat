@@ -29,6 +29,7 @@ void usage()
     cout << "                  will start with rootDirectory, unless -f is provided" << endl;
     cout << "  -f [cluster]: define the cluster starting point for the extraction" << endl;
     cout << "  -c: enable contiguous mode" << endl;
+    cout << "* -S: write scamble data in unallocated sectors" << endl;
     cout << endl;
     cout << "FAT Hacking" << endl;
     cout << "  -@ [cluster]: Get the cluster address and informations" << endl;
@@ -111,9 +112,15 @@ int main(int argc, char *argv[])
     // -T: FAT table to write
     int table;
 
+    // -S: write random data in unallocated sectors
+    bool scramble = false;
+
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2@:ob:p:w:v:mT:f:")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2@:ob:p:w:v:mT:f:S")) != -1) {
         switch (index) {
+            case 'S':
+                scramble = true;
+                break;
             case 'T':
                 table = atoi(optarg);
                 break;
@@ -204,7 +211,7 @@ int main(int argc, char *argv[])
     // If the user did not required any actions
     if (!(infoFlag || listFlag || listClusterFlag || 
         readFlag || clusterRead || extract || compare || address ||
-        chains || backup || patch || writeNext || merge)) {
+        chains || backup || patch || writeNext || merge || scramble)) {
         usage();
     }
 
@@ -275,6 +282,9 @@ int main(int argc, char *argv[])
             } else if (merge) {
                 FatDiff diff(fat);
                 diff.merge();
+            } else if (scramble) {
+                fat.enableWrite();
+                fat.scramble();
             }
         } else {
             cout << "! Failed to init the FAT filesystem" << endl;

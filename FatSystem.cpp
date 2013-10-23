@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <time.h>
 #include <string>
 #include <iostream>
 #include <string.h>
@@ -546,4 +547,22 @@ bool FatSystem::isDirectory(unsigned int cluster)
     }
 
     return hasDotDir && hasDotDotDir;
+}
+
+void FatSystem::scramble()
+{
+    int total = 0;
+    srand(time(NULL));
+    for (int cluster=0; cluster<totalClusters; cluster++) {
+        if (freeCluster(cluster)) {
+            char buffer[bytesPerCluster];
+            for (int i=0; i<sizeof(buffer); i++) {
+                buffer[i] = rand()&0xff;
+            }
+            writeData(clusterAddress(cluster), buffer, sizeof(buffer));
+            total++;
+        }
+    }
+
+    cout << "Scrambled " << total << " sectors" << endl;
 }

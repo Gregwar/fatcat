@@ -159,6 +159,11 @@ class FatSystem
          * Guess if a given cluster is a directory
          */
         bool isDirectory(unsigned int cluster);
+
+        /**
+         * Write random data in unallocated sectors
+         */
+        void scramble();
     
     protected:
         void parseHeader();

@@ -78,6 +78,12 @@ void FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
     }
     visited.insert(cluster);
 
+    if (system.nextCluster(cluster) == 0) {
+        return;
+    }
+
+    cout << "Exploring " << cluster << endl;
+
     vector<FatEntry> entries = system.getEntries(cluster);
     vector<FatEntry>::iterator it;
 

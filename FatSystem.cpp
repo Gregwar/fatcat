@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <set>
 
 #include "FatSystem.h"
 #include "FatFilename.h"
@@ -65,10 +66,10 @@ FatSystem::~FatSystem()
 int FatSystem::readData(unsigned long long address, char *buffer, int size)
 {
     if (totalSize != -1 && address+size > totalSize) {
-        cout << "! Trying to read outside the disk" << endl;
+//        cout << "! Trying to read outside the disk" << endl;
     }
 
-    lseek(fd, address, SEEK_SET);
+    lseek64(fd, address, SEEK_SET);
 
     return read(fd, buffer, size);
 }
@@ -79,7 +80,7 @@ int FatSystem::writeData(unsigned long long address, char *buffer, int size)
         throw string("Trying to write data while write mode is disabled");
     }
 
-    lseek(fd, address, SEEK_SET);
+    lseek64(fd, address, SEEK_SET);
 
     return write(fd, buffer, size);
 }
@@ -172,6 +173,7 @@ unsigned long long FatSystem::clusterAddress(unsigned int cluster)
 
 vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
 {
+    set<unsigned int> visited;
     vector<FatEntry> entries;
     FatFilename filename;
 
@@ -182,6 +184,7 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
     do {
         unsigned long long address = clusterAddress(cluster);
         char buffer[FAT_ENTRY_SIZE];
+        visited.insert(cluster);
 
         unsigned int i;
         for (i=0; i<bytesPerSector*sectorsPerCluster; i+=sizeof(buffer)) {
@@ -210,7 +213,13 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
         }
 
         cluster = nextCluster(cluster);
-    } while (cluster != FAT_LAST);
+
+        if (visited.find(cluster) != visited.end()) {
+            cerr << "! Looping directory" << endl;
+            break;
+        }
+
+    } while (cluster != FAT_LAST && cluster != 0);
 
     return entries;
 }
@@ -229,7 +238,7 @@ void FatSystem::list(unsigned int cluster)
     vector<FatEntry> entries = getEntries(cluster);
     vector<FatEntry>::iterator it;
 
-    printf("Cluster: %llu\n", cluster);
+    printf("Cluster: %u\n", cluster);
 
     for (it=entries.begin(); it!=entries.end(); it++) {
         FatEntry &entry = *it;
@@ -250,7 +259,7 @@ void FatSystem::list(unsigned int cluster)
         }
         printf(" %-40s", name.c_str());
 
-        printf(" c=%llu", entry.cluster);
+        printf(" c=%u", entry.cluster);
         
         if (!entry.isDirectory()) {
             printf(" s=%llu", entry.size);

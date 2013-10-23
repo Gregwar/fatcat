@@ -37,6 +37,7 @@ void FatChains::chainsAnalysis()
         if (chain.orphaned) {
             if (system.isDirectory(chain.startCluster)) {
                 recursiveExploration(chains, visited, chain.startCluster);
+                chain.orphaned = true;
             }
         }
     }
@@ -93,7 +94,7 @@ void FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
 
         // Search the cluster in the previously visited chains, if it
         // exists, mark it as non-orphaned
-        if (chains.find(cluster)!=chains.end() && visited.find(cluster)==visited.end()) {
+        if (chains.find(cluster)!=chains.end()) {
             chains[cluster].orphaned = false;
         }
 

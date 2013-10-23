@@ -2,6 +2,7 @@ project(fatcat)
 
 set(SOURCES
     main.cpp
+    FatBackup.cpp
     FatChain.cpp
     FatChains.cpp
     FatEntry.cpp

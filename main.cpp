@@ -6,6 +6,7 @@
 #include "FatSystem.h"
 #include "FatPath.h"
 #include "FatChains.h"
+#include "FatBackup.h"
 
 using namespace std;
 
@@ -26,6 +27,8 @@ void usage()
     cout << "-2: analysis & compare the 2 FATs" << endl;
     cout << "-@ [cluster]: Get the cluster address" << endl;
     cout << "-k: analysis the chains" << endl;
+    cout << "-b [file]: backup the FATs" << endl;
+    cout << "-p [file]: restore (patch) the FATs" << endl;
 
     cout << endl;
     exit(EXIT_FAILURE);
@@ -78,8 +81,13 @@ int main(int argc, char *argv[])
     // -k: analysis the chains
     bool chains = false;
 
+    // -b: backup the fats
+    bool backup = false;
+    bool patch = false;
+    string backupFile;
+
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2@:k")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2@:kb:p:")) != -1) {
         switch (index) {
             case '@':
                 address = true;
@@ -123,6 +131,14 @@ int main(int argc, char *argv[])
             case '2':
                 compare = true;
                 break;
+            case 'b':
+                backup = true;
+                backupFile = string(optarg);
+                break;
+            case 'p':
+                patch = true;
+                backupFile = string(optarg);
+                break;
             case 'h':
                 usage();
                 break;
@@ -146,45 +162,57 @@ int main(int argc, char *argv[])
     // If the user did not required any actions
     if (!(infoFlag || listFlag || listClusterFlag || 
         readFlag || clusterRead || extract || compare || address ||
-        chains)) {
+        chains || backup || patch)) {
         usage();
     }
 
-    // Openning the image
-    FatSystem fat(image);
+    try {
+        // Openning the image
+        FatSystem fat(image);
 
-    fat.setListDeleted(listDeleted);
-    fat.setContiguous(contiguous);
+        fat.setListDeleted(listDeleted);
+        fat.setContiguous(contiguous);
 
-    if (fat.init()) {
-        if (infoFlag) {
-            fat.infos();
-        } else if (listFlag) {
-            cout << "Listing path " << listPath << endl;
-            FatPath path(listPath);
-            fat.list(path);
-        } else if (listClusterFlag) {
-            cout << "Listing cluster " << listCluster << endl;
-            fat.list(listCluster);
-        } else if (readFlag) {
-            FatPath path(readPath);
-            fat.readFile(path);
-        } else if (clusterRead) {
-            fat.readFile(cluster, size);
-        } else if (extract) {
-            fat.extract(extractDirectory);
-        } else if (compare) {
-            fat.compare();
-        } else if (address) {
-            cout << "Cluster " << cluster << " address:" << endl;
-            int addr = fat.clusterAddress(cluster);
-            printf("%d (%08x)\n", addr, addr);
-        } else if (chains) {
-            FatChains chains(fat);
-            chains.findChains();
+        if (fat.init()) {
+            if (infoFlag) {
+                fat.infos();
+            } else if (listFlag) {
+                cout << "Listing path " << listPath << endl;
+                FatPath path(listPath);
+                fat.list(path);
+            } else if (listClusterFlag) {
+                cout << "Listing cluster " << listCluster << endl;
+                fat.list(listCluster);
+            } else if (readFlag) {
+                FatPath path(readPath);
+                fat.readFile(path);
+            } else if (clusterRead) {
+                fat.readFile(cluster, size);
+            } else if (extract) {
+                fat.extract(extractDirectory);
+            } else if (compare) {
+                fat.compare();
+            } else if (address) {
+                cout << "Cluster " << cluster << " address:" << endl;
+                int addr = fat.clusterAddress(cluster);
+                printf("%d (%08x)\n", addr, addr);
+            } else if (chains) {
+                FatChains chains(fat);
+                chains.findChains();
+            } else if (backup || patch) {
+                FatBackup backupSystem(fat);
+                
+                if (backup) {
+                    backupSystem.backup(backupFile);
+                } else {
+                    backupSystem.patch(backupFile);
+                }
+            }
+        } else {
+            cout << "! Failed to init the FAT filesystem" << endl;
         }
-    } else {
-        cout << "! Failed to init the FAT filesystem" << endl;
+    } catch (string error) {
+        cerr << "Error: " << error << endl;
     }
 
     exit(EXIT_SUCCESS);

@@ -94,7 +94,9 @@ class FatSystem
         unsigned long long clusterAddress(int cluster);
 
         // File descriptor
+        string filename;
         int fd;
+        bool writeMode;
 
         // Header values
         string diskLabel;
@@ -131,14 +133,25 @@ class FatSystem
          * If contiguous mode, this will just return cluster+1
          */
         int nextCluster(int cluster, int fat=0);
-    
-    protected:
-        void parseHeader();
+
+        /**
+         * Enable write mode on the FAT system, the internal file descriptor
+         * will be re-opened in write mode
+         */
+        void enableWrite();
 
         /**
          * Read some data from the system
          */
-        void readData(unsigned long long address, char *buffer, int size);
+        int readData(unsigned long long address, char *buffer, int size);
+
+        /**
+         * Write some data to the system, write should be enabled
+         */
+        int writeData(unsigned long long address, char *buffer, int size);
+    
+    protected:
+        void parseHeader();
 
         /**
          * Extract an entry

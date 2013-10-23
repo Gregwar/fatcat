@@ -18,8 +18,9 @@ using namespace std;
 /**
  * Opens the FAT resource
  */
-FatSystem::FatSystem(string filename)
+FatSystem::FatSystem(string filename_)
     : strange(0),
+    filename(filename_),
     totalSize(-1),
     listDeleted(false),
     contiguous(false),
@@ -27,6 +28,29 @@ FatSystem::FatSystem(string filename)
     freeClusters(0)
 {
     fd = open(filename.c_str(), O_RDONLY|O_LARGEFILE);
+    writeMode = false;
+
+    if (fd < 0) {
+        ostringstream oss;
+        oss << "! Unable to open the input file: " << filename << " for reading";
+
+        throw oss.str();
+    }
+}
+
+void FatSystem::enableWrite()
+{
+    close(fd);
+    fd = open(filename.c_str(), O_RDWR|O_LARGEFILE);
+
+    if (fd < 0) {
+        ostringstream oss;
+        oss << "! Unable to open the input file: " << filename << " for writing";
+
+        throw oss.str();
+    }
+    
+    writeMode = true;
 }
 
 FatSystem::~FatSystem()
@@ -37,14 +61,26 @@ FatSystem::~FatSystem()
 /**
  * Reading some data
  */
-void FatSystem::readData(unsigned long long address, char *buffer, int size)
+int FatSystem::readData(unsigned long long address, char *buffer, int size)
 {
     if (totalSize != -1 && address+size > totalSize) {
         cout << "! Trying to read outside the disk" << endl;
     }
 
     lseek(fd, address, SEEK_SET);
-    read(fd, buffer, size);
+
+    return read(fd, buffer, size);
+}
+
+int FatSystem::writeData(unsigned long long address, char *buffer, int size)
+{
+    if (!writeMode) {
+        throw string("Trying to write data while write mode is disabled");
+    }
+
+    lseek(fd, address, SEEK_SET);
+
+    return write(fd, buffer, size);
 }
 
 /**

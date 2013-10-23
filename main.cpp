@@ -255,13 +255,15 @@ int main(int argc, char *argv[])
                     throw string("You should provide a value with -v");
                 }
 
-                cout << "Writing next cluster of " << cluster << " to " << value << endl;
+                printf("Writing next cluster of %u to %u\n", cluster, value);
                 fat.enableWrite();
 
                 if (table == 0 || table == 1) {
+                    printf("Writing on FAT1\n");
                     fat.writeNextCluster(cluster, value, 0);
                 } 
                 if (table == 0 || table == 2) {
+                    printf("Writing on FAT2\n");
                     fat.writeNextCluster(cluster, value, 1);
                 } 
             } else if (merge) {

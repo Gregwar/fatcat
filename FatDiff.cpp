@@ -57,7 +57,8 @@ void FatDiff::merge()
 
         if (A != B && (A==0 || B==0)) {
             printf("Merging cluster %d\n", cluster);
-            system.writeNextCluster(cluster, A+B);
+            system.writeNextCluster(cluster, A+B, 0);
+            system.writeNextCluster(cluster, A+B, 1);
             merged++;
         }
     }

@@ -153,6 +153,10 @@ bool FatSystem::writeNextCluster(int cluster, int next, int fat)
 {
     char buffer[4];
 
+    if (cluster >= totalClusters || cluster < 0) {
+        throw string("Trying to access a cluster outside bounds");
+    }
+
     buffer[0] = (next>>0)&0xff;
     buffer[1] = (next>>8)&0xff;
     buffer[2] = (next>>16)&0xff;
@@ -490,7 +494,10 @@ FatEntry FatSystem::rootEntry()
 
 bool FatSystem::freeCluster(int cluster)
 {
-    return nextCluster(cluster) == 0;
+    int next = nextCluster(cluster);
+
+    return next == 0 
+        || next == 0xf0000000;
 }
         
 void FatSystem::computeStats()

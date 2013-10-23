@@ -255,7 +255,8 @@ int main(int argc, char *argv[])
                     throw string("You should provide a value with -v");
                 }
 
-                printf("Writing next cluster of %u to %u\n", cluster, value);
+                int prev = fat.nextCluster(cluster);
+                printf("Writing next cluster of %u from %u to %u\n", cluster, prev, value);
                 fat.enableWrite();
 
                 if (table == 0 || table == 1) {
@@ -273,6 +274,13 @@ int main(int argc, char *argv[])
         } else {
             cout << "! Failed to init the FAT filesystem" << endl;
         }
+
+        /*
+        fat.enableWrite();
+        for (int i=0; i<fat.totalClusters/2; i++) {
+            fat.writeNextCluster(i, 0xffffffff, 0);
+        }
+        */
     } catch (string error) {
         cerr << "Error: " << error << endl;
     }

@@ -275,12 +275,10 @@ int main(int argc, char *argv[])
             cout << "! Failed to init the FAT filesystem" << endl;
         }
 
-        /*
         fat.enableWrite();
         for (int i=0; i<fat.totalClusters/2; i++) {
             fat.writeNextCluster(i, 0xffffffff, 0);
         }
-        */
     } catch (string error) {
         cerr << "Error: " << error << endl;
     }

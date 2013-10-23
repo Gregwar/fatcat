@@ -112,11 +112,6 @@ void FatSystem::parseHeader()
         strange++;
     }
 
-    if (reservedSectors != 0x20) {
-        printf("WARNING: Reserved sectors !=0x20 (0x%08x)\n", reservedSectors);
-        strange++;
-    }
-
     if (fats != 2) {
         printf("WARNING: Fats number different of 2 (%llu)\n", fats);
         strange++;

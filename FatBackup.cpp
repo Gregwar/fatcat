@@ -1,4 +1,5 @@
 #include <string>
+#include <sstream>
 #include <stdio.h>
 #include <iostream>
 #include <fcntl.h>
@@ -6,7 +7,7 @@
 
 using namespace std;
 
-#define CHUNK_SIZES 1024
+#define CHUNKS_SIZES 1024
         
 FatBackup::FatBackup(FatSystem &system_)
     : system(system_)
@@ -15,13 +16,19 @@ FatBackup::FatBackup(FatSystem &system_)
 
 void FatBackup::backup(string backupFile)
 {
-    char buffer[CHUNK_SIZES];
+    char buffer[CHUNKS_SIZES];
     int size = system.fatSize*2;
     int n = 0;
     FILE *backup = fopen(backupFile.c_str(), "w+");
 
+    if (backup == NULL) {
+        ostringstream oss;
+        oss << "Unable to open file " << backupFile << " for writing";
+        throw oss.str();
+    }
+
     for (int i=0; i<size; i+=n) {
-        int toRead = CHUNK_SIZES;
+        int toRead = CHUNKS_SIZES;
         if (size-i < toRead) {
             toRead = size-i;
         }
@@ -37,5 +44,28 @@ void FatBackup::backup(string backupFile)
 
 void FatBackup::patch(string backupFile)
 {
-    throw string("Not implemented!");
+    char buffer[CHUNKS_SIZES];
+
+    // Opening the file
+    FILE *backup = fopen(backupFile.c_str(), "r");
+    if (backup == NULL) {
+        ostringstream oss;
+        oss << "Unable to open file " << backupFile << " for reading";
+        throw oss.str();
+    }
+
+    // Activating the writing mode on the fat system
+    system.enableWrite();
+
+    int n;
+    int position;
+    int toWrite = 1;
+    for (position=0; toWrite; position+=n) {
+        toWrite = fread(buffer, 1, CHUNKS_SIZES, backup);
+        n = system.writeData(system.fatStart+position, buffer, toWrite);
+    }
+
+    fclose(backup);
+
+    cout << "Successfully wrote " << backupFile << " as the FAT table of system (" << position << ")" << endl;
 }

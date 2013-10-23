@@ -26,6 +26,8 @@ void usage()
     cout << "  -s [size]: specify the size of data to read from the cluster" << endl;
     cout << "  -d: enable listing of deleted files" << endl;
     cout << "  -x [directory]: extract all files to a directory, deleted files included if -d" << endl;
+    cout << "                  will start with rootDirectory, unless -f is provided" << endl;
+    cout << "  -f [cluster]: define the cluster starting point for the extraction" << endl;
     cout << "  -c: enable contiguous mode" << endl;
     cout << endl;
     cout << "FAT Hacking" << endl;
@@ -36,7 +38,7 @@ void usage()
     cout << "* -w [cluster] -v [value]: write next cluster (see -T)" << endl;
     cout << "  -T [table]: specify which table to write (0:both, 1:first, 2:second)" << endl;
     cout << "* -m: merge the FATs" << endl;
-    cout << "  -k: analysis the chains" << endl;
+    cout << "  -o: search for orphan files and directories" << endl;
 
     cout << endl;
     cout << "*: These flags writes on the disk, be careful" << endl;
@@ -70,7 +72,7 @@ int main(int argc, char *argv[])
 
     // -t, reads from cluster file
     bool clusterRead = false;
-    int cluster;
+    int cluster = 0;
 
     // -d, lists deleted
     bool listDeleted = false;
@@ -110,7 +112,7 @@ int main(int argc, char *argv[])
     int table;
 
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2@:kb:p:w:v:mT:")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2@:ob:p:w:v:mT:f:")) != -1) {
         switch (index) {
             case 'T':
                 table = atoi(optarg);
@@ -122,6 +124,9 @@ int main(int argc, char *argv[])
                 hasValue = true;
                 value = atoi(optarg);
                 break;
+            case 'f':
+                cluster = atoi(optarg);
+                break;
             case 'w':
                 writeNext = true;
                 cluster = atoi(optarg);
@@ -130,7 +135,7 @@ int main(int argc, char *argv[])
                 address = true;
                 cluster = atoi(optarg);
                 break;
-            case 'k':
+            case 'o':
                 chains = true;
                 break;
             case 'i':
@@ -226,7 +231,7 @@ int main(int argc, char *argv[])
             } else if (clusterRead) {
                 fat.readFile(cluster, size);
             } else if (extract) {
-                fat.extract(extractDirectory);
+                fat.extract(cluster, extractDirectory);
             } else if (compare) {
                 FatDiff diff(fat);
                 diff.compare();

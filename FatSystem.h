@@ -76,7 +76,7 @@ class FatSystem
         /**
          * Extract all the files to the given directory
          */
-        void extract(string directory);
+        void extract(unsigned int cluster, string directory);
 
         /**
          * Is the n-th cluster free?

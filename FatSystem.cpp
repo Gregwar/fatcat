@@ -475,9 +475,16 @@ void FatSystem::extractEntry(FatEntry &entry, string directory)
     }
 }
         
-void FatSystem::extract(string directory)
+void FatSystem::extract(unsigned int cluster, string directory)
 {
-    FatEntry entry = rootEntry();
+    FatEntry entry;
+    if (cluster == 0) {
+        entry = rootEntry();
+    } else {
+        entry.longName = "/";
+        entry.attributes = FAT_ATTRIBUTES_DIR;
+        entry.cluster = cluster;
+    }
     extractEntry(entry, directory);
 }
         

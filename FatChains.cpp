@@ -20,10 +20,12 @@ void FatChains::chainsAnalysis()
     map<int, FatChain> chains = findChains();
 
     cout << "Found " << chains.size() << " chains" << endl;
+    cout << endl;
 
     cout << "Running the recursive differential analysis..." << endl;
     set<int> visited;
     recursiveExploration(chains, visited, system.rootDirectory);
+    cout << endl;
 
     cout << "Having a look at the chains..." << endl;
     map<int, FatChain>::iterator it;
@@ -31,6 +33,18 @@ void FatChains::chainsAnalysis()
     int orphaned = 0;
     for (it=chains.begin(); it!=chains.end(); it++) {
         FatChain &chain = it->second;
+
+        if (chain.orphaned) {
+            if (system.isDirectory(chain.startCluster)) {
+                recursiveExploration(chains, visited, chain.startCluster);
+            }
+        }
+    }
+    cout << endl;
+    
+    for (it=chains.begin(); it!=chains.end(); it++) {
+        FatChain &chain = it->second;
+
         if (chain.orphaned) {
             orphaned++;
             orphanedChains.push_back(chain);
@@ -38,16 +52,23 @@ void FatChains::chainsAnalysis()
     }
 
     if (orphaned) {
-        cout << "There is " << orphaned << " orphaned chains:" << endl;
+        cout << "There is " << orphaned << " orphaned elements:" << endl;
         vector<FatChain>::iterator vit;
 
         for (vit=orphanedChains.begin(); vit!=orphanedChains.end(); vit++) {
             FatChain &chain = (*vit);
-            cout << "Chain from cluster " << chain.startCluster << " to " << chain.endCluster << " (size " << chain.size() << ")" << endl;
+            cout << "Chain from cluster " << chain.startCluster << " to " << chain.endCluster << " (size " << chain.size() << ") ";
+            if (system.isDirectory(chain.startCluster)) {
+                cout << "directory";
+            } else {
+                cout << "file" << endl;
+            }
+            cout << endl;
         }
     } else {
         cout << "There is no orphaned chains, disk seems clean!" << endl;
     }
+    cout << endl;
 }
         
 void FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visited, int cluster)
@@ -66,12 +87,12 @@ void FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
 
         // Search the cluster in the previously visited chains, if it
         // exists, mark it as non-orphaned
-        if (chains.find(cluster) != chains.end()) {
+        if (chains.find(cluster)!=chains.end() && visited.find(cluster)==visited.end()) {
             chains[cluster].orphaned = false;
         }
 
         if (entry.isDirectory()) {
-            recursiveExploration(chains, visited, entry.cluster);
+            recursiveExploration(chains, visited, cluster);
         }
     }
 }

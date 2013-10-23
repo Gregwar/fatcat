@@ -126,7 +126,7 @@ void FatSystem::parseHeader()
 /**
  * Returns the 32-bit fat value for the given cluster number
  */
-int FatSystem::nextCluster(int cluster, int fat)
+unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 {
     char buffer[4];
     
@@ -136,7 +136,7 @@ int FatSystem::nextCluster(int cluster, int fat)
 
     readData(fatStart+fatSize*fat+4*cluster, buffer, sizeof(buffer));
 
-    int next = FAT_READ_LONG(buffer, 0);
+    unsigned int next = FAT_READ_LONG(buffer, 0);
 
     if (next >= 0x0ffffff0) {
         return FAT_LAST;
@@ -148,7 +148,7 @@ int FatSystem::nextCluster(int cluster, int fat)
 /**
  * Changes the next cluster in a file
  */
-bool FatSystem::writeNextCluster(int cluster, int next, int fat)
+bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fat)
 {
     char buffer[4];
 
@@ -164,12 +164,12 @@ bool FatSystem::writeNextCluster(int cluster, int next, int fat)
     return writeData(fatStart+fatSize*fat+4*cluster, buffer, sizeof(buffer))==4;
 }
 
-unsigned long long FatSystem::clusterAddress(int cluster)
+unsigned long long FatSystem::clusterAddress(unsigned int cluster)
 {
     return (dataStart + bytesPerSector*sectorsPerCluster*(cluster-2));
 }
 
-vector<FatEntry> FatSystem::getEntries(int cluster)
+vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
 {
     vector<FatEntry> entries;
     FatFilename filename;
@@ -182,7 +182,7 @@ vector<FatEntry> FatSystem::getEntries(int cluster)
         unsigned long long address = clusterAddress(cluster);
         char buffer[FAT_ENTRY_SIZE];
 
-        int i;
+        unsigned int i;
         for (i=0; i<bytesPerSector*sectorsPerCluster; i+=sizeof(buffer)) {
             // Reading data
             readData(address, buffer, sizeof(buffer));
@@ -216,14 +216,14 @@ vector<FatEntry> FatSystem::getEntries(int cluster)
         
 void FatSystem::list(FatPath &path)
 {
-    int cluster;
+    unsigned int cluster;
 
     if (findDirectory(path, &cluster)) {
         list(cluster);
     }
 }
 
-void FatSystem::list(int cluster)
+void FatSystem::list(unsigned int cluster)
 {
     vector<FatEntry> entries = getEntries(cluster);
     vector<FatEntry>::iterator it;
@@ -266,7 +266,7 @@ void FatSystem::list(int cluster)
     }
 }
 
-void FatSystem::readFile(int cluster, int size, FILE *f)
+void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f)
 {
     bool warning = false;
     if (f == NULL) {
@@ -352,7 +352,7 @@ void FatSystem::infos()
     cout << endl;
 }
         
-bool FatSystem::findDirectory(FatPath &path, int *cluster)
+bool FatSystem::findDirectory(FatPath &path, unsigned int *cluster)
 {
     vector<string> parts = path.getParts();
     *cluster = rootDirectory;
@@ -382,13 +382,13 @@ bool FatSystem::findDirectory(FatPath &path, int *cluster)
     return true;
 }
         
-bool FatSystem::findFile(FatPath &path, int *cluster, int *size, bool *erased)
+bool FatSystem::findFile(FatPath &path, unsigned int *cluster, unsigned int *size, bool *erased)
 {
     string dirname = path.getDirname();
     string basename = path.getBasename();
 
     FatPath parent(dirname);
-    int parentCluster;
+    unsigned int parentCluster;
     if (findDirectory(parent, &parentCluster)) {
         vector<FatEntry> entries = getEntries(parentCluster);
         vector<FatEntry>::iterator it;
@@ -411,7 +411,7 @@ void FatSystem::readFile(FatPath &path, FILE *f)
 {
     bool contiguousSave = contiguous;
     contiguous = false;
-    int cluster, size;
+    unsigned int cluster, size;
     bool erased;
     if (findFile(path, &cluster, &size, &erased)) {
         contiguous = contiguousSave;
@@ -491,9 +491,9 @@ FatEntry FatSystem::rootEntry()
     return entry;
 }
 
-bool FatSystem::freeCluster(int cluster)
+bool FatSystem::freeCluster(unsigned int cluster)
 {
-    int next = nextCluster(cluster);
+    unsigned int next = nextCluster(cluster);
 
     return next == 0 
         || next == 0xf0000000;
@@ -508,9 +508,35 @@ void FatSystem::computeStats()
     statsComputed = true;
 
     freeClusters = 0;
-    for (int cluster=0; cluster<totalClusters; cluster++) {
+    for (unsigned int cluster=0; cluster<totalClusters; cluster++) {
         if (freeCluster(cluster)) {
             freeClusters++;
         }
     }
+}
+
+bool FatSystem::isDirectory(unsigned int cluster)
+{
+    bool hasDotDir = false;
+    bool hasDotDotDir = false;
+    vector<FatEntry> entries;
+    vector<FatEntry>::iterator it;
+
+    entries = getEntries(cluster);
+
+    for (it=entries.begin(); it!=entries.end(); it++) {
+        FatEntry &entry = (*it);
+
+        if (entry.isDirectory()) {
+            string name = entry.getFilename();
+            if (name == ".") {
+                hasDotDir = true;
+            }
+            if (name == "..") {
+                hasDotDotDir = true;
+            }
+        }
+    }
+
+    return hasDotDir && hasDotDotDir;
 }

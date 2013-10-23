@@ -43,7 +43,7 @@ class FatSystem
         /**
          * Directory listing
          */
-        void list(int cluster);
+        void list(unsigned int cluster);
         void list(FatPath &path);
 
         /**
@@ -54,14 +54,14 @@ class FatSystem
         /**
          * Find a directory or a file
          */
-        bool findDirectory(FatPath &path, int *cluster);
-        bool findFile(FatPath &path, int *cluster, int *size, bool *erased);
+        bool findDirectory(FatPath &path, unsigned int *cluster);
+        bool findFile(FatPath &path, unsigned int *cluster, unsigned int *size, bool *erased);
 
         /**
          * File reading
          */
         void readFile(FatPath &path, FILE *f = NULL);
-        void readFile(int cluster, int size, FILE * f = NULL);
+        void readFile(unsigned int cluster, unsigned int size, FILE * f = NULL);
 
         /**
          * Showing deleted file in listing
@@ -81,12 +81,12 @@ class FatSystem
         /**
          * Is the n-th cluster free?
          */
-        bool freeCluster(int cluster);
+        bool freeCluster(unsigned int cluster);
 
         /**
          * Returns the cluster offset in the filesystem
          */
-        unsigned long long clusterAddress(int cluster);
+        unsigned long long clusterAddress(unsigned int cluster);
 
         // File descriptor
         string filename;
@@ -127,12 +127,12 @@ class FatSystem
          * Returns the next cluster number
          * If contiguous mode, this will just return cluster+1
          */
-        int nextCluster(int cluster, int fat=0);
+        unsigned int nextCluster(unsigned int cluster, int fat=0);
 
         /**
          * Write a next cluster value in the file (helper)
          */
-        bool writeNextCluster(int cluster, int next, int fat=0);
+        bool writeNextCluster(unsigned int cluster, unsigned int next, int fat=0);
 
         /**
          * Enable write mode on the FAT system, the internal file descriptor
@@ -153,7 +153,12 @@ class FatSystem
         /**
          * Get directory entries for a given cluster
          */
-        vector<FatEntry> getEntries(int cluster);
+        vector<FatEntry> getEntries(unsigned int cluster);
+
+        /**
+         * Guess if a given cluster is a directory
+         */
+        bool isDirectory(unsigned int cluster);
     
     protected:
         void parseHeader();

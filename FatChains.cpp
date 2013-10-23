@@ -36,6 +36,7 @@ void FatChains::chainsAnalysis()
 
         if (chain.orphaned) {
             if (system.isDirectory(chain.startCluster)) {
+                chain.directory = true;
                 recursiveExploration(chains, visited, chain.startCluster);
                 chain.orphaned = true;
             }
@@ -59,7 +60,7 @@ void FatChains::chainsAnalysis()
         for (vit=orphanedChains.begin(); vit!=orphanedChains.end(); vit++) {
             FatChain &chain = (*vit);
             cout << "Chain from cluster " << chain.startCluster << " to " << chain.endCluster << " (size " << chain.size() << ") ";
-            if (system.isDirectory(chain.startCluster)) {
+            if (chain.directory) {
                 cout << "directory";
             } else {
                 cout << "file" << endl;

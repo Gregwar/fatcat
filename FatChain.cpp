@@ -1,7 +1,8 @@
 #include "FatChain.h"
 
 FatChain::FatChain()
-    : orphaned(true)
+    : orphaned(true),
+    directory(false)
 {
 }
 

@@ -135,6 +135,11 @@ class FatSystem
         int nextCluster(int cluster, int fat=0);
 
         /**
+         * Write a next cluster value in the file (helper)
+         */
+        bool writeNextCluster(int cluster, int next, int fat=0);
+
+        /**
          * Enable write mode on the FAT system, the internal file descriptor
          * will be re-opened in write mode
          */

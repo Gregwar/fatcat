@@ -145,6 +145,21 @@ int FatSystem::nextCluster(int cluster, int fat)
         return next;
     }
 }
+    
+/**
+ * Changes the next cluster in a file
+ */
+bool FatSystem::writeNextCluster(int cluster, int next, int fat)
+{
+    char buffer[4];
+
+    buffer[0] = (next>>0)&0xff;
+    buffer[1] = (next>>8)&0xff;
+    buffer[2] = (next>>16)&0xff;
+    buffer[3] = (next>>24)&0xff;
+
+    return writeData(fatStart+fatSize*fat+4*cluster, buffer, sizeof(buffer))==4;
+}
 
 unsigned long long FatSystem::clusterAddress(int cluster)
 {

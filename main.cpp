@@ -7,6 +7,7 @@
 #include "FatPath.h"
 #include "FatChains.h"
 #include "FatBackup.h"
+#include "FatDiff.h"
 
 using namespace std;
 
@@ -15,23 +16,30 @@ void usage()
     cout << "fatcat v1.0, Gregwar <g.passault@gmail.com>" << endl;
     cout << endl;
     cout << "Usage: fatcat [-i] disk.img" << endl;
-    cout << "-i: display information about disk" << endl;
-    cout << "-l [dir]: list files and directories in the given path" << endl;
-    cout << "-L [cluster]: list files and directories in the given cluster" << endl;
-    cout << "-r [path]: reads the file given by the path" << endl;
-    cout << "-R [cluster]: reads the data from given cluster" << endl;
-    cout << "-s [size]: specify the size of data to read from the cluster" << endl;
-    cout << "-d: enable listing of deleted files" << endl;
-    cout << "-c: enable contiguous mode" << endl;
-    cout << "-x [directory]: extract all files to a directory" << endl;
-    cout << "-2: analysis & compare the 2 FATs" << endl;
-    cout << "-@ [cluster]: Get the cluster address and informations" << endl;
-    cout << "-k: analysis the chains" << endl;
-    cout << "-b [file]: backup the FATs" << endl;
-    cout << "-p [file]: restore (patch) the FATs" << endl;
-    cout << "-w [cluster]: write next cluster" << endl;
-    cout << "-v [value]: value to write" << endl;
+    cout << "  -i: display information about disk" << endl;
+    cout << endl;
+    cout << "Browsing & extracting:" << endl;
+    cout << "  -l [dir]: list files and directories in the given path" << endl;
+    cout << "  -L [cluster]: list files and directories in the given cluster" << endl;
+    cout << "  -r [path]: reads the file given by the path" << endl;
+    cout << "  -R [cluster]: reads the data from given cluster" << endl;
+    cout << "  -s [size]: specify the size of data to read from the cluster" << endl;
+    cout << "  -d: enable listing of deleted files" << endl;
+    cout << "  -x [directory]: extract all files to a directory, deleted files included if -d" << endl;
+    cout << "  -c: enable contiguous mode" << endl;
+    cout << endl;
+    cout << "FAT Hacking" << endl;
+    cout << "  -@ [cluster]: Get the cluster address and informations" << endl;
+    cout << "  -2: analysis & compare the 2 FATs" << endl;
+    cout << "  -b [file]: backup the FATs" << endl;
+    cout << "* -p [file]: restore (patch) the FATs" << endl;
+    cout << "* -w [cluster] -v [value]: write next cluster (see -T)" << endl;
+    cout << "  -T [table]: specify which table to write (0:both, 1:first, 2:second)" << endl;
+    cout << "* -m: merge the FATs" << endl;
+    cout << "  -k: analysis the chains" << endl;
 
+    cout << endl;
+    cout << "*: These flags writes on the disk, be careful" << endl;
     cout << endl;
     exit(EXIT_FAILURE);
 }
@@ -91,13 +99,25 @@ int main(int argc, char *argv[])
     // -w: write next cluster
     bool writeNext = false;
 
+    // -m: merge the FATs
+    bool merge = false;
+
     // -v: value
     bool hasValue = false;
     int value;
 
+    // -T: FAT table to write
+    int table;
+
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2@:kb:p:w:v:")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2@:kb:p:w:v:mT:")) != -1) {
         switch (index) {
+            case 'T':
+                table = atoi(optarg);
+                break;
+            case 'm':
+                merge = true;
+                break;
             case 'v':
                 hasValue = true;
                 value = atoi(optarg);
@@ -179,7 +199,7 @@ int main(int argc, char *argv[])
     // If the user did not required any actions
     if (!(infoFlag || listFlag || listClusterFlag || 
         readFlag || clusterRead || extract || compare || address ||
-        chains || backup || patch || writeNext)) {
+        chains || backup || patch || writeNext || merge)) {
         usage();
     }
 
@@ -208,14 +228,17 @@ int main(int argc, char *argv[])
             } else if (extract) {
                 fat.extract(extractDirectory);
             } else if (compare) {
-                fat.compare();
+                FatDiff diff(fat);
+                diff.compare();
             } else if (address) {
                 cout << "Cluster " << cluster << " address:" << endl;
                 int addr = fat.clusterAddress(cluster);
-                int next = fat.nextCluster(cluster);
+                int next1 = fat.nextCluster(cluster, 0);
+                int next2 = fat.nextCluster(cluster, 1);
                 printf("%d (%08x)\n", addr, addr);
                 cout << "Next cluster:" << endl;
-                printf("%u (%08x)\n", next, next);
+                printf("FAT1: %u (%08x)\n", next1, next1);
+                printf("FAT2: %u (%08x)\n", next2, next2);
             } else if (chains) {
                 FatChains chains(fat);
                 chains.findChains();
@@ -234,7 +257,16 @@ int main(int argc, char *argv[])
 
                 cout << "Writing next cluster of " << cluster << " to " << value << endl;
                 fat.enableWrite();
-                fat.writeNextCluster(cluster, value);
+
+                if (table == 0 || table == 1) {
+                    fat.writeNextCluster(cluster, value, 0);
+                } 
+                if (table == 0 || table == 2) {
+                    fat.writeNextCluster(cluster, value, 1);
+                } 
+            } else if (merge) {
+                FatDiff diff(fat);
+                diff.merge();
             }
         } else {
             cout << "! Failed to init the FAT filesystem" << endl;

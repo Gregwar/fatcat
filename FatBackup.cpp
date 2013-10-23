@@ -9,8 +9,8 @@ using namespace std;
 
 #define CHUNKS_SIZES 1024
         
-FatBackup::FatBackup(FatSystem &system_)
-    : system(system_)
+FatBackup::FatBackup(FatSystem &system)
+    : FatModule(system)
 {
 }
 

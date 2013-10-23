@@ -7,9 +7,9 @@
 #include "FatChain.h"
 
 using namespace std;
-
-FatChains::FatChains(FatSystem &system_)
-: system(system_)
+        
+FatChains::FatChains(FatSystem &system)
+    : FatModule(system)
 {
 }
 

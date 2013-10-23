@@ -5,8 +5,10 @@ set(SOURCES
     FatBackup.cpp
     FatChain.cpp
     FatChains.cpp
+    FatDiff.cpp
     FatEntry.cpp
     FatFilename.cpp
+    FatModule.cpp
     FatPath.cpp
     FatSystem.cpp
     )

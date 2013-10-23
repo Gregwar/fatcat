@@ -79,11 +79,6 @@ class FatSystem
         void extract(string directory);
 
         /**
-         * Compare the 2 FATs
-         */
-        bool compare();
-
-        /**
          * Is the n-th cluster free?
          */
         bool freeCluster(int cluster);

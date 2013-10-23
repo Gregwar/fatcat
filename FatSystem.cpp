@@ -66,12 +66,18 @@ FatSystem::~FatSystem()
 int FatSystem::readData(unsigned long long address, char *buffer, int size)
 {
     if (totalSize != -1 && address+size > totalSize) {
-//        cout << "! Trying to read outside the disk" << endl;
+        cout << "! Trying to read outside the disk" << endl;
     }
 
     lseek64(fd, address, SEEK_SET);
 
-    return read(fd, buffer, size);
+    int n;
+    do {
+        n = read(fd, buffer, size);
+        size -= n;
+    } while (size>0 && n>0);
+
+    return n;
 }
 
 int FatSystem::writeData(unsigned long long address, char *buffer, int size)
@@ -184,6 +190,7 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
     }
 
     do {
+        bool localFound = 0;
         unsigned long long address = clusterAddress(cluster);
         char buffer[FAT_ENTRY_SIZE];
         visited.insert(cluster);
@@ -214,6 +221,8 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
                     foundEntries++;
                     if (entry.cluster < 0 || entry.cluster > totalClusters) {
                         badEntries++;
+                    } else {
+                        localFound++;
                     }
 
                     if (foundEntries >= 1024 && (badEntries/(float)foundEntries)>0.5) {
@@ -232,7 +241,15 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
             break;
         }
 
-    } while (cluster != FAT_LAST && cluster != 0);
+        if (cluster == 0) {
+            if (localFound) {
+                cluster++;
+            } else {
+                break;
+            }
+        }
+
+    } while (cluster != FAT_LAST);
 
     return entries;
 }

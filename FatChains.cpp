@@ -63,7 +63,7 @@ void FatChains::chainsAnalysis()
             if (chain.directory) {
                 cout << "directory";
             } else {
-                cout << "file" << endl;
+                cout << "file";
             }
             cout << endl;
         }

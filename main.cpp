@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     int value;
 
     // -T: FAT table to write
-    int table;
+    int table = 0;
 
     // -S: write random data in unallocated sectors
     bool scramble = false;

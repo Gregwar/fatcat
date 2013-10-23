@@ -36,7 +36,7 @@ class FatEntry
         string longName;
         char attributes;
         int cluster;
-        int size;
+        long long size;
 };
 
 #endif // _FATCAT_FATENTRY_H

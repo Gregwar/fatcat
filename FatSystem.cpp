@@ -262,7 +262,8 @@ void FatSystem::list(unsigned int cluster)
         printf(" c=%u", entry.cluster);
         
         if (!entry.isDirectory()) {
-            printf(" s=%llu", entry.size);
+            string pretty = prettySize(entry.size);
+            printf(" s=%llu (%s)", entry.size, pretty.c_str());
         }
 
         if (entry.isHidden()) {

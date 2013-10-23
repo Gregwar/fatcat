@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 2.8)
 project(fatcat)
 
 set(SOURCES
@@ -14,3 +15,5 @@ set(SOURCES
     )
 
 add_executable(fatcat ${SOURCES})
+
+install(TARGETS fatcat DESTINATION bin)

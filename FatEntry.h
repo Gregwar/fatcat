@@ -28,6 +28,8 @@ using namespace std;
 class FatEntry
 {
     public:
+        FatEntry();
+
         string getFilename();
         bool isDirectory();
         bool isHidden();
@@ -41,6 +43,10 @@ class FatEntry
 
         FatDate creationDate;
         FatDate changeDate;
+
+        void setData(string data);
+        bool hasData;
+        string data;
 };
 
 #endif // _FATCAT_FATENTRY_H

@@ -257,6 +257,7 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
                 entry.longName = filename.getFilename();
                 entry.size = FAT_READ_LONG(buffer, FAT_FILESIZE);
                 entry.cluster = FAT_READ_SHORT(buffer, FAT_CLUSTER_LOW) | (FAT_READ_SHORT(buffer, FAT_CLUSTER_HIGH)<<16);
+                entry.setData(string(buffer, sizeof(buffer)));
 
                 if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.attributes&FAT_ATTRIBUTES_FILE) {
                     foundEntries++;

@@ -6,6 +6,17 @@
 #include "utils.h"
 
 using namespace std;
+
+FatEntry::FatEntry()
+    : hasData(false)
+{
+}
+
+void FatEntry::setData(string data_)
+{
+    hasData = true;
+    data = data_;
+}
         
 string FatEntry::getFilename()
 {

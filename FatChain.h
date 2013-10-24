@@ -12,6 +12,7 @@ class FatChain
         int endCluster;
         bool orphaned;
         bool directory;
+        int elements;
 };
 
 #endif // _FATCAT_FATCHAIN_H

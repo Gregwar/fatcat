@@ -2,7 +2,8 @@
 
 FatChain::FatChain()
     : orphaned(true),
-    directory(false)
+    directory(false),
+    elements(1)
 {
 }
 

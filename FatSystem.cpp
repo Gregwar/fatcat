@@ -66,7 +66,7 @@ FatSystem::~FatSystem()
 int FatSystem::readData(unsigned long long address, char *buffer, int size)
 {
     if (totalSize != -1 && address+size > totalSize) {
-        cout << "! Trying to read outside the disk" << endl;
+        cerr << "! Trying to read outside the disk" << endl;
     }
 
     lseek64(fd, address, SEEK_SET);

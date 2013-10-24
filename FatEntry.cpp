@@ -12,6 +12,7 @@ string FatEntry::getFilename()
     if (longName != "") {
         return longName;
     } else {
+        string name;
         string ext = trim(shortName.substr(8,3));
         string base = trim(shortName.substr(0,8));
 
@@ -19,11 +20,15 @@ string FatEntry::getFilename()
             base = base.substr(1);
         }
 
-        if (ext == "") {
-            return base;
-        } else {
-            return base + "." + ext;
+        name = base;
+
+        if (ext != "") {
+            name += "." + ext;
         }
+
+        name = strtolower(name);
+
+        return name;
     }
 }
         

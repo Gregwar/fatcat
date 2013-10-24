@@ -19,6 +19,7 @@ string FatFilename::getFilename()
     for (it=letters.begin(); it!=letters.end(); it++) {
         rfilename += *it;
     }
+    letters.clear();
 
     return string(rfilename.rbegin(), rfilename.rend());
 }

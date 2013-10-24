@@ -61,4 +61,14 @@ static inline string prettySize(unsigned long long bytes)
     return oss.str();
 }
 
+static inline std::string strtolower(std::string myString)
+{
+  const int length = myString.length();
+  for(int i=0; i!=length; ++i) {
+    myString[i] = std::tolower(myString[i]);
+  }
+
+  return myString;
+}
+
 #endif // _FATCAT_UTILS_H

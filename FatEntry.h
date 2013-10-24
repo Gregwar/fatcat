@@ -44,6 +44,7 @@ class FatEntry
         FatDate creationDate;
         FatDate changeDate;
 
+        void updateData();
         void setData(string data);
         long long address;
         bool hasData;

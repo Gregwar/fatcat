@@ -8,6 +8,7 @@
 #include "FatChains.h"
 #include "FatBackup.h"
 #include "FatDiff.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -28,7 +29,6 @@ void usage()
     cout << "  -x [directory]: extract all files to a directory, deleted files included if -d" << endl;
     cout << "                  will start with rootDirectory, unless -f is provided" << endl;
     cout << "  -f [cluster]: define the cluster starting point for the extraction" << endl;
-    cout << "  -c: enable contiguous mode" << endl;
     cout << "* -S: write scamble data in unallocated sectors" << endl;
     cout << "* -z: write scamble data in unallocated sectors" << endl;
     cout << endl;
@@ -41,6 +41,11 @@ void usage()
     cout << "  -T [table]: specify which table to write (0:both, 1:first, 2:second)" << endl;
     cout << "* -m: merge the FATs" << endl;
     cout << "  -o: search for orphan files and directories" << endl;
+    cout << endl;
+    cout << "Entries hacking" << endl;
+    cout << "  -e [path]: sets the entry to hack, combined with:" << endl;
+    cout << "* -c [cluster]: sets the entry cluster" << endl;
+    cout << "* -s [cluster]: sets the entry size" << endl;
 
     cout << endl;
     cout << "*: These flags writes on the disk, and may damage it, be careful" << endl;
@@ -78,9 +83,6 @@ int main(int argc, char *argv[])
     // -d, lists deleted
     bool listDeleted = false;
 
-    // -c: contiguous mode
-    bool contiguous = false;
-
     // -x: extract
     bool extract = false;
     string extractDirectory;
@@ -116,9 +118,19 @@ int main(int argc, char *argv[])
     bool scramble = false;
     bool zero = false;
 
+    // -e: entry hacking
+    bool entry = false;
+    string entryPath;
+    bool clusterProvided;
+    bool sizeProvided;
+
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dchx:2@:ob:p:w:v:mT:f:Sz")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mT:f:Sze:")) != -1) {
         switch (index) {
+            case 'e':
+                entry = true;
+                entryPath = string(optarg);
+                break;
             case 'z':
                 zero = true;
                 break;
@@ -170,12 +182,14 @@ int main(int argc, char *argv[])
                 break;
             case 's':
                 size = atoi(optarg);
+                sizeProvided = true;
                 break;
             case 'd':
                 listDeleted = true;
                 break;
             case 'c':
-                contiguous = true;
+                cluster = atoi(optarg);
+                clusterProvided = true;
                 break;
             case 'x':
                 extract = true;
@@ -215,7 +229,8 @@ int main(int argc, char *argv[])
     // If the user did not required any actions
     if (!(infoFlag || listFlag || listClusterFlag || 
         readFlag || clusterRead || extract || compare || address ||
-        chains || backup || patch || writeNext || merge || scramble || zero)) {
+        chains || backup || patch || writeNext || merge ||
+        scramble || zero || entry)) {
         usage();
     }
 
@@ -224,7 +239,6 @@ int main(int argc, char *argv[])
         FatSystem fat(image);
 
         fat.setListDeleted(listDeleted);
-        fat.setContiguous(contiguous);
 
         if (fat.init()) {
             if (infoFlag) {
@@ -292,6 +306,37 @@ int main(int argc, char *argv[])
             } else if (zero) {
                 fat.enableWrite();
                 fat.rewriteUnallocated();
+            } else if (entry) {
+                cout << "Searching entry for " << entryPath << endl;
+                FatPath path(entryPath);
+                FatEntry entry;
+                if (fat.findFile(path, entry)) {
+                    printf("Entry address %016x\n", entry.address);
+                    cout << "Found entry, cluster=" << entry.cluster;
+                    if (entry.isDirectory()) {
+                        cout << ", directory";
+                    } else {
+                        cout << ", file with size=" << entry.size << " (" << prettySize(entry.size) << ")";
+                    }
+                    cout << endl;
+
+                    if (clusterProvided) {
+                        cout << "Setting the cluster to " << cluster << endl;
+                        entry.cluster = cluster;
+                    }
+                    if (sizeProvided) {
+                        cout << "Setting the size to " << size << endl;
+                        entry.size = size;
+                    }
+                    if (clusterProvided || sizeProvided) {
+                        entry.updateData();
+                        fat.enableWrite();
+                        string data = entry.data;
+                        fat.writeData(entry.address, data.c_str(), entry.data.size());
+                    }
+                } else {
+                    cout << "Entry not found." << endl;
+                }
             }
         } else {
             cout << "! Failed to init the FAT filesystem" << endl;

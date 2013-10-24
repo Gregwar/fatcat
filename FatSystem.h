@@ -165,7 +165,7 @@ class FatSystem
         /**
          * Write some data to the system, write should be enabled
          */
-        int writeData(unsigned long long address, char *buffer, int size);
+        int writeData(unsigned long long address, const char *buffer, int size);
 
         /**
          * Get directory entries for a given cluster

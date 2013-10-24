@@ -99,7 +99,7 @@ int FatSystem::readData(unsigned long long address, char *buffer, int size)
     return n;
 }
 
-int FatSystem::writeData(unsigned long long address, char *buffer, int size)
+int FatSystem::writeData(unsigned long long address, const char *buffer, int size)
 {
     if (!writeMode) {
         throw string("Trying to write data while write mode is disabled");

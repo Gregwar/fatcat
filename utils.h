@@ -15,6 +15,16 @@ using namespace std;
         ((buffer[x]&0xff)|((buffer[x+1]&0xff)<<8))| \
         (((buffer[x+2]&0xff)<<16)|((buffer[x+3]&0xff)<<24))
 
+#define FAT_WRITE_SHORT(buffer,x,s) \
+        buffer[x] = (s)&0xff; \
+        buffer[x+1] = ((s)>>8)&0xff; \
+
+#define FAT_WRITE_LONG(buffer,x,l) \
+        buffer[x] = (l)&0xff; \
+        buffer[x+1] = ((l)>>8)&0xff; \
+        buffer[x+2] = ((l)>>16)&0xff; \
+        buffer[x+3] = ((l)>>24)&0xff;
+
 // trim from start
 static inline std::string ltrim(std::string s) {
         s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));

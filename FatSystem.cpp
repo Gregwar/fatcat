@@ -300,10 +300,10 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
         
 void FatSystem::list(FatPath &path)
 {
-    unsigned int cluster;
+    FatEntry entry;
 
-    if (findDirectory(path, &cluster)) {
-        list(cluster);
+    if (findDirectory(path, entry)) {
+        list(entry.cluster);
     }
 }
 
@@ -441,14 +441,16 @@ void FatSystem::infos()
     cout << endl;
 }
         
-bool FatSystem::findDirectory(FatPath &path, unsigned int *cluster)
+bool FatSystem::findDirectory(FatPath &path, FatEntry &outputEntry)
 {
+    int cluster;
     vector<string> parts = path.getParts();
-    *cluster = rootDirectory;
+    cluster = rootDirectory;
+    outputEntry.cluster = cluster;
 
     for (int i=0; i<parts.size(); i++) {
         if (parts[i] != "") {
-            vector<FatEntry> entries = getEntries(*cluster);
+            vector<FatEntry> entries = getEntries(cluster);
             vector<FatEntry>::iterator it;
             bool found = false;
 
@@ -456,7 +458,8 @@ bool FatSystem::findDirectory(FatPath &path, unsigned int *cluster)
                 FatEntry &entry = *it;
                 string name = entry.getFilename();
                 if (entry.isDirectory() && name == parts[i]) {
-                    *cluster = entry.cluster;
+                    outputEntry = entry;
+                    cluster = entry.cluster;
                     found = true;
                 }
             }
@@ -470,25 +473,24 @@ bool FatSystem::findDirectory(FatPath &path, unsigned int *cluster)
 
     return true;
 }
-        
-bool FatSystem::findFile(FatPath &path, unsigned int *cluster, unsigned int *size, bool *erased)
+
+bool FatSystem::findFile(FatPath &path, FatEntry &outputEntry)
 {
     bool found = false;
     string dirname = path.getDirname();
     string basename = path.getBasename();
 
     FatPath parent(dirname);
-    unsigned int parentCluster;
-    if (findDirectory(parent, &parentCluster)) {
-        vector<FatEntry> entries = getEntries(parentCluster);
+    FatEntry parentEntry;
+    if (findDirectory(parent, parentEntry)) {
+        vector<FatEntry> entries = getEntries(parentEntry.cluster);
         vector<FatEntry>::iterator it;
 
         for (it=entries.begin(); it!=entries.end(); it++) {
             FatEntry &entry = (*it);
             if (entry.getFilename() == path.getBasename()) {
-                *cluster = entry.cluster;
-                *size = entry.size;
-                *erased = entry.isErased();
+                outputEntry = entry;
+
                 if (entry.size == 0) {
                     found = true;
                 } else {
@@ -505,15 +507,15 @@ void FatSystem::readFile(FatPath &path, FILE *f)
 {
     bool contiguousSave = contiguous;
     contiguous = false;
-    unsigned int cluster, size;
-    bool erased;
-    if (findFile(path, &cluster, &size, &erased)) {
+    FatEntry entry;
+    
+    if (findFile(path, entry)) {
         contiguous = contiguousSave;
-        if (erased && freeCluster(cluster)) {
+        if (entry.isErased() && freeCluster(entry.cluster)) {
             fprintf(stderr, "! Trying to read a deleted file, auto-enabling contiguous mode\n");
             contiguous = true;
         }
-        readFile(cluster, size, f);
+        readFile(entry.cluster, entry.size, f);
     }
 }
         

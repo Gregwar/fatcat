@@ -57,8 +57,8 @@ class FatSystem
         /**
          * Find a directory or a file
          */
-        bool findDirectory(FatPath &path, unsigned int *cluster);
-        bool findFile(FatPath &path, unsigned int *cluster, unsigned int *size, bool *erased);
+        bool findDirectory(FatPath &path, FatEntry &entry);
+        bool findFile(FatPath &path, FatEntry &entry);
 
         /**
          * File reading

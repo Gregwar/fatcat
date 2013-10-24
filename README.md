@@ -214,7 +214,7 @@ Comparing the FATs
 
 FATs are exactly equals
 
-# Writing 123 in the 500th cluster
+# Writing 123 in the 500th cluster only in FAT1
 $ fatcat c.img -w 500 -v 123 -T 1
 Writing next cluster of 500 from 0 to 123
 Writing on FAT1

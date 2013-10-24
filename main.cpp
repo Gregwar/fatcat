@@ -15,7 +15,7 @@ void usage()
 {
     cout << "fatcat v1.0, Gregwar <g.passault@gmail.com>" << endl;
     cout << endl;
-    cout << "Usage: fatcat [-i] disk.img" << endl;
+    cout << "Usage: fatcat disk.img [options]" << endl;
     cout << "  -i: display information about disk" << endl;
     cout << endl;
     cout << "Browsing & extracting:" << endl;

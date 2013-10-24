@@ -313,7 +313,7 @@ void FatSystem::list(unsigned int cluster)
     vector<FatEntry> entries = getEntries(cluster);
     vector<FatEntry>::iterator it;
 
-    printf("Cluster: %u\n", cluster);
+    printf("Directory cluster: %u\n", cluster);
 
     for (it=entries.begin(); it!=entries.end(); it++) {
         FatEntry &entry = *it;

@@ -80,7 +80,7 @@ int FatSystem::readData(unsigned long long address, char *buffer, int size)
             pos += n;
             size -= n;
         }
-    } while (size>0);
+    } while ((size>0) && (n>0));
 
     return n;
 }

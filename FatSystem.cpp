@@ -492,7 +492,7 @@ void FatSystem::extractEntry(FatEntry &entry, string directory)
         if (listDeleted || (!entry.isErased())) {
             string name = entry.getFilename();
 
-            if (name == "." || name == "..") {
+            if (name == "." || name == ".." || entry.cluster == 0) {
                 continue;
             }
                 

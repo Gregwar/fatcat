@@ -63,13 +63,16 @@ If you provide `-d` to extract, deleted files will be extracted too.
 
 ## Undelete
 
+### Browsing deleted files & directories
+
 As explaines above, deleted files can be found in listing by providing `-d`:
 
 ```
-fatcat disk.img -l / -d
+$ fatcat disk.img -l / -d
+f 24/10/2013 12:13:24  delete_me.txt                  c=5764 s=16 (16B) d
 ```
 
-You can explore and spot a file or an interesting directory.
+You can explore and spot a file or an interesting deleted directory.
 
 ### Retrieving deleted file
 

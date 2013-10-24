@@ -263,6 +263,7 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
             }
         }
 
+        int previousCluster = cluster;
         cluster = nextCluster(cluster);
 
         if (visited.find(cluster) != visited.end()) {
@@ -272,7 +273,7 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
 
         if (cluster == 0) {
             if (localFound) {
-                cluster++;
+                cluster = previousCluster+1;
             } else {
                 break;
             }

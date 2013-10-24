@@ -142,7 +142,7 @@ File clusters 4611 to 4611: ~512B
 You can then use directly `-L` and `-R` to have a look into those files and directories:
 
 ```
-$ fatcat c.img -L 4592
+$ fatcat disk.img -L 4592
 Listing cluster 4592
 Cluster: 4592
 d 23/10/2013 17:45:06  ./                             c=4592
@@ -209,18 +209,18 @@ You can have a look at the diff of the two FATs by using `-2`:
 
 ```
 # Watching the diff
-$ fatcat c.img -2
+$ fatcat disk.img -2
 Comparing the FATs
 
 FATs are exactly equals
 
 # Writing 123 in the 500th cluster only in FAT1
-$ fatcat c.img -w 500 -v 123 -T 1
+$ fatcat disk.img -w 500 -v 123 -T 1
 Writing next cluster of 500 from 0 to 123
 Writing on FAT1
 
 # Watching the diff
-$ fatcat c.img -2
+$ fatcat disk.img -2
 Comparing the FATs
 [000001f4] 1:0000007b 2:00000000
 
@@ -232,7 +232,7 @@ You can merge two FATs using `-m`. For each different entries in the table,
 if one is zero and not the other, the non-zero file will be choosen:
 
 ```
-$ fatcat c.img -m
+$ fatcat disk.img -m
 Begining the merge...
 Merging cluster 500
 Merge complete, 1 clusters merged

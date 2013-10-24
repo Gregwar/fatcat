@@ -72,10 +72,15 @@ int FatSystem::readData(unsigned long long address, char *buffer, int size)
     lseek64(fd, address, SEEK_SET);
 
     int n;
+    int pos = 0;
     do {
-        n = read(fd, buffer, size);
-        size -= n;
-    } while (size>0 && n>0);
+        n = read(fd, buffer+pos, size);
+
+        if (n > 0) {
+            pos += n;
+            size -= n;
+        }
+    } while (size>0);
 
     return n;
 }

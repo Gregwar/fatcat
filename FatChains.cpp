@@ -66,11 +66,11 @@ void FatChains::chainsAnalysis()
 
         for (vit=orphanedChains.begin(); vit!=orphanedChains.end(); vit++) {
             FatChain &chain = (*vit);
-            cout << "Chain from cluster " << chain.startCluster << " to " << chain.endCluster << " (size " << chain.size() << ") ";
+            cout << "Chain from cluster " << chain.startCluster << " to " << chain.endCluster;
             if (chain.directory) {
-                cout << "directory (" << chain.elements << " elements)";
+                cout << " directory (" << chain.elements << " elements)";
             } else {
-                cout << "file";
+                cout << " file";
             }
             cout << endl;
         }
@@ -100,6 +100,8 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
     vector<FatEntry> entries = system.getEntries(cluster);
     vector<FatEntry>::iterator it;
 
+    cout << myCluster << ": " << chains[myCluster].elements << " elements" << endl;
+
     for (it=entries.begin(); it!=entries.end(); it++) {
         FatEntry &entry = (*it);
         int cluster = entry.cluster;
@@ -110,6 +112,7 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
             if (entry.getFilename() != ".." && entry.getFilename() != ".") {
 
                 chains[cluster].orphaned = false;
+                cout << "Adding " << chains[cluster].elements << " elements from " << cluster << endl;
                 chains[myCluster].elements += chains[cluster].elements;
             }
         } else {

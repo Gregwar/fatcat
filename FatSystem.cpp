@@ -276,7 +276,8 @@ void FatSystem::list(unsigned int cluster)
     printf("Cluster: %u\n", cluster);
 
     for (it=entries.begin(); it!=entries.end(); it++) {
-        usleep(100);
+        fflush(stdout);
+        usleep(1000);
         FatEntry &entry = *it;
 
         if (entry.isErased() && !listDeleted) {

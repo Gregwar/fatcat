@@ -13,6 +13,7 @@
 #include "FatSystem.h"
 #include "FatFilename.h"
 #include "FatEntry.h"
+#include "FatDate.h"
 #include "utils.h"
 
 using namespace std;
@@ -249,6 +250,8 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
                 if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.attributes&FAT_ATTRIBUTES_FILE) {
                     foundEntries++;
                     if (validCluster(entry.cluster)) {
+                        entry.creationDate = FatDate(&buffer[FAT_CREATION_DATE]);
+                        entry.changeDate = FatDate(&buffer[FAT_CHANGE_DATE]);
                         entries.push_back(entry);
                         localFound++;
                     } else {
@@ -317,7 +320,9 @@ void FatSystem::list(unsigned int cluster)
         if (entry.isDirectory()) {
             name += "/";
         }
-        printf(" %-40s", name.c_str());
+
+        printf(" %s ", entry.changeDate.pretty().c_str());
+        printf(" %-30s", name.c_str());
 
         printf(" c=%u", entry.cluster);
         

@@ -26,6 +26,8 @@ using namespace std;
 #define FAT_DISK_OEM_SIZE           8
 #define FAT_DISK_FS                 0x52
 #define FAT_DISK_FS_SIZE            8
+#define FAT_CREATION_DATE           0x10
+#define FAT_CHANGE_DATE             0x16
 
 /**
  * A FAT fileSystem

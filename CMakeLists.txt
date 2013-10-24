@@ -6,6 +6,7 @@ set(SOURCES
     FatBackup.cpp
     FatChain.cpp
     FatChains.cpp
+    FatDate.cpp
     FatDiff.cpp
     FatEntry.cpp
     FatFilename.cpp

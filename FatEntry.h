@@ -2,6 +2,7 @@
 #define _FATCAT_FATENTRY_H
 
 #include <string>
+#include "FatDate.h"
 
 using namespace std;
 
@@ -37,6 +38,9 @@ class FatEntry
         char attributes;
         int cluster;
         long long size;
+
+        FatDate creationDate;
+        FatDate changeDate;
 };
 
 #endif // _FATCAT_FATENTRY_H

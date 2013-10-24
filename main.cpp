@@ -121,8 +121,8 @@ int main(int argc, char *argv[])
     // -e: entry hacking
     bool entry = false;
     string entryPath;
-    bool clusterProvided;
-    bool sizeProvided;
+    bool clusterProvided = false;
+    bool sizeProvided = false;
 
     // Parsing command line
     while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mT:f:Sze:")) != -1) {

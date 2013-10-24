@@ -107,7 +107,18 @@ int FatSystem::writeData(unsigned long long address, char *buffer, int size)
 
     lseek64(fd, address, SEEK_SET);
 
-    return write(fd, buffer, size);
+    int n;
+    int pos = 0;
+    do {
+        n = write(fd, buffer, size);
+
+        if (n > 0) {
+            pos += n;
+            size -= n;
+        }
+    } while ((size>0) && (n>0));
+
+    return n;
 }
 
 /**

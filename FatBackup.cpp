@@ -60,9 +60,14 @@ void FatBackup::patch(string backupFile)
     int n;
     int position;
     int toWrite = 1;
-    for (position=0; toWrite; position+=n) {
+    for (position=0; toWrite>0; position+=n) {
         toWrite = fread(buffer, 1, CHUNKS_SIZES, backup);
-        n = system.writeData(system.fatStart+position, buffer, toWrite);
+        if (position+toWrite > system.fatSize*2) {
+            toWrite = system.fatSize*2-position;
+        }
+        if (toWrite > 0) {
+            n = system.writeData(system.fatStart+position, buffer, toWrite);
+        }
     }
 
     fclose(backup);

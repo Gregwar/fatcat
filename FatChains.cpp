@@ -16,6 +16,8 @@ FatChains::FatChains(FatSystem &system)
 
 void FatChains::chainsAnalysis()
 {
+    system.enableCache();
+
     cout << "Building the chains..." << endl;
     map<int, FatChain> chains = findChains();
 
@@ -100,8 +102,6 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
     vector<FatEntry> entries = system.getEntries(cluster);
     vector<FatEntry>::iterator it;
 
-    cout << myCluster << ": " << chains[myCluster].elements << " elements" << endl;
-
     for (it=entries.begin(); it!=entries.end(); it++) {
         FatEntry &entry = (*it);
         int cluster = entry.cluster;
@@ -123,7 +123,6 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
                 chains[cluster].elements = 1;
                 chains[cluster].orphaned = true;
                 foundNew = true;
-                cout << "NEW!!!" << endl;
             }
         }
 
@@ -132,9 +131,7 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
         }
         
         if (wasOrphaned) {
-            cout << "Adding " << chains[cluster].elements << " elements to " << myCluster << " from " << cluster << endl;
             chains[myCluster].elements += chains[cluster].elements;
-            cout << "Now: " << chains[myCluster].elements << endl;
         }
     }
 

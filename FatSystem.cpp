@@ -27,7 +27,8 @@ FatSystem::FatSystem(string filename_)
     listDeleted(false),
     contiguous(false),
     statsComputed(false),
-    freeClusters(0)
+    freeClusters(0),
+    cacheEnabled(false)
 {
     fd = open(filename.c_str(), O_RDONLY|O_LARGEFILE);
     writeMode = false;
@@ -37,6 +38,18 @@ FatSystem::FatSystem(string filename_)
         oss << "! Unable to open the input file: " << filename << " for reading";
 
         throw oss.str();
+    }
+}
+
+void FatSystem::enableCache()
+{
+    if (!cacheEnabled) {
+        cout << "Computing FAT cache..." << endl;
+        for (int cluster=0; cluster<totalClusters; cluster++) {
+            cache[cluster] = nextCluster(cluster);
+        }
+        
+        cacheEnabled = true;
     }
 }
 
@@ -145,6 +158,10 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
     
     if (cluster >= totalClusters || cluster < 0) {
         return 0;
+    }
+
+    if (cacheEnabled) {
+        return cache[cluster];
     }
 
     readData(fatStart+fatSize*fat+4*cluster, buffer, sizeof(buffer));
@@ -276,8 +293,6 @@ void FatSystem::list(unsigned int cluster)
     printf("Cluster: %u\n", cluster);
 
     for (it=entries.begin(); it!=entries.end(); it++) {
-        fflush(stdout);
-        usleep(1000);
         FatEntry &entry = *it;
 
         if (entry.isErased() && !listDeleted) {
@@ -311,6 +326,7 @@ void FatSystem::list(unsigned int cluster)
         }
 
         printf("\n");
+        fflush(stdout);
     }
 }
 
@@ -335,6 +351,7 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f)
 
         // Write file data to the given file
         fwrite(buffer, toRead, 1, f);
+        fflush(f);
 
         if (contiguous) {
             if (!warning && !freeCluster(cluster)) {

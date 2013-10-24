@@ -1,6 +1,7 @@
 #ifndef _FATCAT_FATSYSTEM_H
 #define _FATCAT_FATSYSTEM_H
 
+#include <map>
 #include <vector>
 #include <string>
 #include "FatEntry.h"
@@ -88,6 +89,11 @@ class FatSystem
          */
         unsigned long long clusterAddress(unsigned int cluster);
 
+        /**
+         * Enable the FAT caching
+         */
+        void enableCache();
+
         // File descriptor
         string filename;
         int fd;
@@ -114,6 +120,10 @@ class FatSystem
         unsigned long long totalSize;
         unsigned long long fatSize;
         unsigned long long totalClusters;
+
+        // FAT Cache
+        bool cacheEnabled;
+        map<int, int> cache;
 
         // Stats values
         bool statsComputed;

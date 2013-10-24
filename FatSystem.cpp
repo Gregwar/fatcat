@@ -156,7 +156,7 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 {
     char buffer[4];
     
-    if (cluster >= totalClusters || cluster < 0) {
+    if (!validCluster(cluster)) {
         return 0;
     }
 
@@ -182,7 +182,7 @@ bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fa
 {
     char buffer[4];
 
-    if (cluster >= totalClusters || cluster < 0) {
+    if (!validCluster(cluster)) {
         throw string("Trying to access a cluster outside bounds");
     }
 
@@ -192,6 +192,11 @@ bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fa
     buffer[3] = (next>>24)&0xff;
 
     return writeData(fatStart+fatSize*fat+4*cluster, buffer, sizeof(buffer))==4;
+}
+        
+bool FatSystem::validCluster(unsigned int cluster)
+{
+    return cluster < totalClusters;
 }
 
 unsigned long long FatSystem::clusterAddress(unsigned int cluster)
@@ -209,6 +214,10 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
 
     if (cluster == 0) {
         cluster = rootDirectory;
+    }
+
+    if (!validCluster(cluster)) {
+        return vector<FatEntry>();
     }
 
     do {
@@ -238,19 +247,17 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
                 entry.cluster = FAT_READ_SHORT(buffer, FAT_CLUSTER_LOW) | (FAT_READ_SHORT(buffer, FAT_CLUSTER_HIGH)<<16);
 
                 if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.attributes&FAT_ATTRIBUTES_FILE) {
-                    entries.push_back(entry);
-
                     foundEntries++;
-                    if (entry.cluster < 0 || entry.cluster > totalClusters) {
-                        badEntries++;
-                    } else {
+                    if (validCluster(entry.cluster)) {
+                        entries.push_back(entry);
                         localFound++;
+                    } else {
+                        badEntries++;
                     }
 
                     if (foundEntries >= 1024 && (badEntries/(float)foundEntries)>0.5) {
                         cerr << "! Entries don't look good, this is maybe not a directory" << endl;
-                        vector<FatEntry> noEntry;
-                        return noEntry;
+                        return vector<FatEntry>();
                     }
                 }
             }
@@ -591,7 +598,6 @@ bool FatSystem::isDirectory(vector<FatEntry> &entries)
 {
     bool hasDotDir = false;
     bool hasDotDotDir = false;
-    int badClusters = 0;
     vector<FatEntry>::iterator it;
 
     for (it=entries.begin(); it!=entries.end(); it++) {
@@ -606,15 +612,9 @@ bool FatSystem::isDirectory(vector<FatEntry> &entries)
                 hasDotDotDir = true;
             }
         }
-
-        if (entry.cluster > totalClusters) {
-            badClusters++;
-        }
     }
 
-    double badClustersRatio = badClusters/(double)entries.size();
-
-    return hasDotDir && hasDotDotDir && badClustersRatio<0.1;
+    return hasDotDir && hasDotDotDir;
 }
 
 bool FatSystem::isDirectory(unsigned int cluster)

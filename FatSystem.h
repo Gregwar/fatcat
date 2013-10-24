@@ -145,6 +145,11 @@ class FatSystem
         bool writeNextCluster(unsigned int cluster, unsigned int next, int fat=0);
 
         /**
+         * Is this cluster valid?
+         */
+        bool validCluster(unsigned int cluster);
+
+        /**
          * Enable write mode on the FAT system, the internal file descriptor
          * will be re-opened in write mode
          */

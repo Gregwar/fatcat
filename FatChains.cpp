@@ -150,7 +150,7 @@ map<int, FatChain> FatChains::findChains()
                 int next = cluster;
                 while (true) {
                     int tmp = system.nextCluster(next);
-                    if (tmp == FAT_LAST) {
+                    if (tmp == FAT_LAST || !system.validCluster(tmp)) {
                         break;
                     }
                     if (localSeen.find(tmp) != localSeen.end()) {

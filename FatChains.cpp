@@ -105,26 +105,36 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
     for (it=entries.begin(); it!=entries.end(); it++) {
         FatEntry &entry = (*it);
         int cluster = entry.cluster;
+        bool wasOrphaned = false;
 
         // Search the cluster in the previously visited chains, if it
         // exists, mark it as non-orphaned
         if (chains.find(cluster)!=chains.end()) {
             if (entry.getFilename() != ".." && entry.getFilename() != ".") {
-
+                if (chains[cluster].orphaned) {
+                    wasOrphaned = true;
+                }
                 chains[cluster].orphaned = false;
-                cout << "Adding " << chains[cluster].elements << " elements from " << cluster << endl;
-                chains[myCluster].elements += chains[cluster].elements;
             }
         } else {
             if (entry.getFilename() == "..") {
                 chains[cluster].startCluster = cluster;
                 chains[cluster].endCluster = cluster;
+                chains[cluster].elements = 1;
+                chains[cluster].orphaned = true;
                 foundNew = true;
+                cout << "NEW!!!" << endl;
             }
         }
 
         if (entry.isDirectory() && entry.getFilename() != "..") {
             recursiveExploration(chains, visited, cluster, false);
+        }
+        
+        if (wasOrphaned) {
+            cout << "Adding " << chains[cluster].elements << " elements to " << myCluster << " from " << cluster << endl;
+            chains[myCluster].elements += chains[cluster].elements;
+            cout << "Now: " << chains[myCluster].elements << endl;
         }
     }
 

@@ -32,6 +32,11 @@ class FatChains : public FatModule
          * by the first cluster of each chain
          */
         map<int, FatChain> findChains();
+
+        /**
+         * Explore the chains
+         */
+        void exploreChains(map<int, FatChain> &chains, set<int> &visited);
 };
 
 #endif // _FATCAT_FATCHAINS_H

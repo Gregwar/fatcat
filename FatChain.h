@@ -6,13 +6,13 @@ class FatChain
     public:
         FatChain();
 
-        int size();
-
         int startCluster;
         int endCluster;
         bool orphaned;
         bool directory;
         int elements;
+        int length;
+        int size;
 };
 
 #endif // _FATCAT_FATCHAIN_H

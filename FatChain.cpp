@@ -3,11 +3,8 @@
 FatChain::FatChain()
     : orphaned(true),
     directory(false),
-    elements(1)
+    elements(1),
+    length(1),
+    size(0)
 {
-}
-
-int FatChain::size()
-{
-    return 1+endCluster-startCluster;
 }

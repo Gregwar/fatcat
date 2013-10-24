@@ -6,6 +6,7 @@
 #include "FatChains.h"
 #include "FatChain.h"
 #include "FatEntry.h"
+#include "utils.h"
 
 using namespace std;
         
@@ -30,10 +31,50 @@ void FatChains::chainsAnalysis()
     cout << endl;
 
     cout << "Having a look at the chains..." << endl;
+    exploreChains(chains, visited);
+   
     map<int, FatChain>::iterator it;
-    vector<FatChain> orphanedChains;
     int orphaned = 0;
+    vector<FatChain> orphanedChains;
+    for (it=chains.begin(); it!=chains.end(); it++) {
+        FatChain &chain = it->second;
 
+        if (chain.orphaned) {
+            orphaned++;
+            orphanedChains.push_back(chain);
+        }
+    }
+
+    if (orphaned) {
+        cout << "There is " << orphaned << " orphaned elements:" << endl;
+        vector<FatChain>::iterator vit;
+
+        for (vit=orphanedChains.begin(); vit!=orphanedChains.end(); vit++) {
+            FatChain &chain = (*vit);
+            if (chain.directory) {
+                cout << "Directory ";
+            } else {
+                cout << "File ";
+            }
+
+            cout << "clusters " << chain.startCluster << " to " << chain.endCluster;
+
+            if (chain.directory) {
+                cout << ": " << chain.elements << " elements, " << prettySize(chain.size);
+            } else {
+                cout << ": ~" << prettySize(chain.length*system.bytesPerCluster);
+            }
+            cout << endl;
+        }
+    } else {
+        cout << "There is no orphaned chains, disk seems clean!" << endl;
+    }
+    cout << endl;
+}
+
+void FatChains::exploreChains(map<int, FatChain> &chains, set<int> &visited)
+{
+    map<int, FatChain>::iterator it;
     bool foundNew;
     do {
         foundNew = false;
@@ -51,34 +92,6 @@ void FatChains::chainsAnalysis()
             }
         }
     } while (foundNew);
-    cout << endl;
-    
-    for (it=chains.begin(); it!=chains.end(); it++) {
-        FatChain &chain = it->second;
-
-        if (chain.orphaned) {
-            orphaned++;
-            orphanedChains.push_back(chain);
-        }
-    }
-
-    if (orphaned) {
-        cout << "There is " << orphaned << " orphaned elements:" << endl;
-        vector<FatChain>::iterator vit;
-
-        for (vit=orphanedChains.begin(); vit!=orphanedChains.end(); vit++) {
-            FatChain &chain = (*vit);
-            cout << "Chain from cluster " << chain.startCluster << " to " << chain.endCluster;
-            if (chain.directory) {
-                cout << " directory (" << chain.elements << " elements)";
-            } else {
-                cout << " file";
-            }
-            cout << endl;
-        }
-    } else {
-        cout << "There is no orphaned chains, disk seems clean!" << endl;
-    }
     cout << endl;
 }
         
@@ -115,6 +128,10 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
                     wasOrphaned = true;
                 }
                 chains[cluster].orphaned = false;
+
+                if (!entry.isDirectory()) {
+                    chains[cluster].size = entry.size;
+                }
             }
         } else {
             if (entry.getFilename() == "..") {
@@ -132,6 +149,7 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
         
         if (wasOrphaned) {
             chains[myCluster].elements += chains[cluster].elements;
+            chains[myCluster].size += chains[cluster].size;
         }
     }
 
@@ -144,10 +162,14 @@ map<int, FatChain> FatChains::findChains()
     map<int, FatChain> chains;
 
     for (int cluster=system.rootDirectory; cluster<system.totalClusters; cluster++) {
+        // This cluster is new
         if (seen.find(cluster) == seen.end()) {
+            // If this is an allocated cluster
             if (!system.freeCluster(cluster)) {
                 set<int> localSeen;
                 int next = cluster;
+                int length = 1;
+                // Walking through the chain
                 while (true) {
                     int tmp = system.nextCluster(next);
                     if (tmp == FAT_LAST || !system.validCluster(tmp)) {
@@ -158,6 +180,7 @@ map<int, FatChain> FatChains::findChains()
                         break;
                     }
                     next = tmp;
+                    length++;
                     seen.insert(next);
                     localSeen.insert(next);
                 }
@@ -165,6 +188,7 @@ map<int, FatChain> FatChains::findChains()
                 FatChain chain;
                 chain.startCluster = cluster;
                 chain.endCluster = next;
+                chain.length = length;
 
                 if (chain.startCluster == system.rootDirectory) {
                     chain.orphaned = false;

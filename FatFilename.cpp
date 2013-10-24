@@ -13,10 +13,14 @@ static unsigned char longFilePos[] = {
 
 string FatFilename::getFilename()
 {
-    string filename = string(data.rbegin(), data.rend());
-    data = "";
+    string rfilename;
+    vector<string>::iterator it;
 
-    return filename;
+    for (it=letters.begin(); it!=letters.end(); it++) {
+        rfilename += *it;
+    }
+
+    return string(rfilename.rbegin(), rfilename.rend());
 }
 
 void FatFilename::append(char *buffer)
@@ -26,14 +30,20 @@ void FatFilename::append(char *buffer)
     }
 
     if (buffer[0]&FAT_LONG_NAME_LAST) {
-        data = "";
+        letters.clear();
     }
 
     int i;
     for (i=0; i<sizeof(longFilePos); i++) {
         unsigned char c = buffer[longFilePos[i]];
+        unsigned char d = buffer[longFilePos[i]+1];
         if (c != 0 && c != 0xff) {
-            data += c;
+            string letter;
+            if (d != 0x00) {
+                letter += d;
+            }
+            letter += c;
+            letters.push_back(letter);
         }
     }
 }

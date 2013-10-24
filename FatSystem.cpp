@@ -439,7 +439,7 @@ bool FatSystem::findDirectory(FatPath &path, unsigned int *cluster)
             for (it=entries.begin(); it!=entries.end(); it++) {
                 FatEntry &entry = *it;
                 string name = entry.getFilename();
-                if (name == parts[i]) {
+                if (entry.isDirectory() && name == parts[i]) {
                     *cluster = entry.cluster;
                     found = true;
                 }
@@ -468,7 +468,7 @@ bool FatSystem::findFile(FatPath &path, unsigned int *cluster, unsigned int *siz
 
         for (it=entries.begin(); it!=entries.end(); it++) {
             FatEntry &entry = (*it);
-            if (entry.getFilename() == path.getBasename()) {    
+            if (entry.getFilename() == path.getBasename()) {
                 *cluster = entry.cluster;
                 *size = entry.size;
                 *erased = entry.isErased();

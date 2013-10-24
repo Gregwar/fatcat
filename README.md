@@ -191,13 +191,6 @@ And use `-p` to write it back:
 fatcat disk.img -p backup.fats
 ```
 
-### Diff & merge the FATs
-
-You can have a look at the diff of the two FATs by using `-2`.
-
-You can merge two FATs using `-m`. For each different entries in the table,
-if one is zero and not the other, the non-zero file will be choosen.
-
 ### Writing to the FATs
 
 You can write to the FAT tables with `-w` and `-v`:
@@ -209,6 +202,41 @@ fatcat disk.img -w 123 -v 124
 This will write `124` as value of the next cluster of `123`.
 
 You can also choose the table with `-T`, 0 is both tables, 1 is the first and 2 the second.
+
+### Diff & merge the FATs
+
+You can have a look at the diff of the two FATs by using `-2`:
+
+```
+# Watching the diff
+$ fatcat c.img -2
+Comparing the FATs
+
+FATs are exactly equals
+
+# Writing 123 in the 500th cluster
+$ fatcat c.img -w 500 -v 123 -T 1
+Writing next cluster of 500 from 0 to 123
+Writing on FAT1
+
+# Watching the diff
+$ fatcat c.img -2
+Comparing the FATs
+[000001f4] 1:0000007b 2:00000000
+
+FATs differs
+It seems mergeable
+```
+
+You can merge two FATs using `-m`. For each different entries in the table,
+if one is zero and not the other, the non-zero file will be choosen:
+
+```
+$ fatcat c.img -m
+Begining the merge...
+Merging cluster 500
+Merge complete, 1 clusters merged
+```
 
 ### Erasing unallocated files
 

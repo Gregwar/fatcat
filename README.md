@@ -10,7 +10,13 @@ explore, extract, repair, recover and forensic them.
 You can explore the FAT partition using `-l` option like this:
 
 ```
-fatcat disk.img -l /
+$ fatcat disk.img -l /
+Listing path /
+Cluster: 2
+d 24/10/2013 12:06:00  some_directory/                c=4661
+d 24/10/2013 12:06:02  other_directory/               c=4662
+f 24/10/2013 12:06:40  picture.jpg                    c=4672 s=532480 (520K)
+f 24/10/2013 12:06:06  hello.txt                      c=4671 s=13 (13B)
 ```
 
 You can also provide a path like `-l /some/directory`.
@@ -36,7 +42,9 @@ You can read a file using `-r`, the file will be wrote on the standard
 output:
 
 ```
-fatcat disk.img -r /path/to/my/file.txt
+$ fatcat disk.img -r /hello.txt
+Hello world!
+$ fatcat disk.img -r /picture.jpg > save.jpg
 ```
 
 Using `-R`, you can provide a cluster number instead of a path, but the file size

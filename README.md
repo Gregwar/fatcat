@@ -3,6 +3,23 @@
 This tool is designed to manipulate FAT32 filesystems, in order to
 explore, extract, repair, recover and forensic them.
 
+## Building and installing
+
+You can build `fatcat` this way:
+
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
+And then install it:
+
+```
+make install
+```
+
 ## Exploring
 
 ### Listing

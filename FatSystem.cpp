@@ -473,6 +473,7 @@ bool FatSystem::findDirectory(FatPath &path, unsigned int *cluster)
         
 bool FatSystem::findFile(FatPath &path, unsigned int *cluster, unsigned int *size, bool *erased)
 {
+    bool found = false;
     string dirname = path.getDirname();
     string basename = path.getBasename();
 
@@ -488,12 +489,16 @@ bool FatSystem::findFile(FatPath &path, unsigned int *cluster, unsigned int *siz
                 *cluster = entry.cluster;
                 *size = entry.size;
                 *erased = entry.isErased();
-                return true;
+                if (entry.size == 0) {
+                    found = true;
+                } else {
+                    return true;
+                }
             }
         }
     }
 
-    return false;
+    return found;
 }
         
 void FatSystem::readFile(FatPath &path, FILE *f)

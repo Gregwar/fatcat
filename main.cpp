@@ -43,8 +43,7 @@ void usage()
     cout << "  -o: search for orphan files and directories" << endl;
 
     cout << endl;
-    cout << "*: These flags writes on the disk, be careful" << endl;
-    cout << endl;
+    cout << "*: These flags writes on the disk, and may damage it, be careful" << endl;
     exit(EXIT_FAILURE);
 }
 

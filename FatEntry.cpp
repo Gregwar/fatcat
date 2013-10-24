@@ -8,7 +8,8 @@
 using namespace std;
 
 FatEntry::FatEntry()
-    : hasData(false)
+    : hasData(false),
+      address(0)
 {
 }
 

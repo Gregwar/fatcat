@@ -242,12 +242,12 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
         for (i=0; i<bytesPerSector*sectorsPerCluster; i+=sizeof(buffer)) {
             // Reading data
             readData(address, buffer, sizeof(buffer));
-            address += sizeof(buffer);
 
             // Creating entry
             FatEntry entry;
 
             entry.attributes = buffer[FAT_ATTRIBUTES];
+            entry.address = address;
 
             if (entry.attributes == FAT_ATTRIBUTES_LONGFILE) {
                 // Long file part
@@ -276,6 +276,8 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
                     }
                 }
             }
+
+            address += sizeof(buffer);
         }
 
         int previousCluster = cluster;

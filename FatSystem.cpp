@@ -211,14 +211,14 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
 
             entry.attributes = buffer[FAT_ATTRIBUTES];
 
-            if (entry.attributes & FAT_ATTRIBUTES_LONGFILE) {
+            if (entry.attributes == FAT_ATTRIBUTES_LONGFILE) {
                 // Long file part
                 filename.append(buffer);
             } else {
                 entry.shortName = string(buffer, 11);
                 entry.longName = filename.getFilename();
-                entry.cluster = FAT_READ_SHORT(buffer, FAT_CLUSTER_LOW) | (FAT_READ_SHORT(buffer, FAT_CLUSTER_HIGH)<<16);
                 entry.size = FAT_READ_LONG(buffer, FAT_FILESIZE);
+                entry.cluster = FAT_READ_SHORT(buffer, FAT_CLUSTER_LOW) | (FAT_READ_SHORT(buffer, FAT_CLUSTER_HIGH)<<16);
 
                 if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.attributes&FAT_ATTRIBUTES_FILE) {
                     entries.push_back(entry);

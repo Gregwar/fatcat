@@ -41,7 +41,7 @@ multiple partitions on a block devices, for instance:
 fatcat disk.img -O 1048576 [options]
 ```
 
-This will tell fatcat to begin on the 1048576th byte
+This will tell fatcat to begin on the 1048576th byte. Have a look to the [partition tutorial](docs/partition.md).
 
 ### Listing
 
@@ -121,6 +121,8 @@ file will be read contiguously from the original FAT system and may be broken.
 
 To retrieve a deleted directory, note its cluster number and extract it like above:
 
+See also: [undelete tutorial](docs/undelete.md)
+
 ```
 # If your deleted directory cluster is 71829
 fatcat disk.img -x output/ -f 71829
@@ -173,6 +175,8 @@ f 23/10/2013 17:45:22  poor_orphan.txt                c=4601 s=49 (49B)
 
 Note that orphan files have an unknown size, this mean that if you read it, you will get
 a file that is a multiple of the cluster sizes.
+
+See also: [orphaned files tutorial](docs/orphan.md)
 
 ## Hacking
 

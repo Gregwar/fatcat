@@ -23,7 +23,7 @@ Disk identifier: 0x00000000
    disk.img1            2048      206847      102400   83  Linux
 
 Command (m for help): q
-̀``
+```
 
 This output means that the first partition starts in the sector 2048. Each sector is 512 byte.
 To use it with fatcat, you'll just have to pass -O to 2048*512=1048576 bytes:

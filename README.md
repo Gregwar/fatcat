@@ -121,12 +121,12 @@ file will be read contiguously from the original FAT system and may be broken.
 
 To retrieve a deleted directory, note its cluster number and extract it like above:
 
-See also: [undelete tutorial](docs/undelete.md)
-
 ```
 # If your deleted directory cluster is 71829
 fatcat disk.img -x output/ -f 71829
 ```
+
+See also: [undelete tutorial](docs/undelete.md)
 
 ## Recover
 
@@ -262,6 +262,8 @@ Begining the merge...
 Merging cluster 500
 Merge complete, 1 clusters merged
 ```
+
+See also: [fixing fat tutorial](docs/fat.md)
 
 ### Entries hacking
 

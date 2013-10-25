@@ -419,7 +419,7 @@ void FatSystem::infos()
     cout << "Filesystem type: " << fsType << endl;
     cout << "OEM name: " << oemName << endl;
     cout << "Total sectors: " << totalSectors << endl;
-    cout << "Total clusters: " << totalClusters << endl;
+    cout << "Total data clusters: " << totalClusters << endl;
     cout << "Disk size: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
     cout << "Bytes per sector: " << bytesPerSector << endl;
     cout << "Sectors per cluster: " << sectorsPerCluster << endl;

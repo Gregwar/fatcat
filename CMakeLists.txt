@@ -15,6 +15,9 @@ set(SOURCES
     FatSystem.cpp
     )
 
-add_executable(fatcat ${SOURCES})
+foreach(SOURCE ${SOURCES})
+    set(ALL_SOURCES ${ALL_SOURCES} src/${SOURCE})
+endforeach()
 
+add_executable(fatcat ${ALL_SOURCES})
 install(TARGETS fatcat DESTINATION bin)

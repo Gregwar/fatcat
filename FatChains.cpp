@@ -39,6 +39,10 @@ void FatChains::chainsAnalysis()
     for (it=chains.begin(); it!=chains.end(); it++) {
         FatChain &chain = it->second;
 
+        if (chain.startCluster == 0) {
+            chain.orphaned = false;
+        }
+
         if (chain.orphaned) {
             orphaned++;
             orphanedChains.push_back(chain);
@@ -67,9 +71,9 @@ void FatChains::chainsAnalysis()
                 cout << ": ~" << prettySize(chain.length*system.bytesPerCluster);
                 totalSize += chain.length*system.bytesPerCluster;
             }
-            cout << endl << endl;
-            cout << "Estimation of orphan files total sizes: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
+            cout << endl;
         }
+        cout << "Estimation of orphan files total sizes: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
     } else {
         cout << "There is no orphaned chains, disk seems clean!" << endl;
     }

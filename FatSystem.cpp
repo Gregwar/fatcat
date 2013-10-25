@@ -408,6 +408,7 @@ bool FatSystem::init()
     totalSize = totalSectors*bytesPerSector;
     fatSize = sectorsPerFat*bytesPerSector;
     totalClusters = fatSize/4;
+    dataSize = totalClusters*bytesPerCluster;
 
     return strange == 0;
 }
@@ -420,6 +421,7 @@ void FatSystem::infos()
     cout << "OEM name: " << oemName << endl;
     cout << "Total sectors: " << totalSectors << endl;
     cout << "Total data clusters: " << totalClusters << endl;
+    cout << "Data size: " << dataSize << " (" << prettySize(dataSize) << ")" << endl;
     cout << "Disk size: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
     cout << "Bytes per sector: " << bytesPerSector << endl;
     cout << "Sectors per cluster: " << sectorsPerCluster << endl;

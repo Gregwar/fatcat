@@ -428,7 +428,7 @@ void FatSystem::infos()
     cout << "Bytes per cluster: " << bytesPerCluster << endl;
     cout << "Reserved sectors: " << reservedSectors << endl;
     cout << "Sectors per FAT: " << sectorsPerFat << endl;
-    cout << "Fat size: " << fatSize << endl;
+    cout << "Fat size: " << fatSize << " (" << prettySize(fatSize) << ")" << endl;
     printf("FAT1 start address: %016llx\n", fatStart);
     printf("FAT2 start address: %016llx\n", fatStart+fatSize);
     printf("Data start address: %016llx\n", dataStart);

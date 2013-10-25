@@ -53,7 +53,7 @@ void FatChains::chainsAnalysis()
     }
 
     if (orphaned) {
-        int totalSize = 0;
+        unsigned long long totalSize = 0;
         cout << "There is " << orphaned << " orphaned elements:" << endl;
         vector<FatChain>::iterator vit;
 

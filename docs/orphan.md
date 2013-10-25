@@ -28,7 +28,7 @@ Let's do a proof of concept of this, create a directory, and then a file in it:
 # mount disk.img disk/
 # mkdir disk/somedir/
 # echo "Hello world" > disk/somedir/orphan.txt
-# umount disk.img
+# umount disk
 ```
 
 Now, with `fatcat`, you are being able to list the files and to access `orphan.txt`:
@@ -104,19 +104,24 @@ Found 3 chains
 
 Running the recursive differential analysis...
 Exploring 2
+Exploring 0
 
 Having a look at the chains...
 Exploring 3
-
 There is 1 orphaned elements:
 * Directory clusters 3 to 3: 2 elements, 12B
 
 Estimation of orphan files total sizes: 12 (12B)
+
+Listing of found elements with known entry:
+In directory with cluster 3:
+f 26/10/2013 11:20:54  orphan.txt                     c=4 s=12 (12B)
 ```
 
 The interesting section is the orphans list. As you can see, our cluster 3
 appears in this list. Moreover, `fatcat` says that there is 2 elements regrouped
-in this row, because there is the directory and the orphaned file.
+in this row, because there is the directory and the orphaned file. Just below, you
+can also see a part of the listing showing you the name of the elements found.
 
 You can now try to list the directory using `-L` and 3, because it's the cluster
 number of the lost directory:

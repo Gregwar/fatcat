@@ -10,6 +10,8 @@
 #include "FatDiff.h"
 #include "utils.h"
 
+#define ATOU(i) ((unsigned int)atoi(i))
+
 using namespace std;
 
 void usage()
@@ -59,7 +61,7 @@ int main(int argc, char *argv[])
     int index;
 
     // -s, specify the size to be read
-    int size = -1;
+    unsigned int size = -1;
 
     // -i, display informations about the disk
     bool infoFlag = false;
@@ -70,7 +72,7 @@ int main(int argc, char *argv[])
 
     // -c, listing for a direct cluster
     bool listClusterFlag = false;
-    int listCluster;
+    unsigned int listCluster;
 
     // -r, reads a file
     bool readFlag = false;
@@ -78,7 +80,7 @@ int main(int argc, char *argv[])
 
     // -R, reads from cluster file
     bool clusterRead = false;
-    int cluster = 0;
+    unsigned int cluster = 0;
 
     // -d, lists deleted
     bool listDeleted = false;
@@ -109,10 +111,10 @@ int main(int argc, char *argv[])
 
     // -v: value
     bool hasValue = false;
-    int value;
+    unsigned int value;
 
     // -t: FAT table to write or read
-    int table = 0;
+    unsigned int table = 0;
 
     // -S: write random data in unallocated sectors
     bool scramble = false;
@@ -138,25 +140,25 @@ int main(int argc, char *argv[])
                 scramble = true;
                 break;
             case 't':
-                table = atoi(optarg);
+                table = ATOU(optarg);
                 break;
             case 'm':
                 merge = true;
                 break;
             case 'v':
                 hasValue = true;
-                value = atoi(optarg);
+                value = ATOU(optarg);
                 break;
             case 'f':
-                cluster = atoi(optarg);
+                cluster = ATOU(optarg);
                 break;
             case 'w':
                 writeNext = true;
-                cluster = atoi(optarg);
+                cluster = ATOU(optarg);
                 break;
             case '@':
                 address = true;
-                cluster = atoi(optarg);
+                cluster = ATOU(optarg);
                 break;
             case 'o':
                 chains = true;
@@ -170,7 +172,7 @@ int main(int argc, char *argv[])
                 break;
             case 'L':
                 listClusterFlag = true;
-                listCluster = atoi(optarg);
+                listCluster = ATOU(optarg);
                 break;
             case 'r':
                 readFlag = true;
@@ -178,17 +180,17 @@ int main(int argc, char *argv[])
                 break;
             case 'R':
                 clusterRead = true;
-                cluster = atoi(optarg);
+                cluster = ATOU(optarg);
                 break;
             case 's':
-                size = atoi(optarg);
+                size = ATOU(optarg);
                 sizeProvided = true;
                 break;
             case 'd':
                 listDeleted = true;
                 break;
             case 'c':
-                cluster = atoi(optarg);
+                cluster = ATOU(optarg);
                 clusterProvided = true;
                 break;
             case 'x':
@@ -327,7 +329,7 @@ int main(int argc, char *argv[])
                     }
                     if (sizeProvided) {
                         cout << "Setting the size to " << size << endl;
-                        entry.size = size;
+                        entry.size = size&0xffffffff;
                     }
                     if (clusterProvided || sizeProvided) {
                         entry.updateData();

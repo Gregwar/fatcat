@@ -163,3 +163,6 @@ drwxr-xr-x 4 root root 512 Jan  1  1970 ../
 ```
 
 This way, your `tunnel` directory will allow you to access again your files normally.
+
+If you have a damaged disk, do not hesitate to test `-o`, this could be a really
+good way to get some data back to life.

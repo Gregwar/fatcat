@@ -21,9 +21,10 @@ using namespace std;
 /**
  * Opens the FAT resource
  */
-FatSystem::FatSystem(string filename_)
+FatSystem::FatSystem(string filename_, unsigned long long globalOffset_)
     : strange(0),
     filename(filename_),
+    globalOffset(globalOffset_),
     totalSize(-1),
     listDeleted(false),
     contiguous(false),
@@ -83,7 +84,7 @@ int FatSystem::readData(unsigned long long address, char *buffer, int size)
         cerr << "! Trying to read outside the disk" << endl;
     }
 
-    lseek64(fd, address, SEEK_SET);
+    lseek64(fd, globalOffset+address, SEEK_SET);
 
     int n;
     int pos = 0;
@@ -105,7 +106,7 @@ int FatSystem::writeData(unsigned long long address, const char *buffer, int siz
         throw string("Trying to write data while write mode is disabled");
     }
 
-    lseek64(fd, address, SEEK_SET);
+    lseek64(fd, globalOffset+address, SEEK_SET);
 
     int n;
     int pos = 0;

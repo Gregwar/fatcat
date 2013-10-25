@@ -26,6 +26,23 @@ make install
 
 ## Exploring
 
+### Using fatcat
+
+Fatcat takes an image as argument:
+
+```
+fatcat disk.img [options]
+```
+
+You can specify an offset in the file with `-O`, this could be useful if there is 
+multiple partitions on a block devices, for instance:
+
+```
+fatcat disk.img -O 1048576 [options]
+```
+
+This will tell fatcat to begin on the 1048576th byte
+
 ### Listing
 
 You can explore the FAT partition using `-l` option like this:

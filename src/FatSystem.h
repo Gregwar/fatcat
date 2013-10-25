@@ -35,7 +35,7 @@ using namespace std;
 class FatSystem
 {
     public:
-        FatSystem(string filename);
+        FatSystem(string filename, unsigned long long globalOffset = 0);
         ~FatSystem();
 
         /**
@@ -99,6 +99,7 @@ class FatSystem
 
         // File descriptor
         string filename;
+        unsigned long long globalOffset;
         int fd;
         bool writeMode;
 

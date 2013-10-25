@@ -20,6 +20,7 @@ void usage()
     cout << endl;
     cout << "Usage: fatcat disk.img [options]" << endl;
     cout << "  -i: display information about disk" << endl;
+    cout << "  -O [offset]: global offset (may be partition place)" << endl;
     cout << endl;
     cout << "Browsing & extracting:" << endl;
     cout << "  -l [dir]: list files and directories in the given path" << endl;
@@ -59,6 +60,9 @@ int main(int argc, char *argv[])
     vector<string> arguments;
     char *image = NULL;
     int index;
+
+    // -O offset
+    unsigned long long globalOffset = 0;
 
     // -s, specify the size to be read
     unsigned int size = -1;
@@ -127,8 +131,11 @@ int main(int argc, char *argv[])
     bool sizeProvided = false;
 
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:f:Sze:")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:f:Sze:O:")) != -1) {
         switch (index) {
+            case 'O':
+                globalOffset = atoll(optarg);
+                break;
             case 'e':
                 entry = true;
                 entryPath = string(optarg);
@@ -238,7 +245,7 @@ int main(int argc, char *argv[])
 
     try {
         // Openning the image
-        FatSystem fat(image);
+        FatSystem fat(image, globalOffset);
 
         fat.setListDeleted(listDeleted);
 

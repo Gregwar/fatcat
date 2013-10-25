@@ -45,8 +45,6 @@ string FatEntry::getFilename()
             name += "." + ext;
         }
 
-        name = strtolower(name);
-
         return name;
     }
 }

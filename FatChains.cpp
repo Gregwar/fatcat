@@ -67,7 +67,7 @@ void FatChains::chainsAnalysis()
                 cout << ": ~" << prettySize(chain.length*system.bytesPerCluster);
                 totalSize += chain.length*system.bytesPerCluster;
             }
-            cout << endl;
+            cout << endl << endl;
             cout << "Estimation of orphan files total sizes: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
         }
     } else {

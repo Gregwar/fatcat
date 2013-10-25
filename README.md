@@ -3,7 +3,7 @@
 This tool is designed to manipulate FAT32 filesystems, in order to
 explore, extract, repair, recover and forensic them.
 
-[Full documentation & tutorials](docs/index.md)
+[Tutorials & examples](docs/index.md)
 
 ## Building and installing
 
@@ -239,6 +239,20 @@ Begining the merge...
 Merging cluster 500
 Merge complete, 1 clusters merged
 ```
+
+### Entries hacking
+
+You can have information about an entry with `-e`:
+
+```
+fatcat disk.img -e /hello.txt
+```
+
+This will display the address of the entry (not the file itself), the cluster reference
+and the file size (if not a directory).
+
+You can add the flag `-c [cluster]` to change the cluster of the entry and the flag
+`-s [size]` to change the entry size.
 
 ### Erasing unallocated files
 

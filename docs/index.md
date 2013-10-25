@@ -9,7 +9,7 @@ undelete and hack FAT32:
 * [FAT table tutorial: how to fix damaged table](fat.md)
 * [Fun with FAT: fun filesystem hackings](fun-with-fat.md)
 
-## images
+## Images
 
 You can find prebuilt images in `images/` directory:
 

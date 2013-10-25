@@ -1,5 +1,7 @@
 # fatcat
 
+![fatcat](doc/fatcat.jpg)
+
 This tool is designed to manipulate FAT32 filesystems, in order to
 explore, extract, repair, recover and forensic them.
 

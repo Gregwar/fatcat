@@ -391,7 +391,7 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f)
         }
 
         if (cluster == 0) {
-            fprintf(stderr, "! One of your file's cluster is 0 (maybe FAT is broken, you should try -c)\n");
+            fprintf(stderr, "! One of your file's cluster is 0 (maybe FAT is broken, have a look to -2 and -m)\n");
         }
     }
 }

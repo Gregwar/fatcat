@@ -175,16 +175,6 @@ class FatSystem
         vector<FatEntry> getEntries(unsigned int cluster);
 
         /**
-         * Guess if a given cluster is a directory
-         */
-        bool isDirectory(unsigned int cluster);
-
-        /**
-         * Check that entries are correct for a directory
-         */
-        bool isDirectory(vector<FatEntry> &entries);
-
-        /**
          * Write random data in unallocated sectors
          */
         void rewriteUnallocated(bool random=false);

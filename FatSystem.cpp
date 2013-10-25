@@ -218,6 +218,8 @@ unsigned long long FatSystem::clusterAddress(unsigned int cluster)
 
 vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
 {
+    bool hasDot = false;
+    bool hasDotDot = false;
     set<unsigned int> visited;
     vector<FatEntry> entries;
     FatFilename filename;
@@ -266,11 +268,18 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
                         entry.changeDate = FatDate(&buffer[FAT_CHANGE_DATE]);
                         entries.push_back(entry);
                         localFound++;
+
+                        if (!hasDot && entry.getFilename() == ".") {
+                            hasDot = true;
+                        }
+                        if (!hasDotDot && entry.getFilename() == "..") {
+                            hasDotDot = true;
+                        }
                     } else {
                         badEntries++;
                     }
 
-                    if (foundEntries >= 1024 && (badEntries/(float)foundEntries)>0.5) {
+                    if (foundEntries >= 128 && (!hasDot || !hasDotDot) && (badEntries/(float)foundEntries)>0.3) {
                         cerr << "! Entries don't look good, this is maybe not a directory" << endl;
                         return vector<FatEntry>();
                     }
@@ -625,36 +634,6 @@ void FatSystem::computeStats()
             freeClusters++;
         }
     }
-}
-
-bool FatSystem::isDirectory(vector<FatEntry> &entries)
-{
-    bool hasDotDir = false;
-    bool hasDotDotDir = false;
-    vector<FatEntry>::iterator it;
-
-    for (it=entries.begin(); it!=entries.end(); it++) {
-        FatEntry &entry = (*it);
-
-        if (entry.isDirectory()) {
-            string name = entry.getFilename();
-            if (name == ".") {
-                hasDotDir = true;
-            }
-            if (name == "..") {
-                hasDotDotDir = true;
-            }
-        }
-    }
-
-    return hasDotDir && hasDotDotDir;
-}
-
-bool FatSystem::isDirectory(unsigned int cluster)
-{
-    vector<FatEntry> entries = getEntries(cluster);
-
-    return isDirectory(entries);
 }
 
 void FatSystem::rewriteUnallocated(bool random)

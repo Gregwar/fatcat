@@ -109,19 +109,20 @@ void FatChains::exploreChains(map<int, FatChain> &chains, set<int> &visited)
             FatChain &chain = it->second;
 
             if (chain.orphaned) {
-                    if (system.isDirectory(chain.startCluster)) {
-                        chain.directory = true;
-                        if (recursiveExploration(chains, visited, chain.startCluster, true)) {
-                            foundNew = true;
-                        }
-                        chain.orphaned = true;
+                vector<FatEntry> entries = system.getEntries(chain.startCluster);
+                if (entries.size()) {
+                    chain.directory = true;
+                    if (recursiveExploration(chains, visited, chain.startCluster, true, &entries)) {
+                        foundNew = true;
                     }
+                    chain.orphaned = true;
+                }
             }
         }
     } while (foundNew);
 }
         
-bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visited, int cluster, bool force)
+bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visited, int cluster, bool force, vector<FatEntry> *inputEntries)
 {
     if (visited.find(cluster) != visited.end()) {
         return false;
@@ -138,7 +139,12 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
 
     cout << "Exploring " << cluster << endl;
 
-    vector<FatEntry> entries = system.getEntries(cluster);
+    vector<FatEntry> entries;
+    if (inputEntries != NULL) {
+        entries = *inputEntries;
+    } else {
+        entries = system.getEntries(cluster);
+    }
     vector<FatEntry>::iterator it;
 
     for (it=entries.begin(); it!=entries.end(); it++) {

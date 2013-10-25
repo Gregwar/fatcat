@@ -9,3 +9,21 @@ undelete and hack FAT32:
 * [FAT table tutorial: how to fix damaged table](fat.md)
 * [Fun with FAT: fun filesystem hackings](fun-with-fat.md)
 
+## images
+
+You can find prebuilt images in `images/` directory:
+
+* `empty.img`: an empty FAT32 filesystem
+* `hello-world.img`: a simple image with txt files and a directory
+* `directory-loop.img`: an image with looping directories
+* `infinite-file.img`: a file which is looping and with maximum FAT32 size
+  (4G the image is just 50M)
+* `full-fat.img`: an image with a full FAT, the disk appear full even
+  if you can't see any file in it
+* `two-file-same-cluster.img`: an image with two files having different
+  names pointing to the same cluster. If you change one, the other will be
+  changed too (note that your OS may cache some data).
+* `fake-big-disk-1T.img`: an image with fake values in the FAT32 headers,
+  so that your system may behaves like you have a 1T disk, even if it's smaller.
+  You can read & write files on it until you'll reach the actual size of your
+  disk.

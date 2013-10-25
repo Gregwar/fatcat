@@ -60,7 +60,7 @@ static inline string prettySize(unsigned long long bytes)
     double size = bytes;
     int n = 0;
 
-    while (size > 1024) {
+    while (size >= 1024) {
         size /= 1024;
         n++;
     }

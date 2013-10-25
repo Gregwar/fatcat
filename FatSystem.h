@@ -186,6 +186,11 @@ class FatSystem
          * Write random data in unallocated sectors
          */
         void rewriteUnallocated(bool random=false);
+
+        /**
+         * Return a chain size
+         */
+        int chainSize(int cluster);
     
     protected:
         void parseHeader();

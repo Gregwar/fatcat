@@ -427,9 +427,9 @@ void FatSystem::infos()
     cout << "Reserved sectors: " << reservedSectors << endl;
     cout << "Sectors per FAT: " << sectorsPerFat << endl;
     cout << "Fat size: " << fatSize << endl;
-    printf("FAT1 start address: %08x\n", fatStart);
-    printf("FAT2 start address: %08x\n", fatStart+fatSize);
-    printf("Data start address: %08x\n", dataStart);
+    printf("FAT1 start address: %016llx\n", fatStart);
+    printf("FAT2 start address: %016llx\n", fatStart+fatSize);
+    printf("Data start address: %016llx\n", dataStart);
     cout << "Root directory cluster: " << rootDirectory << endl;
     cout << "Disk label: " << diskLabel << endl;
     cout << endl;
@@ -671,4 +671,16 @@ void FatSystem::rewriteUnallocated(bool random)
     }
 
     cout << "Scrambled " << total << " sectors" << endl;
+}
+
+int FatSystem::chainSize(int cluster)
+{
+    int length = 0;
+
+    do {
+        length++;
+        cluster = nextCluster(cluster);
+    } while (validCluster(cluster) && cluster!=FAT_LAST);
+
+    return length;
 }

@@ -265,10 +265,11 @@ int main(int argc, char *argv[])
                 long long addr = fat.clusterAddress(cluster);
                 int next1 = fat.nextCluster(cluster, 0);
                 int next2 = fat.nextCluster(cluster, 1);
-                printf("%llu (%08x)\n", addr, addr);
+                printf("%llu (%016llx)\n", addr, addr);
                 cout << "Next cluster:" << endl;
                 printf("FAT1: %u (%08x)\n", next1, next1);
                 printf("FAT2: %u (%08x)\n", next2, next2);
+                printf("Chain size: %d\n", fat.chainSize(cluster));
             } else if (chains) {
                 FatChains chains(fat);
                 chains.chainsAnalysis();
@@ -311,7 +312,7 @@ int main(int argc, char *argv[])
                 FatPath path(entryPath);
                 FatEntry entry;
                 if (fat.findFile(path, entry)) {
-                    printf("Entry address %016x\n", entry.address);
+                    printf("Entry address %016llx\n", entry.address);
                     cout << "Found entry, cluster=" << entry.cluster;
                     if (entry.isDirectory()) {
                         cout << ", directory";

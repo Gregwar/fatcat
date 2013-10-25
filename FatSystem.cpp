@@ -468,6 +468,7 @@ bool FatSystem::findDirectory(FatPath &path, FatEntry &outputEntry)
 
     for (int i=0; i<parts.size(); i++) {
         if (parts[i] != "") {
+            parts[i] = strtolower(parts[i]);
             vector<FatEntry> entries = getEntries(cluster);
             vector<FatEntry>::iterator it;
             bool found = false;
@@ -475,7 +476,7 @@ bool FatSystem::findDirectory(FatPath &path, FatEntry &outputEntry)
             for (it=entries.begin(); it!=entries.end(); it++) {
                 FatEntry &entry = *it;
                 string name = entry.getFilename();
-                if (entry.isDirectory() && name == parts[i]) {
+                if (entry.isDirectory() && strtolower(name) == parts[i]) {
                     outputEntry = entry;
                     cluster = entry.cluster;
                     found = true;
@@ -497,6 +498,7 @@ bool FatSystem::findFile(FatPath &path, FatEntry &outputEntry)
     bool found = false;
     string dirname = path.getDirname();
     string basename = path.getBasename();
+    basename = strtolower(basename);
 
     FatPath parent(dirname);
     FatEntry parentEntry;
@@ -506,7 +508,7 @@ bool FatSystem::findFile(FatPath &path, FatEntry &outputEntry)
 
         for (it=entries.begin(); it!=entries.end(); it++) {
             FatEntry &entry = (*it);
-            if (entry.getFilename() == path.getBasename()) {
+            if (strtolower(entry.getFilename()) == basename) {
                 outputEntry = entry;
 
                 if (entry.size == 0) {

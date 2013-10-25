@@ -279,7 +279,7 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
                         badEntries++;
                     }
 
-                    if (foundEntries >= 128 && (!hasDot || !hasDotDot) && (badEntries/(float)foundEntries)>0.3) {
+                    if (cluster!=rootDirectory && foundEntries >= 128 && (!hasDot || !hasDotDot) && (badEntries/(float)foundEntries)>0.3) {
                         cerr << "! Entries don't look good, this is maybe not a directory" << endl;
                         return vector<FatEntry>();
                     }

@@ -1,4 +1,4 @@
-# FAT32 Undelete tutorial
+# FAT32 Orphan tutorial: how to recover lost files and directories
 
 Back to [documentation index](index.md)
 

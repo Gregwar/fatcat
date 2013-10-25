@@ -279,6 +279,8 @@ and the file size (if not a directory).
 You can add the flag `-c [cluster]` to change the cluster of the entry and the flag
 `-s [size]` to change the entry size.
 
+See also: [fun with fat tutorial](docs/fun-with-fat.md)
+
 ### Erasing unallocated files
 
 You can erase unallocated sectors data, with zeroes using `-z`, or using

@@ -35,10 +35,10 @@ void usage()
     cout << "FAT Hacking" << endl;
     cout << "  -@ [cluster]: Get the cluster address and informations" << endl;
     cout << "  -2: analysis & compare the 2 FATs" << endl;
-    cout << "  -b [file]: backup the FATs" << endl;
-    cout << "* -p [file]: restore (patch) the FATs" << endl;
-    cout << "* -w [cluster] -v [value]: write next cluster (see -T)" << endl;
-    cout << "  -T [table]: specify which table to write (0:both, 1:first, 2:second)" << endl;
+    cout << "  -b [file]: backup the FATs (see -t)" << endl;
+    cout << "* -p [file]: restore (patch) the FATs (see -t)" << endl;
+    cout << "* -w [cluster] -v [value]: write next cluster (see -t)" << endl;
+    cout << "  -t [table]: specify which table to write (0:both, 1:first, 2:second)" << endl;
     cout << "* -m: merge the FATs" << endl;
     cout << "  -o: search for orphan files and directories" << endl;
     cout << endl;
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     bool readFlag = false;
     string readPath;
 
-    // -t, reads from cluster file
+    // -R, reads from cluster file
     bool clusterRead = false;
     int cluster = 0;
 
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     bool hasValue = false;
     int value;
 
-    // -T: FAT table to write
+    // -t: FAT table to write or read
     int table = 0;
 
     // -S: write random data in unallocated sectors
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
     bool sizeProvided = false;
 
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mT:f:Sze:")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:f:Sze:")) != -1) {
         switch (index) {
             case 'e':
                 entry = true;
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
             case 'S':
                 scramble = true;
                 break;
-            case 'T':
+            case 't':
                 table = atoi(optarg);
                 break;
             case 'm':
@@ -277,9 +277,9 @@ int main(int argc, char *argv[])
                 FatBackup backupSystem(fat);
                 
                 if (backup) {
-                    backupSystem.backup(backupFile);
+                    backupSystem.backup(backupFile, table);
                 } else {
-                    backupSystem.patch(backupFile);
+                    backupSystem.patch(backupFile, table);
                 }
             } else if (writeNext) {
                 if (!hasValue) {

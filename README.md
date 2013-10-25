@@ -203,7 +203,7 @@ fatcat disk.img -w 123 -v 124
 
 This will write `124` as value of the next cluster of `123`.
 
-You can also choose the table with `-T`, 0 is both tables, 1 is the first and 2 the second.
+You can also choose the table with `-t`, 0 is both tables, 1 is the first and 2 the second.
 
 ### Diff & merge the FATs
 
@@ -217,7 +217,7 @@ Comparing the FATs
 FATs are exactly equals
 
 # Writing 123 in the 500th cluster only in FAT1
-$ fatcat disk.img -w 500 -v 123 -T 1
+$ fatcat disk.img -w 500 -v 123 -t 1
 Writing next cluster of 500 from 0 to 123
 Writing on FAT1
 

@@ -14,12 +14,20 @@ FatBackup::FatBackup(FatSystem &system)
 {
 }
 
-void FatBackup::backup(string backupFile)
+void FatBackup::backup(string backupFile, int fat)
 {
     char buffer[CHUNKS_SIZES];
-    int size = system.fatSize*2;
+    int size = system.fatSize;
     int n = 0;
+    int offset = 0;
     FILE *backup = fopen(backupFile.c_str(), "w+");
+
+    if (fat == 0) {
+        size *= 2;
+    } 
+    if (fat == 2) {
+        offset = system.fatSize;
+    }
 
     if (backup == NULL) {
         ostringstream oss;
@@ -32,7 +40,7 @@ void FatBackup::backup(string backupFile)
         if (size-i < toRead) {
             toRead = size-i;
         }
-        n = system.readData(system.fatStart+i, buffer, toRead);
+        n = system.readData(system.fatStart+i+offset, buffer, toRead);
         if (n > 0) {
             fwrite(buffer, n, 1, backup);
         }
@@ -42,7 +50,7 @@ void FatBackup::backup(string backupFile)
     cout << "Successfully wrote " << backupFile << " (" << size << ")" << endl;
 }
 
-void FatBackup::patch(string backupFile)
+void FatBackup::patch(string backupFile, int fat)
 {
     char buffer[CHUNKS_SIZES];
 
@@ -58,15 +66,23 @@ void FatBackup::patch(string backupFile)
     system.enableWrite();
 
     int n;
+    int offset = 0;
+    int size = system.fatSize;
     int position;
     int toWrite = 1;
+    if (fat == 0) {
+        size *= 2;
+    }
+    if (fat == 2) {
+        offset = system.fatSize;
+    }
     for (position=0; toWrite>0; position+=n) {
         toWrite = fread(buffer, 1, CHUNKS_SIZES, backup);
-        if (position+toWrite > system.fatSize*2) {
-            toWrite = system.fatSize*2-position;
+        if (position+toWrite > size) {
+            toWrite = size-position;
         }
         if (toWrite > 0) {
-            n = system.writeData(system.fatStart+position, buffer, toWrite);
+            n = system.writeData(system.fatStart+offset+position, buffer, toWrite);
         }
     }
 

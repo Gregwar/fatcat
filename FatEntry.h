@@ -38,8 +38,8 @@ class FatEntry
         string shortName;
         string longName;
         char attributes;
-        int cluster;
-        long long size;
+        unsigned int cluster;
+        unsigned long long size;
 
         FatDate creationDate;
         FatDate changeDate;

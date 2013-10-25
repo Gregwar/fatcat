@@ -255,8 +255,8 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
             } else {
                 entry.shortName = string(buffer, 11);
                 entry.longName = filename.getFilename();
-                entry.size = FAT_READ_LONG(buffer, FAT_FILESIZE);
-                entry.cluster = FAT_READ_SHORT(buffer, FAT_CLUSTER_LOW) | (FAT_READ_SHORT(buffer, FAT_CLUSTER_HIGH)<<16);
+                entry.size = FAT_READ_LONG(buffer, FAT_FILESIZE)&0xffffffff;
+                entry.cluster = (FAT_READ_SHORT(buffer, FAT_CLUSTER_LOW)&0xffff) | (FAT_READ_SHORT(buffer, FAT_CLUSTER_HIGH)<<16);
                 entry.setData(string(buffer, sizeof(buffer)));
 
                 if (entry.isCorrect()) {

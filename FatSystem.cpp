@@ -675,12 +675,24 @@ void FatSystem::rewriteUnallocated(bool random)
 
 int FatSystem::chainSize(int cluster)
 {
+    set<int> visited;
     int length = 0;
+    bool stop;
 
     do {
+        stop = true;
+        int currentCluster = cluster;
+        visited.insert(cluster);
         length++;
         cluster = nextCluster(cluster);
-    } while (validCluster(cluster) && cluster!=FAT_LAST);
+        if (validCluster(cluster) && cluster!=FAT_LAST) {
+            if (visited.find(cluster) != visited.end()) {
+                cerr << "! Loop detected, " << currentCluster << " points to " << cluster << " that I already met" << endl;
+            } else {
+                stop = false;
+            }
+        }
+    } while (!stop);
 
     return length;
 }

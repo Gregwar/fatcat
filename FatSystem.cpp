@@ -259,13 +259,15 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
                 entry.cluster = FAT_READ_SHORT(buffer, FAT_CLUSTER_LOW) | (FAT_READ_SHORT(buffer, FAT_CLUSTER_HIGH)<<16);
                 entry.setData(string(buffer, sizeof(buffer)));
 
-                if (entry.attributes&FAT_ATTRIBUTES_DIR || entry.attributes&FAT_ATTRIBUTES_FILE) {
+                if (entry.isCorrect()) {
                     foundEntries++;
                     if (validCluster(entry.cluster)) {
-                        entry.creationDate = FatDate(&buffer[FAT_CREATION_DATE]);
-                        entry.changeDate = FatDate(&buffer[FAT_CHANGE_DATE]);
-                        entries.push_back(entry);
-                        localFound++;
+                        if (entry.cluster != 0) {
+                            entry.creationDate = FatDate(&buffer[FAT_CREATION_DATE]);
+                            entry.changeDate = FatDate(&buffer[FAT_CHANGE_DATE]);
+                            entries.push_back(entry);
+                            localFound++;
+                        }
                     } else {
                         badEntries++;
                     }

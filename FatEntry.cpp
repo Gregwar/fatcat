@@ -65,3 +65,21 @@ bool FatEntry::isErased()
 {
     return ((shortName[0]&0xff) == FAT_ERASED);
 }
+
+bool FatEntry::isCorrect()
+{
+    bool isZero = true;
+
+    for (int i=0; i<data.size(); i++) {
+        if (data[i] != 0) {
+            isZero = false;
+            break;
+        }
+    }
+
+    if (isZero) {
+        return false;
+    }
+
+    return (!attributes) || (attributes&FAT_ATTRIBUTES_DIR) || (attributes&FAT_ATTRIBUTES_FILE);
+}

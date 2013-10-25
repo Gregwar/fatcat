@@ -49,6 +49,8 @@ class FatEntry
         long long address;
         bool hasData;
         string data;
+
+        bool isCorrect();
 };
 
 #endif // _FATCAT_FATENTRY_H

@@ -46,6 +46,7 @@ class FatSystem
         /**
          * Directory listing
          */
+        void list(vector<FatEntry> &entries);
         void list(unsigned int cluster);
         void list(FatPath &path);
 

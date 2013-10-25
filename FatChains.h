@@ -25,7 +25,7 @@ class FatChains : public FatModule
          * Recursive method to do an exploration and do the differential
          * chains analysis
          */
-        bool recursiveExploration(map<int, FatChain> &chains, set<int> &visited, int cluster, bool force);
+        bool recursiveExploration(map<int, FatChain> &chains, set<int> &visited, int cluster, bool force, vector<FatEntry> *entries = NULL);
 
         /**
          * Find the chains from the FAT and return a map indexed
@@ -36,7 +36,7 @@ class FatChains : public FatModule
         /**
          * Explore the chains
          */
-        void exploreChains(map<int, FatChain> &chains, set<int> &visited);
+        vector<FatEntry> exploreChains(map<int, FatChain> &chains, set<int> &visited);
 };
 
 #endif // _FATCAT_FATCHAINS_H

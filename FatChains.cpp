@@ -31,7 +31,7 @@ void FatChains::chainsAnalysis()
     cout << endl;
 
     cout << "Having a look at the chains..." << endl;
-    exploreChains(chains, visited);
+    vector<FatEntry> entries = exploreChains(chains, visited);
    
     map<int, FatChain>::iterator it;
     int orphaned = 0;
@@ -75,14 +75,20 @@ void FatChains::chainsAnalysis()
         }
         cout << endl;
         cout << "Estimation of orphan files total sizes: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
+        cout << endl;
+        if (entries.size()) {
+            cout << "Listing of found elements with known entry:" << endl;
+            system.list(entries);
+        }
     } else {
         cout << "There is no orphaned chains, disk seems clean!" << endl;
     }
     cout << endl;
 }
 
-void FatChains::exploreChains(map<int, FatChain> &chains, set<int> &visited)
+vector<FatEntry> FatChains::exploreChains(map<int, FatChain> &chains, set<int> &visited)
 {
+    vector<FatEntry> entries;
     map<int, FatChain>::iterator it;
     bool foundNew;
     do {
@@ -93,7 +99,7 @@ void FatChains::exploreChains(map<int, FatChain> &chains, set<int> &visited)
             if (chain.orphaned) {
                     if (system.isDirectory(chain.startCluster)) {
                         chain.directory = true;
-                        if (recursiveExploration(chains, visited, chain.startCluster, true)) {
+                        if (recursiveExploration(chains, visited, chain.startCluster, true, &entries)) {
                             foundNew = true;
                         }
                         chain.orphaned = true;
@@ -101,10 +107,11 @@ void FatChains::exploreChains(map<int, FatChain> &chains, set<int> &visited)
             }
         }
     } while (foundNew);
-    cout << endl;
+
+    return entries;
 }
         
-bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visited, int cluster, bool force)
+bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visited, int cluster, bool force, vector<FatEntry> *outEntries)
 {
     if (visited.find(cluster) != visited.end()) {
         return false;
@@ -135,6 +142,10 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
             if (entry.getFilename() != ".." && entry.getFilename() != ".") {
                 if (chains[cluster].orphaned) {
                     wasOrphaned = true;
+
+                    if (outEntries != NULL) {
+                        outEntries->push_back(entry);
+                    }
                 }
                 chains[cluster].orphaned = false;
 

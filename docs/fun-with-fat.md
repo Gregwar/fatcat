@@ -1,6 +1,29 @@
 # Fun with FAT: fun filesystem hackings
 
-## The directory loop
+Back to [documentation index](index.md)
+
+## Prebuilt fun images
+
+You can find prebuilt images in `images/` directory:
+
+* `empty.img`: an empty FAT32 filesystem
+* `hello-world.img`: a simple image with txt files and a directory
+* `directory-loop.img`: an image with looping directories
+* `infinite-file.img`: a file which is looping and with maximum FAT32 size
+  (4G the image is just 50M)
+* `full-fat.img`: an image with a full FAT, the disk appear full even
+  if you can't see any file in it
+* `two-file-same-cluster.img`: an image with two files having different
+  names pointing to the same cluster. If you change one, the other will be
+  changed too (note that your OS may cache some data).
+* `fake-big-disk-1T.img`: an image with fake values in the FAT32 headers,
+  so that your system may behaves like you have a 1T disk, even if it's smaller.
+  You can read & write files on it until you'll reach the actual size of your
+  disk.
+
+## Tutorials
+
+### The directory loop
 
 In FAT32, directories are just a list of entries which can point to files or
 other directories.
@@ -64,7 +87,7 @@ Now, have a look to the result:
 You made it! You created an infinite loop of directories. The directory structure
 is no longer a tree, but a graph.
 
-## The infinite file
+### The infinite file
 
 Let's create a file which is longer than 1 cluster:
 

@@ -262,12 +262,10 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
                 if (entry.isCorrect()) {
                     foundEntries++;
                     if (validCluster(entry.cluster)) {
-                        if (entry.cluster != 0) {
-                            entry.creationDate = FatDate(&buffer[FAT_CREATION_DATE]);
-                            entry.changeDate = FatDate(&buffer[FAT_CHANGE_DATE]);
-                            entries.push_back(entry);
-                            localFound++;
-                        }
+                        entry.creationDate = FatDate(&buffer[FAT_CREATION_DATE]);
+                        entry.changeDate = FatDate(&buffer[FAT_CHANGE_DATE]);
+                        entries.push_back(entry);
+                        localFound++;
                     } else {
                         badEntries++;
                     }

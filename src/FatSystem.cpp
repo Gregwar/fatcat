@@ -219,16 +219,17 @@ unsigned long long FatSystem::clusterAddress(unsigned int cluster)
 
 vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
 {
-    bool hasDot = false;
-    bool hasDotDot = false;
+    bool isValid = false;
     set<unsigned int> visited;
     vector<FatEntry> entries;
     FatFilename filename;
-    int badEntries = 0;
-    int foundEntries = 0;
 
     if (cluster == 0) {
         cluster = rootDirectory;
+    }
+
+    if (cluster == rootDirectory) {
+        isValid = true;
     }
 
     if (!validCluster(cluster)) {
@@ -263,31 +264,25 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
                 entry.setData(string(buffer, sizeof(buffer)));
 
                 if (entry.isCorrect()) {
-                    foundEntries++;
                     if (validCluster(entry.cluster)) {
                         entry.creationDate = FatDate(&buffer[FAT_CREATION_DATE]);
                         entry.changeDate = FatDate(&buffer[FAT_CHANGE_DATE]);
                         entries.push_back(entry);
                         localFound++;
 
-                        if (!hasDot && entry.getFilename() == ".") {
-                            hasDot = true;
+                        if (!isValid && entry.getFilename() == "." && entry.cluster == cluster) {
+                            isValid = true;
                         }
-                        if (!hasDotDot && entry.getFilename() == "..") {
-                            hasDotDot = true;
-                        }
-                    } else {
-                        badEntries++;
-                    }
-
-                    if (cluster!=rootDirectory && foundEntries >= 128 && (!hasDot || !hasDotDot) && (badEntries/(float)foundEntries)>0.3) {
-                        cerr << "! Entries don't look good, this is maybe not a directory" << endl;
-                        return vector<FatEntry>();
                     }
                 }
             }
 
             address += sizeof(buffer);
+        }
+
+        if (!isValid) {
+            cerr << "! Entries don't look good, this is maybe not a directory" << endl;
+            return vector<FatEntry>();
         }
 
         int previousCluster = cluster;

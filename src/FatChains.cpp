@@ -109,6 +109,7 @@ void FatChains::exploreChains(map<int, FatChain> &chains, set<int> &visited)
             FatChain &chain = it->second;
 
             if (chain.orphaned) {
+                cout << "Trying " << chain.startCluster << endl;
                 vector<FatEntry> entries = system.getEntries(chain.startCluster);
                 if (entries.size()) {
                     chain.directory = true;
@@ -152,6 +153,10 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
         int cluster = entry.cluster;
         bool wasOrphaned = false;
 
+        if (entry.isErased()) {
+            continue;
+        }
+
         // Search the cluster in the previously visited chains, if it
         // exists, mark it as non-orphaned
         if (chains.find(cluster)!=chains.end()) {
@@ -164,6 +169,7 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
                         clusterToEntry[entry.cluster] = entry;
                     }
                 }
+                cout << "Unorphaning " << cluster << " from " << myCluster << endl;
                 chains[cluster].orphaned = false;
 
                 if (!entry.isDirectory()) {

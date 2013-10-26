@@ -219,6 +219,8 @@ unsigned long long FatSystem::clusterAddress(unsigned int cluster)
 
 vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
 {
+    int foundEntries = 0;
+    int badEntries = 0;
     bool isValid = false;
     set<unsigned int> visited;
     vector<FatEntry> entries;
@@ -237,13 +239,14 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
     }
 
     do {
-        bool localFound = 0;
+        int localFound = 0;
+        int localBadEntries = 0;
         unsigned long long address = clusterAddress(cluster);
         char buffer[FAT_ENTRY_SIZE];
         visited.insert(cluster);
 
         unsigned int i;
-        for (i=0; i<bytesPerSector*sectorsPerCluster; i+=sizeof(buffer)) {
+        for (i=0; i<bytesPerCluster; i+=sizeof(buffer)) {
             // Reading data
             readData(address, buffer, sizeof(buffer));
 
@@ -263,26 +266,25 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
                 entry.cluster = (FAT_READ_SHORT(buffer, FAT_CLUSTER_LOW)&0xffff) | (FAT_READ_SHORT(buffer, FAT_CLUSTER_HIGH)<<16);
                 entry.setData(string(buffer, sizeof(buffer)));
 
-                if (entry.isCorrect()) {
-                    if (validCluster(entry.cluster)) {
+                if (!entry.isZero()) {
+                    if (entry.isCorrect() && validCluster(entry.cluster)) {
                         entry.creationDate = FatDate(&buffer[FAT_CREATION_DATE]);
                         entry.changeDate = FatDate(&buffer[FAT_CHANGE_DATE]);
                         entries.push_back(entry);
                         localFound++;
+                        foundEntries++;
 
                         if (!isValid && entry.getFilename() == "." && entry.cluster == cluster) {
                             isValid = true;
                         }
+                    } else {
+                        localBadEntries++;
+                        badEntries++;
                     }
                 }
             }
 
             address += sizeof(buffer);
-        }
-
-        if (!isValid) {
-            cerr << "! Entries don't look good, this is maybe not a directory" << endl;
-            return vector<FatEntry>();
         }
 
         int previousCluster = cluster;
@@ -294,11 +296,18 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
         }
 
         if (cluster == 0) {
-            if (localFound) {
+            if (localFound && localBadEntries<localFound) {
                 cluster = previousCluster+1;
             } else {
                 break;
             }
+        }
+
+        if (!isValid) {
+            if (badEntries>foundEntries) {
+                cerr << "! Entries don't look good, this is maybe not a directory" << endl;
+                return vector<FatEntry>();
+          }
         }
 
     } while (cluster != FAT_LAST);

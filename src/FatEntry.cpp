@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <ctype.h>
 #include <cstdlib>
 #include <iostream>
 #include <string.h>
@@ -64,20 +65,28 @@ bool FatEntry::isErased()
     return ((shortName[0]&0xff) == FAT_ERASED);
 }
 
-bool FatEntry::isCorrect()
+bool FatEntry::isZero()
 {
-    bool isZero = true;
-
     for (int i=0; i<data.size(); i++) {
         if (data[i] != 0) {
-            isZero = false;
-            break;
+            return false;
         }
     }
 
-    if (isZero) {
+    return true;
+}
+
+bool FatEntry::isCorrect()
+{
+    if (attributes && !(attributes&FAT_ATTRIBUTES_DIR) && !(attributes&FAT_ATTRIBUTES_FILE)) {
         return false;
     }
 
-    return (!attributes) || (attributes&FAT_ATTRIBUTES_DIR) || (attributes&FAT_ATTRIBUTES_FILE);
+    for (int i=1; i<11; i++) {
+        if (!isprint(data[i])) {
+            return false;
+        }
+    }
+
+    return true;
 }

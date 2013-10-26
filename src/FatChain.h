@@ -12,7 +12,7 @@ class FatChain
         bool directory;
         int elements;
         int length;
-        int size;
+        unsigned long long size;
 };
 
 #endif // _FATCAT_FATCHAIN_H

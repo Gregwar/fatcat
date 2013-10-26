@@ -65,17 +65,12 @@ class FatSystem
          * File reading
          */
         void readFile(FatPath &path, FILE *f = NULL);
-        void readFile(unsigned int cluster, unsigned int size, FILE * f = NULL);
+        void readFile(unsigned int cluster, unsigned int size, FILE * f = NULL, bool contiguous = false);
 
         /**
          * Showing deleted file in listing
          */
         void setListDeleted(bool listDeleted);
-
-        /**
-         * Contiguous mode
-         */
-        void setContiguous(bool setContiguous);
 
         /**
          * Extract all the files to the given directory
@@ -136,11 +131,9 @@ class FatSystem
 
         // Flags
         bool listDeleted;
-        bool contiguous;
         
         /**
          * Returns the next cluster number
-         * If contiguous mode, this will just return cluster+1
          */
         unsigned int nextCluster(unsigned int cluster, int fat=0);
 

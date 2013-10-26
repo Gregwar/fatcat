@@ -27,7 +27,6 @@ FatSystem::FatSystem(string filename_, unsigned long long globalOffset_)
     globalOffset(globalOffset_),
     totalSize(-1),
     listDeleted(false),
-    contiguous(false),
     statsComputed(false),
     freeClusters(0),
     cacheEnabled(false)
@@ -375,9 +374,8 @@ void FatSystem::list(vector<FatEntry> &entries)
     }
 }
 
-void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f)
+void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool contiguous)
 {
-    bool autoContiguous = contiguous;
     if (f == NULL) {
         f = stdout;
     }
@@ -399,11 +397,11 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f)
         fwrite(buffer, toRead, 1, f);
         fflush(f);
 
-        if (autoContiguous) {
+        if (contiguous) {
             if (!freeCluster(cluster)) {
                 fprintf(stderr, "! Contiguous file contains cluster that seems allocated\n");
-                fprintf(stderr, "! Trying to auto-disable contiguous mode\n");
-                autoContiguous = false;
+                fprintf(stderr, "! Trying to disable contiguous mode\n");
+                contiguous = false;
                 cluster = nextCluster(cluster);
             } else {
                 cluster++;
@@ -413,8 +411,8 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f)
 
             if (cluster == 0) {
                 fprintf(stderr, "! One of your file's cluster is 0 (maybe FAT is broken, have a look to -2 and -m)\n");
-                fprintf(stderr, "! Trying to auto-enable contigous mode\n");
-                autoContiguous = true;
+                fprintf(stderr, "! Trying to enable contigous mode\n");
+                contiguous = true;
                 cluster = currentCluster+1;
             }
         }
@@ -537,28 +535,21 @@ bool FatSystem::findFile(FatPath &path, FatEntry &outputEntry)
         
 void FatSystem::readFile(FatPath &path, FILE *f)
 {
-    bool contiguousSave = contiguous;
-    contiguous = false;
     FatEntry entry;
     
     if (findFile(path, entry)) {
-        contiguous = contiguousSave;
+        bool contiguous = false;
         if (entry.isErased() && freeCluster(entry.cluster)) {
             fprintf(stderr, "! Trying to read a deleted file, auto-enabling contiguous mode\n");
             contiguous = true;
         }
-        readFile(entry.cluster, entry.size, f);
+        readFile(entry.cluster, entry.size, f, contiguous);
     }
 }
         
 void FatSystem::setListDeleted(bool listDeleted_)
 {
     listDeleted = listDeleted_;
-}
-        
-void FatSystem::setContiguous(bool contiguous_)
-{
-    contiguous = contiguous_;
 }
         
 void FatSystem::extractEntry(FatEntry &entry, string directory)
@@ -587,14 +578,13 @@ void FatSystem::extractEntry(FatEntry &entry, string directory)
                 cout << "Extracting " << fullname << endl;
                 FILE *output = fopen(fullname.c_str(), "w+");
                 if (output != NULL) {
-                    bool contiguousSave = contiguous;
+                    bool contiguous = false;
                     if (entry.isErased() && freeCluster(entry.cluster)) {
                         fprintf(stderr, "! Trying to read a deleted file, auto-enabling contiguous mode\n");
                         contiguous = true;
                     }
                     readFile(entry.cluster, entry.size, output);
                     fclose(output);
-                    contiguous = contiguousSave;
                 } else {
                     fprintf(stderr, "! Unable to open %s\n", fullname.c_str());
                 }

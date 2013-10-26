@@ -176,7 +176,7 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
 
                     if (saveEntries) {
                         orphanEntries[myCluster].push_back(entry);
-                        clusterToEntry[entry.cluster] = entry;
+                        clusterToEntry[cluster] = entry;
                     }
                 }
                 // cout << "Unorphaning " << cluster << " from " << myCluster << endl;
@@ -187,17 +187,26 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
                 }
             }
         } else {
-            if (entry.getFilename() == "..") {
+            // Creating the entry
+            if (entry.getFilename() != ".") {
                 chains[cluster].startCluster = cluster;
                 chains[cluster].endCluster = cluster;
                 chains[cluster].elements = 1;
-                chains[cluster].orphaned = true;
-                foundNew = true;
-            }
+                chains[cluster].orphaned = (entry.getFilename() != "..");
+
+                if (!chains[cluster].orphaned) {
+                    if (saveEntries) {
+                        orphanEntries[myCluster].push_back(entry);
+                        clusterToEntry[cluster] = entry;
+                    }
+                } else {
+                    foundNew = true;
+                }
+            } 
         }
 
         if (entry.isDirectory() && entry.getFilename() != "..") {
-            recursiveExploration(chains, visited, cluster, false);
+            recursiveExploration(chains, visited, cluster, force);
         }
         
         if (wasOrphaned) {

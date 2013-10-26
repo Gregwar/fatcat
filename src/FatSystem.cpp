@@ -377,12 +377,13 @@ void FatSystem::list(vector<FatEntry> &entries)
 
 void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f)
 {
-    bool warning = false;
+    bool autoContiguous = contiguous;
     if (f == NULL) {
         f = stdout;
     }
 
     while ((size!=0) && cluster!=FAT_LAST) {
+        int currentCluster = cluster;
         int toRead = size;
         if (toRead > bytesPerCluster || size < 0) {
             toRead = bytesPerCluster;
@@ -398,18 +399,24 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f)
         fwrite(buffer, toRead, 1, f);
         fflush(f);
 
-        if (contiguous) {
-            if (!warning && !freeCluster(cluster)) {
-                warning = true;
-                fprintf(stderr, "! Warning: contiguous file contains cluster that seems allocated");
+        if (autoContiguous) {
+            if (!freeCluster(cluster)) {
+                fprintf(stderr, "! Contiguous file contains cluster that seems allocated\n");
+                fprintf(stderr, "! Trying to auto-disable contiguous mode\n");
+                autoContiguous = false;
+                cluster = nextCluster(cluster);
+            } else {
+                cluster++;
             }
-            cluster++;
         } else {
-            cluster = nextCluster(cluster);
-        }
+            cluster = nextCluster(currentCluster);
 
-        if (cluster == 0) {
-            fprintf(stderr, "! One of your file's cluster is 0 (maybe FAT is broken, have a look to -2 and -m)\n");
+            if (cluster == 0) {
+                fprintf(stderr, "! One of your file's cluster is 0 (maybe FAT is broken, have a look to -2 and -m)\n");
+                fprintf(stderr, "! Trying to auto-enable contigous mode\n");
+                autoContiguous = true;
+                cluster = currentCluster+1;
+            }
         }
     }
 }

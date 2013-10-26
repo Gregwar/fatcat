@@ -278,7 +278,8 @@ int main(int argc, char *argv[])
                 cout << "Next cluster:" << endl;
                 printf("FAT1: %u (%08x)\n", next1, next1);
                 printf("FAT2: %u (%08x)\n", next2, next2);
-                printf("Chain size: %d\n", fat.chainSize(cluster));
+                unsigned long long size = fat.chainSize(cluster);
+                printf("Chain size: %llu (%llu / %s)\n", size, size*fat.bytesPerCluster, prettySize(size*fat.bytesPerCluster).c_str());
             } else if (chains) {
                 FatChains chains(fat);
                 chains.chainsAnalysis();

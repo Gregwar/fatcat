@@ -1,4 +1,5 @@
 #include <map>
+#include <list>
 #include <stdio.h>
 #include <set>
 #include <vector>
@@ -9,6 +10,11 @@
 #include "utils.h"
 
 using namespace std;
+
+bool compare_size(FatChain &A, FatChain &B)
+{
+    return A.size > B.size;
+}
         
 FatChains::FatChains(FatSystem &system)
     : FatModule(system),
@@ -38,7 +44,7 @@ void FatChains::chainsAnalysis()
    
     map<int, FatChain>::iterator it;
     int orphaned = 0;
-    vector<FatChain> orphanedChains;
+    list<FatChain> orphanedChains;
     for (it=chains.begin(); it!=chains.end(); it++) {
         FatChain &chain = it->second;
 
@@ -47,15 +53,19 @@ void FatChains::chainsAnalysis()
         }
 
         if (chain.orphaned) {
+            if (!chain.directory) {
+                chain.size = chain.length*system.bytesPerCluster;
+            }
             orphaned++;
             orphanedChains.push_back(chain);
         }
     }
 
     if (orphaned) {
+        orphanedChains.sort(compare_size);
         unsigned long long totalSize = 0;
         cout << "There is " << orphaned << " orphaned elements:" << endl;
-        vector<FatChain>::iterator vit;
+        list<FatChain>::iterator vit;
 
         for (vit=orphanedChains.begin(); vit!=orphanedChains.end(); vit++) {
             FatChain &chain = (*vit);
@@ -68,12 +78,12 @@ void FatChains::chainsAnalysis()
             cout << "clusters " << chain.startCluster << " to " << chain.endCluster;
 
             if (chain.directory) {
-                cout << ": " << chain.elements << " elements, " << prettySize(chain.size);
-                totalSize += chain.size;
+                cout << ": " << chain.elements << " elements, ";
             } else {
-                cout << ": ~" << prettySize(chain.length*system.bytesPerCluster);
-                totalSize += chain.length*system.bytesPerCluster;
+                cout << ": ~";
             }
+            cout << prettySize(chain.size);
+            totalSize += chain.size;
             cout << endl;
         }
         cout << endl;
@@ -109,7 +119,7 @@ void FatChains::exploreChains(map<int, FatChain> &chains, set<int> &visited)
             FatChain &chain = it->second;
 
             if (chain.orphaned) {
-                cout << "Trying " << chain.startCluster << endl;
+                // cout << "Trying " << chain.startCluster << endl;
                 vector<FatEntry> entries = system.getEntries(chain.startCluster);
                 if (entries.size()) {
                     chain.directory = true;
@@ -169,7 +179,7 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
                         clusterToEntry[entry.cluster] = entry;
                     }
                 }
-                cout << "Unorphaning " << cluster << " from " << myCluster << endl;
+                // cout << "Unorphaning " << cluster << " from " << myCluster << endl;
                 chains[cluster].orphaned = false;
 
                 if (!entry.isDirectory()) {

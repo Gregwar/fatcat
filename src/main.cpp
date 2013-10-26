@@ -278,8 +278,14 @@ int main(int argc, char *argv[])
                 cout << "Next cluster:" << endl;
                 printf("FAT1: %u (%08x)\n", next1, next1);
                 printf("FAT2: %u (%08x)\n", next2, next2);
-                unsigned long long size = fat.chainSize(cluster);
+                bool isContiguous = false;
+                unsigned long long size = fat.chainSize(cluster, &isContiguous);
                 printf("Chain size: %llu (%llu / %s)\n", size, size*fat.bytesPerCluster, prettySize(size*fat.bytesPerCluster).c_str());
+                if (isContiguous) {
+                    printf("Chain is contiguous\n");
+                } else {
+                    printf("Chain is not contiguous\n");
+                }
             } else if (chains) {
                 FatChains chains(fat);
                 chains.chainsAnalysis();

@@ -183,7 +183,7 @@ class FatSystem
         /**
          * Return a chain size
          */
-        int chainSize(int cluster);
+        int chainSize(int cluster, bool *isContiguous = NULL);
     
     protected:
         void parseHeader();

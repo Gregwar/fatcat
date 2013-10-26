@@ -188,21 +188,25 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
             }
         } else {
             // Creating the entry
-            if (entry.getFilename() != ".") {
+            if (force && entry.getFilename() != ".") {
                 chains[cluster].startCluster = cluster;
                 chains[cluster].endCluster = cluster;
+                chains[cluster].directory = entry.isDirectory();
                 chains[cluster].elements = 1;
-                chains[cluster].orphaned = (entry.getFilename() != "..");
+                chains[cluster].orphaned = (entry.getFilename() == "..");
+
+                cout << "Discovering new directory " << entry.getFilename() << " " << cluster << " from " << myCluster << endl;
 
                 if (!chains[cluster].orphaned) {
+                    wasOrphaned = true;
                     if (saveEntries) {
                         orphanEntries[myCluster].push_back(entry);
                         clusterToEntry[cluster] = entry;
                     }
-                } else {
-                    foundNew = true;
                 }
-            } 
+                    
+                foundNew = true;
+            }
         }
 
         if (entry.isDirectory() && entry.getFilename() != "..") {

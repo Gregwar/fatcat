@@ -195,7 +195,7 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
                 chains[cluster].elements = 1;
                 chains[cluster].orphaned = (entry.getFilename() == "..");
 
-                cout << "Discovering new directory " << entry.getFilename() << " " << cluster << " from " << myCluster << endl;
+                // cout << "Discovering new directory " << entry.getFilename() << " " << cluster << " from " << myCluster << endl;
 
                 if (!chains[cluster].orphaned) {
                     wasOrphaned = true;

@@ -265,6 +265,13 @@ Merge complete, 1 clusters merged
 
 See also: [fixing fat tutorial](docs/fat.md)
 
+### Directories fixing
+
+Fatcat can fix directories having broken FAT chaining.
+
+To do this, use `-D`. All the filesystem tree will be walked and the directories
+that are unallocated in the FAT but that fatcat can read will be fixed in the FAT.
+
 ### Entries hacking
 
 You can have information about an entry with `-e`:
@@ -280,6 +287,8 @@ You can add the flag `-c [cluster]` to change the cluster of the entry and the f
 `-s [size]` to change the entry size.
 
 See also: [fun with fat tutorial](docs/fun-with-fat.md)
+
+You can use `-k` to search for a cluster reference.
 
 ### Erasing unallocated files
 

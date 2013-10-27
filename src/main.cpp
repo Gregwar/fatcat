@@ -50,6 +50,7 @@ void usage()
     cout << "  -e [path]: sets the entry to hack, combined with:" << endl;
     cout << "* -c [cluster]: sets the entry cluster" << endl;
     cout << "* -s [cluster]: sets the entry size" << endl;
+    cout << "  -k [cluster]: try to find an entry that point to that cluster" << endl;
 
     cout << endl;
     cout << "*: These flags writes on the disk, and may damage it, be careful" << endl;
@@ -134,9 +135,16 @@ int main(int argc, char *argv[])
     bool clusterProvided = false;
     bool sizeProvided = false;
 
+    // -k: entry finder
+    bool findEntry = false;
+
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:f:Sze:O:D")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:f:Sze:O:Dk:")) != -1) {
         switch (index) {
+            case 'k':
+                findEntry = true;
+                cluster = atoi(optarg);
+                break;
             case 'D':
                 fixReachable = true;
                 break;
@@ -246,7 +254,7 @@ int main(int argc, char *argv[])
     if (!(infoFlag || listFlag || listClusterFlag || 
         readFlag || clusterRead || extract || compare || address ||
         chains || backup || patch || writeNext || merge ||
-        scramble || zero || entry || fixReachable)) {
+        scramble || zero || entry || fixReachable || findEntry)) {
         usage();
     }
 
@@ -299,6 +307,9 @@ int main(int argc, char *argv[])
             } else if (fixReachable) {
                 FatChains chains(fat);
                 chains.fixReachable();
+            } else if (findEntry) {
+                FatChains chains(fat);
+                chains.findEntry(cluster);
             } else if (backup || patch) {
                 FatBackup backupSystem(fat);
                 

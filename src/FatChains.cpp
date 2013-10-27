@@ -36,6 +36,7 @@ void FatChains::chainsAnalysis()
     set<int> visited;
     saveEntries = false;
     recursiveExploration(chains, visited, system.rootDirectory, false);
+    visited.insert(0);
     cout << endl;
 
     cout << "Having a look at the chains..." << endl;
@@ -282,7 +283,7 @@ void FatChains::fixReachable()
     set<int> visited;
     cout << "Running an exploration of damaged directories..." << endl;
     system.enableWrite();
-    fixReachable(visited, system.rootDirectory, "");
+    fixReachable(visited, system.rootDirectory, "/");
 }
 
 void FatChains::fixReachable(set<int> &visited, int cluster, string name)
@@ -290,6 +291,7 @@ void FatChains::fixReachable(set<int> &visited, int cluster, string name)
     if (visited.find(cluster) != visited.end()) {
         return;
     }
+    visited.insert(cluster);
 
     bool broken = false;
     if (system.freeCluster(cluster)) {
@@ -297,7 +299,6 @@ void FatChains::fixReachable(set<int> &visited, int cluster, string name)
     }
 
     int size;
-    visited.insert(cluster);
     vector<FatEntry> entries = system.getEntries(cluster, &size);
     vector<FatEntry>::iterator it;
 
@@ -347,3 +348,42 @@ void FatChains::fixReachable(set<int> &visited, int cluster, string name)
     }
 }
 
+void FatChains::findEntry(int cluster)
+{
+    set<int> visited;
+    cout << "Searching for an entry referencing " << cluster << " ..." << endl;
+    findEntry(visited, system.rootDirectory, cluster);
+}
+
+void FatChains::findEntry(set<int> &visited, int cluster, int search, string name)
+{
+    if (visited.find(cluster) != visited.end()) {
+        return;
+    }
+    visited.insert(cluster);
+
+    vector<FatEntry> entries = system.getEntries(cluster);
+    vector<FatEntry>::iterator it;
+
+    for (it=entries.begin(); it!=entries.end(); it++) {
+        FatEntry &entry = *it;
+
+        if (entry.isErased()) {
+            continue;
+        }
+
+        if (entry.cluster == search) {
+            cout << "Found in " << name << " (" << cluster << ") :" << endl;
+            vector<FatEntry> tmp;
+            tmp.push_back(entry);
+            system.list(tmp);
+        }
+
+        if (entry.getFilename() != "." && entry.getFilename() != "..") {
+            if (entry.isDirectory()) {
+                string subname = name + "/" + entry.getFilename();
+                findEntry(visited, entry.cluster, search, subname);
+            }
+        }
+    }
+}

@@ -88,5 +88,9 @@ bool FatEntry::isCorrect()
         }
     }
 
+    if (cluster == 0 && getFilename()!="..") {
+        return false;
+    }
+
     return true;
 }

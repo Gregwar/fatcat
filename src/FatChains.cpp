@@ -303,11 +303,6 @@ void FatChains::fixReachable(set<int> &visited, int cluster, string name)
     vector<FatEntry>::iterator it;
 
     if (entries.size()) {
-        if (broken) {
-            cout << "Directory " << name << " (" << cluster << ") seems broken, trying to repair FAT..." << endl;
-            fixChain(cluster, size);
-        }
-
         for (it=entries.begin(); it!=entries.end(); it++) {
             FatEntry &entry = *it;
 
@@ -326,6 +321,11 @@ void FatChains::fixReachable(set<int> &visited, int cluster, string name)
                     }
                 }
             }
+        }
+
+        if (broken) {
+            cout << "Directory " << name << " (" << cluster << ") seems broken, trying to repair FAT..." << endl;
+            fixChain(cluster, size);
         }
     }
 }

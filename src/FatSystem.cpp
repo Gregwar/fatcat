@@ -178,7 +178,7 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 
     readData(fatStart+fatSize*fat+4*cluster, buffer, sizeof(buffer));
 
-    unsigned int next = FAT_READ_LONG(buffer, 0);
+    unsigned int next = FAT_READ_LONG(buffer, 0)&0x0fffffff;
 
     if (next >= 0x0ffffff0) {
         return FAT_LAST;

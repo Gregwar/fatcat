@@ -280,6 +280,7 @@ map<int, FatChain> FatChains::findChains()
 void FatChains::fixReachable()
 {
     set<int> visited;
+    cout << "Running an exploration of damaged directories..." << endl;
     system.enableWrite();
     fixReachable(visited, system.rootDirectory, "");
 }
@@ -292,7 +293,6 @@ void FatChains::fixReachable(set<int> &visited, int cluster, string name)
 
     bool broken = false;
     if (system.freeCluster(cluster)) {
-        cout << "Directory " << name << " seems broken, trying to repair FAT..." << endl;
         broken = true;
     }
 
@@ -303,21 +303,39 @@ void FatChains::fixReachable(set<int> &visited, int cluster, string name)
 
     if (entries.size()) {
         if (broken) {
+            cout << "Directory " << name << " (" << cluster << ") seems broken, trying to repair FAT..." << endl;
+            bool fixIt = true;
+
             cout << "Read " << entries.size() << " entries, fixing the FAT (" << size << " entries)" << endl;
 
             for (int i=0; i<size; i++) {
-                if (system.freeCluster(cluster+i)) {
-                    if (i == size-1) {
-                        system.writeNextCluster(cluster+i, FAT_LAST);
-                    } else {
-                        system.writeNextCluster(cluster+i, cluster+i+1);
+                if (!system.freeCluster(cluster+i)) {
+                    fixIt = false;
+                }
+            }
+
+            if (fixIt) {
+                cout << "Clusters are free, fixing" << endl;
+                for (int i=0; i<size; i++) {
+                    if (system.freeCluster(cluster+i)) {
+                        if (i == size-1) {
+                            system.writeNextCluster(cluster+i, FAT_LAST);
+                        } else {
+                            system.writeNextCluster(cluster+i, cluster+i+1);
+                        }
                     }
                 }
+            } else {
+                cout << "There is allocated clusters in the list, not fixing" << endl;
             }
         }
 
         for (it=entries.begin(); it!=entries.end(); it++) {
             FatEntry &entry = *it;
+
+            if (entry.isErased()) {
+                continue;
+            }
 
             if (entry.getFilename() != "." && entry.getFilename() != "..") {
                 if (entry.isDirectory()) {
@@ -326,8 +344,6 @@ void FatChains::fixReachable(set<int> &visited, int cluster, string name)
                 }
             }
         }
-    } else {
-        cout << "Unable to read it" << endl;
     }
 }
 

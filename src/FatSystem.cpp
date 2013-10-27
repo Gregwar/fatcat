@@ -216,8 +216,9 @@ unsigned long long FatSystem::clusterAddress(unsigned int cluster)
     return (dataStart + bytesPerSector*sectorsPerCluster*(cluster-2));
 }
 
-vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters)
+vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool *hasFree)
 {
+    bool contiguous = false;
     int foundEntries = 0;
     int badEntries = 0;
     bool isValid = false;
@@ -227,6 +228,10 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters)
 
     if (clusters != NULL) {
         *clusters = 0;
+    }
+
+    if (hasFree != NULL) {
+        *hasFree = false;
     }
 
     if (cluster == 0) {
@@ -246,6 +251,10 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters)
         int localBadEntries = 0;
         unsigned long long address = clusterAddress(cluster);
         char buffer[FAT_ENTRY_SIZE];
+        if (visited.find(cluster) != visited.end()) {
+            cerr << "! Looping directory" << endl;
+            break;
+        }
         visited.insert(cluster);
 
         unsigned int i;
@@ -291,14 +300,15 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters)
         }
 
         int previousCluster = cluster;
+
         cluster = nextCluster(cluster);
 
-        if (visited.find(cluster) != visited.end()) {
-            cerr << "! Looping directory" << endl;
-            break;
-        }
+        if (cluster == 0 || contiguous) {
+            contiguous = true;
 
-        if (cluster == 0) {
+            if (hasFree != NULL) {
+                *hasFree = true;
+            }
             if (localFound && localBadEntries<localFound) {
                 cluster = previousCluster+1;
             } else {
@@ -333,8 +343,12 @@ void FatSystem::list(FatPath &path)
 
 void FatSystem::list(unsigned int cluster)
 {
-    vector<FatEntry> entries = getEntries(cluster);
+    bool hasFree = false;
+    vector<FatEntry> entries = getEntries(cluster, NULL, &hasFree);
     printf("Directory cluster: %u\n", cluster);
+    if (hasFree) {
+        printf("Warning: this directory has free clusters that was read contiguously\n");
+    }
     list(entries);
 }
             

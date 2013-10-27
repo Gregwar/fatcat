@@ -305,30 +305,7 @@ void FatChains::fixReachable(set<int> &visited, int cluster, string name)
     if (entries.size()) {
         if (broken) {
             cout << "Directory " << name << " (" << cluster << ") seems broken, trying to repair FAT..." << endl;
-            bool fixIt = true;
-
-            cout << "Read " << entries.size() << " entries, fixing the FAT (" << size << " entries)" << endl;
-
-            for (int i=0; i<size; i++) {
-                if (!system.freeCluster(cluster+i)) {
-                    fixIt = false;
-                }
-            }
-
-            if (fixIt) {
-                cout << "Clusters are free, fixing" << endl;
-                for (int i=0; i<size; i++) {
-                    if (system.freeCluster(cluster+i)) {
-                        if (i == size-1) {
-                            system.writeNextCluster(cluster+i, FAT_LAST);
-                        } else {
-                            system.writeNextCluster(cluster+i, cluster+i+1);
-                        }
-                    }
-                }
-            } else {
-                cout << "There is allocated clusters in the list, not fixing" << endl;
-            }
+            fixChain(cluster, size);
         }
 
         for (it=entries.begin(); it!=entries.end(); it++) {
@@ -342,6 +319,11 @@ void FatChains::fixReachable(set<int> &visited, int cluster, string name)
                 if (entry.isDirectory()) {
                     string subname = name + "/" + entry.getFilename();
                     fixReachable(visited, entry.cluster, subname);
+                } else {
+                    if (system.freeCluster(entry.cluster)) {
+                        cout << "File " << name << "/" << entry.getFilename() << " seems broken" << endl;
+                        fixChain(entry.cluster, entry.size/system.bytesPerCluster+1);
+                    }
                 }
             }
         }
@@ -385,5 +367,33 @@ void FatChains::findEntry(set<int> &visited, int cluster, int search, string nam
                 findEntry(visited, entry.cluster, search, subname);
             }
         }
+    }
+}
+        
+void FatChains::fixChain(int cluster, int size)
+{
+    bool fixIt = true;
+
+    cout << "Fixing the FAT (" << size << " clusters)" << endl;
+
+    for (int i=0; i<size; i++) {
+        if (!system.freeCluster(cluster+i)) {
+            fixIt = false;
+        }
+    }
+
+    if (fixIt) {
+        cout << "Clusters are free, fixing" << endl;
+        for (int i=0; i<size; i++) {
+            if (system.freeCluster(cluster+i)) {
+                if (i == size-1) {
+                    system.writeNextCluster(cluster+i, FAT_LAST);
+                } else {
+                    system.writeNextCluster(cluster+i, cluster+i+1);
+                }
+            }
+        }
+    } else {
+        cout << "There is allocated clusters in the list, not fixing" << endl;
     }
 }

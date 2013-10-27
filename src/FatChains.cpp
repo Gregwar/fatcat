@@ -276,3 +276,58 @@ map<int, FatChain> FatChains::findChains()
 
     return chainsByStart;
 }
+
+void FatChains::fixReachable()
+{
+    set<int> visited;
+    system.enableWrite();
+    fixReachable(visited, system.rootDirectory, "");
+}
+
+void FatChains::fixReachable(set<int> &visited, int cluster, string name)
+{
+    if (visited.find(cluster) != visited.end()) {
+        return;
+    }
+
+    bool broken = false;
+    if (system.freeCluster(cluster)) {
+        cout << "Directory " << name << " seems broken, trying to repair FAT..." << endl;
+        broken = true;
+    }
+
+    int size;
+    visited.insert(cluster);
+    vector<FatEntry> entries = system.getEntries(cluster, &size);
+    vector<FatEntry>::iterator it;
+
+    if (entries.size()) {
+        if (broken) {
+            cout << "Read " << entries.size() << " entries, fixing the FAT (" << size << " entries)" << endl;
+
+            for (int i=0; i<size; i++) {
+                if (system.freeCluster(cluster+i)) {
+                    if (i == size-1) {
+                        system.writeNextCluster(cluster+i, FAT_LAST);
+                    } else {
+                        system.writeNextCluster(cluster+i, cluster+i+1);
+                    }
+                }
+            }
+        }
+
+        for (it=entries.begin(); it!=entries.end(); it++) {
+            FatEntry &entry = *it;
+
+            if (entry.getFilename() != "." && entry.getFilename() != "..") {
+                if (entry.isDirectory()) {
+                    string subname = name + "/" + entry.getFilename();
+                    fixReachable(visited, entry.cluster, subname);
+                }
+            }
+        }
+    } else {
+        cout << "Unable to read it" << endl;
+    }
+}
+

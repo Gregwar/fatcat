@@ -44,6 +44,7 @@ void usage()
     cout << "  -t [table]: specify which table to write (0:both, 1:first, 2:second)" << endl;
     cout << "* -m: merge the FATs" << endl;
     cout << "  -o: search for orphan files and directories" << endl;
+    cout << "* -D: try to fix reachable directories" << endl;
     cout << endl;
     cout << "Entries hacking" << endl;
     cout << "  -e [path]: sets the entry to hack, combined with:" << endl;
@@ -124,6 +125,9 @@ int main(int argc, char *argv[])
     bool scramble = false;
     bool zero = false;
 
+    // -D: fix reachable
+    bool fixReachable = false;
+
     // -e: entry hacking
     bool entry = false;
     string entryPath;
@@ -131,8 +135,11 @@ int main(int argc, char *argv[])
     bool sizeProvided = false;
 
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:f:Sze:O:")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:f:Sze:O:D")) != -1) {
         switch (index) {
+            case 'D':
+                fixReachable = true;
+                break;
             case 'O':
                 globalOffset = atoll(optarg);
                 break;
@@ -239,7 +246,7 @@ int main(int argc, char *argv[])
     if (!(infoFlag || listFlag || listClusterFlag || 
         readFlag || clusterRead || extract || compare || address ||
         chains || backup || patch || writeNext || merge ||
-        scramble || zero || entry)) {
+        scramble || zero || entry || fixReachable)) {
         usage();
     }
 
@@ -289,6 +296,9 @@ int main(int argc, char *argv[])
             } else if (chains) {
                 FatChains chains(fat);
                 chains.chainsAnalysis();
+            } else if (fixReachable) {
+                FatChains chains(fat);
+                chains.fixReachable();
             } else if (backup || patch) {
                 FatBackup backupSystem(fat);
                 

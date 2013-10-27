@@ -216,7 +216,7 @@ unsigned long long FatSystem::clusterAddress(unsigned int cluster)
     return (dataStart + bytesPerSector*sectorsPerCluster*(cluster-2));
 }
 
-vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
+vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters)
 {
     int foundEntries = 0;
     int badEntries = 0;
@@ -224,6 +224,10 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
     set<unsigned int> visited;
     vector<FatEntry> entries;
     FatFilename filename;
+
+    if (clusters != NULL) {
+        *clusters = 0;
+    }
 
     if (cluster == 0) {
         cluster = rootDirectory;
@@ -307,6 +311,10 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster)
                 cerr << "! Entries don't look good, this is maybe not a directory" << endl;
                 return vector<FatEntry>();
           }
+        }
+        
+        if (clusters) {
+            (*clusters)++;
         }
 
     } while (cluster != FAT_LAST);

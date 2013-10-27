@@ -166,7 +166,7 @@ class FatSystem
         /**
          * Get directory entries for a given cluster
          */
-        vector<FatEntry> getEntries(unsigned int cluster);
+        vector<FatEntry> getEntries(unsigned int cluster, int *clusters = NULL);
 
         /**
          * Write random data in unallocated sectors

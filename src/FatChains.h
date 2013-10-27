@@ -3,6 +3,7 @@
 
 #include <set>
 #include <map>
+#include <string>
 #include <vector>
 #include <iostream>
 #include "FatSystem.h"
@@ -37,6 +38,12 @@ class FatChains : public FatModule
          * Explore the chains
          */
         void exploreChains(map<int, FatChain> &chains, set<int> &visited);
+
+        /**
+         * Fix reachable directories
+         */
+        void fixReachable();
+        void fixReachable(set<int> &visited, int cluster, string name);
 
     protected:
         bool saveEntries;

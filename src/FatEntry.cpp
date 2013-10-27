@@ -88,7 +88,7 @@ bool FatEntry::isCorrect()
         }
     }
 
-    if (cluster == 0 && getFilename()!="..") {
+    if (isDirectory() && cluster == 0 && getFilename()!="..") {
         return false;
     }
 

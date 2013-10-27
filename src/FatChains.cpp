@@ -29,6 +29,13 @@ void FatChains::chainsAnalysis()
     cout << "Building the chains..." << endl;
     map<int, FatChain> chains = findChains();
 
+    /*
+    map<int, FatChain>::iterator mit;
+    for (mit=chains.begin(); mit!=chains.end(); mit++) {
+        cout << mit->first << endl;
+    } 
+    */
+
     cout << "Found " << chains.size() << " chains" << endl;
     cout << endl;
 

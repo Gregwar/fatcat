@@ -29,3 +29,8 @@ You can find prebuilt images in `images/` directory:
   so that your system may behaves like you have a 1T disk, even if it's smaller.
   You can read & write files on it until you'll reach the actual size of your
   disk.
+* `repair.img`: an image that you can repair to test the fatcat options. it contains
+  a directory that is unallocated in FAT1 (can be merged with FAT2 using -m), a directory that
+  is unallocated (can be fixed with -f), and an orphan directory (can be found using -o,
+  see [orphaned tutorial](orphan.md))
+

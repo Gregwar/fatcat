@@ -5,6 +5,11 @@ Back to [documentation index](index.md)
 This guide try to describe the steps you can follow to try to fix a FAT32
 filesystem that is damaged.
 
+Note: you can try all this with the image `repair.img`, this image contains:
+* A directory that is just unallocated in FAT1 (can be fixed with -m)
+* A directory that is fully unallocated (can be fixed with -f)
+* An orphan directory (can be found with -o)
+
 ## Step 1: Backup everything!
 
 First, you should backup your disk using `ddrescue` or another thing. You

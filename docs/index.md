@@ -32,5 +32,5 @@ You can find prebuilt images in `images/` directory:
 * `repair.img`: an image that you can repair to test the fatcat options. it contains
   a directory that is unallocated in FAT1 (can be merged with FAT2 using -m), a directory that
   is unallocated (can be fixed with -f), and an orphan directory (can be found using -o,
-  see [orphaned tutorial](orphan.md))
+  see [orphaned tutorial](orphan.md)). Have a look to the [repair guide](repair.md).
 

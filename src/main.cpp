@@ -30,8 +30,7 @@ void usage()
     cout << "  -s [size]: specify the size of data to read from the cluster" << endl;
     cout << "  -d: enable listing of deleted files" << endl;
     cout << "  -x [directory]: extract all files to a directory, deleted files included if -d" << endl;
-    cout << "                  will start with rootDirectory, unless -f is provided" << endl;
-    cout << "  -f [cluster]: define the cluster starting point for the extraction" << endl;
+    cout << "                  will start with rootDirectory, unless -c is provided" << endl;
     cout << "* -S: write scamble data in unallocated sectors" << endl;
     cout << "* -z: write scamble data in unallocated sectors" << endl;
     cout << endl;
@@ -126,7 +125,7 @@ int main(int argc, char *argv[])
     bool scramble = false;
     bool zero = false;
 
-    // -D: fix reachable
+    // -f: fix reachable
     bool fixReachable = false;
 
     // -e: entry hacking
@@ -139,13 +138,13 @@ int main(int argc, char *argv[])
     bool findEntry = false;
 
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:f:Sze:O:Dk:")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:Sze:O:fk:")) != -1) {
         switch (index) {
             case 'k':
                 findEntry = true;
                 cluster = atoi(optarg);
                 break;
-            case 'D':
+            case 'f':
                 fixReachable = true;
                 break;
             case 'O':
@@ -170,9 +169,6 @@ int main(int argc, char *argv[])
             case 'v':
                 hasValue = true;
                 value = ATOU(optarg);
-                break;
-            case 'f':
-                cluster = ATOU(optarg);
                 break;
             case 'w':
                 writeNext = true;

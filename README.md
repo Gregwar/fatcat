@@ -269,7 +269,7 @@ See also: [fixing fat tutorial](docs/fat.md)
 
 Fatcat can fix directories having broken FAT chaining.
 
-To do this, use `-D`. All the filesystem tree will be walked and the directories
+To do this, use `-f`. All the filesystem tree will be walked and the directories
 that are unallocated in the FAT but that fatcat can read will be fixed in the FAT.
 
 ### Entries hacking

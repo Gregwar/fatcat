@@ -4,6 +4,7 @@ Here is a documentation that will inform you about FAT32 filesystems,
 and explain how you can use the `fatcat` tool to forensic, repair,
 undelete and hack FAT32:
 
+* [FAT32 repair guide](repair.md)
 * [Use fatcat with a partitionned disk](partition.md)
 * [Undelete tutorial: how to revive deleted files](undelete.md)
 * [FAT table tutorial: how to fix damaged table](fat.md)

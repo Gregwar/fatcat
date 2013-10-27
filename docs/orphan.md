@@ -142,10 +142,10 @@ And you get back the orphan directory! You can even read the file, using `-R`:
 Hello world
 ```
 
-Or extract the orphan directory, using `-x` and `-f`:
+Or extract the orphan directory, using `-x` and `-c`:
 
 ```
-# fatcat disk.img -x . -f 3
+# fatcat disk.img -x . -c 3
 Extracting ./orphan.txt
 # cat orphan.txt 
 Hello world

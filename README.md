@@ -95,7 +95,7 @@ You can use `-x` to extract the FAT32 system to a directory:
 fatcat disk.img -x output/
 ```
 
-If you want to extract from a certain cluster, provide it with `-f`.
+If you want to extract from a certain cluster, provide it with `-c`.
 
 If you provide `-d` to extract, deleted files will be extracted too.
 
@@ -123,7 +123,7 @@ To retrieve a deleted directory, note its cluster number and extract it like abo
 
 ```
 # If your deleted directory cluster is 71829
-fatcat disk.img -x output/ -f 71829
+fatcat disk.img -x output/ -c 71829
 ```
 
 See also: [undelete tutorial](docs/undelete.md)

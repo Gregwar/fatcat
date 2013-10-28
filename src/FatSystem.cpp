@@ -294,6 +294,8 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
                         localBadEntries++;
                         badEntries++;
                     }
+
+                    localZero = false;
                 } else {
                     localZero = true;
                 }

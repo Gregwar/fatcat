@@ -247,6 +247,7 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
     }
 
     do {
+        bool localZero = false;
         int localFound = 0;
         int localBadEntries = 0;
         unsigned long long address = clusterAddress(cluster);
@@ -293,6 +294,8 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
                         localBadEntries++;
                         badEntries++;
                     }
+                } else {
+                    localZero = true;
                 }
             }
 
@@ -309,7 +312,7 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
             if (hasFree != NULL) {
                 *hasFree = true;
             }
-            if (localFound && localBadEntries<localFound) {
+            if (!localZero && localFound && localBadEntries<localFound) {
                 cluster = previousCluster+1;
             } else {
                 break;

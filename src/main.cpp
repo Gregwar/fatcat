@@ -8,6 +8,7 @@
 #include "FatChains.h"
 #include "FatBackup.h"
 #include "FatDiff.h"
+#include "FatSearch.h"
 #include "utils.h"
 
 #define ATOU(i) ((unsigned int)atoi(i))
@@ -304,8 +305,8 @@ int main(int argc, char *argv[])
                 FatChains chains(fat);
                 chains.fixReachable();
             } else if (findEntry) {
-                FatChains chains(fat);
-                chains.findEntry(cluster);
+                FatSearch search(fat);
+                search.search(cluster);
             } else if (backup || patch) {
                 FatBackup backupSystem(fat);
                 

@@ -336,46 +336,6 @@ void FatChains::fixReachable(set<int> &visited, int cluster, string name)
         }
     }
 }
-
-void FatChains::findEntry(int cluster)
-{
-    set<int> visited;
-    cout << "Searching for an entry referencing " << cluster << " ..." << endl;
-    findEntry(visited, system.rootDirectory, cluster);
-}
-
-void FatChains::findEntry(set<int> &visited, int cluster, int search, string name)
-{
-    if (visited.find(cluster) != visited.end()) {
-        return;
-    }
-    visited.insert(cluster);
-
-    vector<FatEntry> entries = system.getEntries(cluster);
-    vector<FatEntry>::iterator it;
-
-    for (it=entries.begin(); it!=entries.end(); it++) {
-        FatEntry &entry = *it;
-
-        if (entry.isErased()) {
-            continue;
-        }
-
-        if (entry.cluster == search) {
-            cout << "Found in " << name << " (" << cluster << ") :" << endl;
-            vector<FatEntry> tmp;
-            tmp.push_back(entry);
-            system.list(tmp);
-        }
-
-        if (entry.getFilename() != "." && entry.getFilename() != "..") {
-            if (entry.isDirectory()) {
-                string subname = name + "/" + entry.getFilename();
-                findEntry(visited, entry.cluster, search, subname);
-            }
-        }
-    }
-}
         
 void FatChains::fixChain(int cluster, int size)
 {

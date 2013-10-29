@@ -12,7 +12,9 @@ set(SOURCES
     FatFilename.cpp
     FatModule.cpp
     FatPath.cpp
+    FatSearch.cpp
     FatSystem.cpp
+    FatWalk.cpp
     )
 
 foreach(SOURCE ${SOURCES})

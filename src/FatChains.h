@@ -46,12 +46,6 @@ class FatChains : public FatModule
         void fixReachable(set<int> &visited, int cluster, string name);
         void fixChain(int cluster, int size);
 
-        /**
-         * Reference finder
-         */
-        void findEntry(int cluster);
-        void findEntry(set<int> &visited, int cluster, int search, string name = "/");
-
     protected:
         bool saveEntries;
         map<int, vector<FatEntry> > orphanEntries;

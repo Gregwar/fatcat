@@ -177,6 +177,11 @@ class FatSystem
          * Return a chain size
          */
         int chainSize(int cluster, bool *isContiguous = NULL);
+        
+        /**
+         * Root directory entry
+         */
+        FatEntry rootEntry();
     
     protected:
         void parseHeader();
@@ -185,11 +190,6 @@ class FatSystem
          * Extract an entry
          */
         void extractEntry(FatEntry &entry, string directory);
-
-        /**
-         * Root directory entry
-         */
-        FatEntry rootEntry();
 
         /**
          * Compute the free clusters stats

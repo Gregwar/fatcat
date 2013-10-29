@@ -43,11 +43,11 @@ void FatWalk::doWalk(set<int> &visited, FatEntry &currentEntry, string name)
 
             subname += entry.getFilename();
 
-            onEntry(currentEntry, entry, subname);
-
             if (entry.isDirectory()) {
                 doWalk(visited, entry, subname);
             }
+            
+            onEntry(currentEntry, entry, subname);
         }
     }
 }

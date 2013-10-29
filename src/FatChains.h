@@ -39,13 +39,6 @@ class FatChains : public FatModule
          */
         void exploreChains(map<int, FatChain> &chains, set<int> &visited);
 
-        /**
-         * Fix reachable directories
-         */
-        void fixReachable();
-        void fixReachable(set<int> &visited, int cluster, string name);
-        void fixChain(int cluster, int size);
-
     protected:
         bool saveEntries;
         map<int, vector<FatEntry> > orphanEntries;

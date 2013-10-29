@@ -29,5 +29,6 @@ void FatSearch::onEntry(FatEntry &parent, FatEntry &entry, string name)
         vector<FatEntry> tmp;
         tmp.push_back(entry);
         system.list(tmp);
+        found++;
     }
 }

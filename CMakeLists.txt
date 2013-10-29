@@ -10,6 +10,7 @@ set(SOURCES
     FatDiff.cpp
     FatEntry.cpp
     FatFilename.cpp
+    FatFix.cpp
     FatModule.cpp
     FatPath.cpp
     FatSearch.cpp

@@ -8,6 +8,7 @@
 #include "FatChains.h"
 #include "FatBackup.h"
 #include "FatDiff.h"
+#include "FatFix.h"
 #include "FatSearch.h"
 #include "utils.h"
 
@@ -302,8 +303,8 @@ int main(int argc, char *argv[])
                 FatChains chains(fat);
                 chains.chainsAnalysis();
             } else if (fixReachable) {
-                FatChains chains(fat);
-                chains.fixReachable();
+                FatFix fix(fat);
+                fix.fix();
             } else if (findEntry) {
                 FatSearch search(fat);
                 search.search(cluster);

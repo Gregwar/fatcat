@@ -307,6 +307,10 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
         int previousCluster = cluster;
 
         cluster = nextCluster(cluster);
+        
+        if (clusters) {
+            (*clusters)++;
+        }
 
         if (cluster == 0 || contiguous) {
             contiguous = true;
@@ -317,6 +321,9 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
             if (!localZero && localFound && localBadEntries<localFound) {
                 cluster = previousCluster+1;
             } else {
+                if (!localFound && clusters) {
+                    (*clusters)--;
+                }
                 break;
             }
         }
@@ -327,11 +334,6 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
                 return vector<FatEntry>();
           }
         }
-        
-        if (clusters) {
-            (*clusters)++;
-        }
-
     } while (cluster != FAT_LAST);
 
     return entries;

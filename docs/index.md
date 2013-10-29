@@ -17,6 +17,7 @@ You can find prebuilt images in `images/` directory:
 
 * `empty.img`: an empty FAT32 filesystem
 * `hello-world.img`: a simple image with txt files and a directory
+* `deleted.img`: an image containing a directory and a file that was both deleted
 * `directory-loop.img`: an image with looping directories
 * `infinite-file.img`: a file which is looping and with maximum FAT32 size
   (4G the image is just 50M)

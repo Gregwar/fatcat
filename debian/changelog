@@ -1,5 +1,12 @@
+fatcat (1.0.1) UNRELEASED; urgency=low
+
+  * Adding a man page
+  * Opening ITP (Closes #728125)
+
+ -- Grégoire Passault <g.passault@gmail.com>  Tue, 29 Oct 2013 12:42:41 +0100
+
 fatcat (1.0-1) UNRELEASED; urgency=low
 
   * Initial release.
 
- -- Grégoire <g.passault@gmail.com>  Mon, 28 Oct 2013 17:29:02 +0100
+ -- Grégoire Passault <g.passault@gmail.com>  Mon, 28 Oct 2013 17:29:02 +0100

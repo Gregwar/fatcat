@@ -45,7 +45,7 @@ void usage()
     cout << "  -t [table]: specify which table to write (0:both, 1:first, 2:second)" << endl;
     cout << "* -m: merge the FATs" << endl;
     cout << "  -o: search for orphan files and directories" << endl;
-    cout << "* -D: try to fix reachable directories" << endl;
+    cout << "* -f: try to fix reachable directories" << endl;
     cout << endl;
     cout << "Entries hacking" << endl;
     cout << "  -e [path]: sets the entry to hack, combined with:" << endl;

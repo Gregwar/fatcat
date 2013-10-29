@@ -1,6 +1,7 @@
 #ifndef _FATCAT_FATCHAINS_H
 #define _FATCAT_FATCHAINS_H
 
+#include <list>
 #include <set>
 #include <map>
 #include <string>
@@ -26,7 +27,7 @@ class FatChains : public FatModule
          * Recursive method to do an exploration and do the differential
          * chains analysis
          */
-        bool recursiveExploration(map<int, FatChain> &chains, set<int> &visited, int cluster, bool force, vector<FatEntry> *inputEntries=NULL);
+        bool recursiveExploration(map<int, FatChain> &chains, set<int> &visited, int cluster, vector<FatEntry> *inputEntries=NULL);
 
         /**
          * Find the chains from the FAT and return a map indexed
@@ -35,12 +36,24 @@ class FatChains : public FatModule
         map<int, FatChain> findChains();
 
         /**
-         * Explore the chains
+         * For each chain, we try to tell if it's a directory and run recursive
+         * exploration if it is
          */
         void exploreChains(map<int, FatChain> &chains, set<int> &visited);
 
+        /**
+         * Get chains that are orphaned
+         */
+        list<FatChain> getOrphaned(map<int, FatChain> &chains);
+
+        /**
+         * Display the orphaned chains
+         */
+        void displayOrphaned(list<FatChain> orphanedChains);
+
     protected:
         bool saveEntries;
+        bool exploreDamaged;
         map<int, vector<FatEntry> > orphanEntries;
         map<int, FatEntry> clusterToEntry;
 };

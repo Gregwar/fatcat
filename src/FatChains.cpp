@@ -18,7 +18,8 @@ bool compare_size(FatChain &A, FatChain &B)
         
 FatChains::FatChains(FatSystem &system)
     : FatModule(system),
-    saveEntries(false)
+    saveEntries(false),
+    exploreDamaged(false)
 {
 }
 
@@ -42,7 +43,8 @@ void FatChains::chainsAnalysis()
     cout << "Running the recursive differential analysis..." << endl;
     set<int> visited;
     saveEntries = false;
-    recursiveExploration(chains, visited, system.rootDirectory, false);
+    exploreDamaged = false;
+    recursiveExploration(chains, visited, system.rootDirectory);
     visited.insert(0);
     cout << endl;
 
@@ -50,77 +52,16 @@ void FatChains::chainsAnalysis()
     saveEntries = true;
     exploreChains(chains, visited);
    
-    map<int, FatChain>::iterator it;
-    int orphaned = 0;
-    list<FatChain> orphanedChains;
-    for (it=chains.begin(); it!=chains.end(); it++) {
-        FatChain &chain = it->second;
-
-        if (chain.startCluster == 0) {
-            chain.orphaned = false;
-        }
-
-        if (chain.orphaned) {
-            if (!chain.directory) {
-                chain.size = chain.length*system.bytesPerCluster;
-            }
-            orphaned++;
-            orphanedChains.push_back(chain);
-        }
-    }
-
-    if (orphaned) {
-        orphanedChains.sort(compare_size);
-        unsigned long long totalSize = 0;
-        cout << "There is " << orphaned << " orphaned elements:" << endl;
-        list<FatChain>::iterator vit;
-
-        for (vit=orphanedChains.begin(); vit!=orphanedChains.end(); vit++) {
-            FatChain &chain = (*vit);
-            if (chain.directory) {
-                cout << "* Directory ";
-            } else {
-                cout << "* File ";
-            }
-
-            cout << "clusters " << chain.startCluster << " to " << chain.endCluster;
-
-            if (chain.directory) {
-                cout << ": " << chain.elements << " elements, ";
-            } else {
-                cout << ": ~";
-            }
-            cout << prettySize(chain.size);
-            totalSize += chain.size;
-            cout << endl;
-        }
-        cout << endl;
-        cout << "Estimation of orphan files total sizes: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
-        cout << endl;
-        if (orphanEntries.size()) {
-            map<int, vector<FatEntry> >::iterator mit;
-            cout << "Listing of found elements with known entry:" << endl;
-
-            for (mit=orphanEntries.begin(); mit!=orphanEntries.end(); mit++) {
-                cout << "In directory with cluster " << mit->first;
-                if (clusterToEntry.find(mit->first) != clusterToEntry.end()) {
-                    cout << " (" << clusterToEntry[mit->first].getFilename() << ") ";
-                }
-                cout << ":" << endl;
-                system.list(mit->second);
-                cout << endl;
-            }
-        }
-    } else {
-        cout << "There is no orphaned chains, disk seems clean!" << endl;
-    }
-    cout << endl;
+    // Getting orphaned elements from the map
+    list<FatChain> orphanedChains = getOrphaned(chains);
+    displayOrphaned(orphanedChains);
 }
 
 void FatChains::exploreChains(map<int, FatChain> &chains, set<int> &visited)
 {
     map<int, FatChain>::iterator it;
     bool foundNew;
+    exploreDamaged = true;
     do {
         foundNew = false;
         for (it=chains.begin(); it!=chains.end(); it++) {
@@ -131,7 +72,7 @@ void FatChains::exploreChains(map<int, FatChain> &chains, set<int> &visited)
                 vector<FatEntry> entries = system.getEntries(chain.startCluster);
                 if (entries.size()) {
                     chain.directory = true;
-                    if (recursiveExploration(chains, visited, chain.startCluster, true, &entries)) {
+                    if (recursiveExploration(chains, visited, chain.startCluster, &entries)) {
                         foundNew = true;
                     }
                     chain.orphaned = true;
@@ -140,14 +81,17 @@ void FatChains::exploreChains(map<int, FatChain> &chains, set<int> &visited)
         }
     } while (foundNew);
 }
-        
-bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visited, int cluster, bool force, vector<FatEntry> *inputEntries)
+    
+/**
+ * Explore a directory
+ */
+bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visited, int cluster, vector<FatEntry> *inputEntries)
 {
     if (visited.find(cluster) != visited.end()) {
         return false;
     }
 
-    if (!force && system.nextCluster(cluster) == 0) {
+    if (!exploreDamaged && system.nextCluster(cluster) == 0) {
         return false;
     }
     
@@ -196,14 +140,14 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
             }
         } else {
             // Creating the entry
-            if (force && entry.getFilename() != ".") {
+            if (exploreDamaged && entry.getFilename() != ".") {
                 chains[cluster].startCluster = cluster;
                 chains[cluster].endCluster = cluster;
                 chains[cluster].directory = entry.isDirectory();
                 chains[cluster].elements = 1;
                 chains[cluster].orphaned = (entry.getFilename() == "..");
 
-                // cout << "Discovering new directory " << entry.getFilename() << " " << cluster << " from " << myCluster << endl;
+                // cout << "Discovering new entry " << entry.getFilename() << endl;
 
                 if (!chains[cluster].orphaned) {
                     wasOrphaned = true;
@@ -218,7 +162,7 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
         }
 
         if (entry.isDirectory() && entry.getFilename() != "..") {
-            recursiveExploration(chains, visited, cluster, force);
+            recursiveExploration(chains, visited, cluster);
         }
         
         if (wasOrphaned) {
@@ -230,6 +174,9 @@ bool FatChains::recursiveExploration(map<int, FatChain> &chains, set<int> &visit
     return foundNew;
 }
 
+/**
+ * Find all cluster chains in the FAT
+ */
 map<int, FatChain> FatChains::findChains()
 {
     set<int> seen;
@@ -283,4 +230,77 @@ map<int, FatChain> FatChains::findChains()
     }
 
     return chainsByStart;
+}
+    
+list<FatChain> FatChains::getOrphaned(map<int, FatChain> &chains)
+{
+    list<FatChain> orphanedChains;
+    map<int, FatChain>::iterator it;
+
+    for (it=chains.begin(); it!=chains.end(); it++) {
+        FatChain &chain = it->second;
+
+        if (chain.startCluster == 0) {
+            chain.orphaned = false;
+        }
+
+        if (chain.orphaned) {
+            if (!chain.directory) {
+                chain.size = chain.length*system.bytesPerCluster;
+            }
+            orphanedChains.push_back(chain);
+        }
+    }
+
+    return orphanedChains;
+}
+
+void FatChains::displayOrphaned(list<FatChain> orphanedChains)
+{
+    if (orphanedChains.size()) {
+        orphanedChains.sort(compare_size);
+        unsigned long long totalSize = 0;
+        cout << "There is " << orphanedChains.size() << " orphaned elements:" << endl;
+        list<FatChain>::iterator vit;
+
+        for (vit=orphanedChains.begin(); vit!=orphanedChains.end(); vit++) {
+            FatChain &chain = (*vit);
+            if (chain.directory) {
+                cout << "* Directory ";
+            } else {
+                cout << "* File ";
+            }
+
+            cout << "clusters " << chain.startCluster << " to " << chain.endCluster;
+
+            if (chain.directory) {
+                cout << ": " << chain.elements << " elements, ";
+            } else {
+                cout << ": ~";
+            }
+            cout << prettySize(chain.size);
+            totalSize += chain.size;
+            cout << endl;
+        }
+        cout << endl;
+        cout << "Estimation of orphan files total sizes: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
+        cout << endl;
+        if (orphanEntries.size()) {
+            map<int, vector<FatEntry> >::iterator mit;
+            cout << "Listing of found elements with known entry:" << endl;
+
+            for (mit=orphanEntries.begin(); mit!=orphanEntries.end(); mit++) {
+                cout << "In directory with cluster " << mit->first;
+                if (clusterToEntry.find(mit->first) != clusterToEntry.end()) {
+                    cout << " (" << clusterToEntry[mit->first].getFilename() << ") ";
+                }
+                cout << ":" << endl;
+                system.list(mit->second);
+                cout << endl;
+            }
+        }
+    } else {
+        cout << "There is no orphaned chains, disk seems clean!" << endl;
+    }
+    cout << endl;
 }

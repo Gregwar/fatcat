@@ -1,0 +1,12 @@
+Source: fatcat
+Maintainer: Grégoire Passault <g.passault@gmail.com>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 8), cmake
+
+Package: fatcat
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: FAT32 explore, extract, repair, and forensic tool
+ FAT32 explore, extract, repair, and forensic tool

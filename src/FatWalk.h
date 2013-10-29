@@ -8,6 +8,13 @@
 
 using namespace std;
 
+/**
+ * Walks the directory tree and call the onEntry virtual method for
+ * each of entries that are found
+ *
+ * This can be overloaded to perform actions on each nodes of the
+ * filesystem
+ */
 class FatWalk : public FatModule
 {
     public:

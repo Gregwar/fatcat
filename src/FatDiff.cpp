@@ -48,7 +48,7 @@ bool FatDiff::compare()
 void FatDiff::merge()
 {
     int merged = 0;
-    cout << "Begining the merge..." << endl;
+    cout << "Beginning the merge..." << endl;
     system.enableWrite();
 
     for (int cluster=0; cluster<system.totalClusters; cluster++) {

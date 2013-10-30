@@ -37,7 +37,7 @@ void usage()
     cout << "* -z: write scamble data in unallocated sectors" << endl;
     cout << endl;
     cout << "FAT Hacking" << endl;
-    cout << "  -@ [cluster]: Get the cluster address and informations" << endl;
+    cout << "  -@ [cluster]: Get the cluster address and information" << endl;
     cout << "  -2: analysis & compare the 2 FATs" << endl;
     cout << "  -b [file]: backup the FATs (see -t)" << endl;
     cout << "* -p [file]: restore (patch) the FATs (see -t)" << endl;

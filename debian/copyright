@@ -1,4 +1,4 @@
-Files: debian/*
+Files: debian/* src/* docs/*
 Copyright: 2013 Grégoire Passault <g.passault@gmail.com>
 License: MIT
  Copyright (c) <2013> Grégoire Passault

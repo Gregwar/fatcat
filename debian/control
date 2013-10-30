@@ -9,6 +9,8 @@ Package: fatcat
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Homepage: https://github.com/Gregwar/fatcat
+Vcs-Browser: https://www.github.com/Gregwar/fatcat
+Vcs-Git: git://github.com/Gregwar/fatcat.git
 Description: FAT32 explore, extract, repair, and forensic tool
  fatcat is a tool to explore, extract, repair and forensic FAT32 filesystem.
  Its features:

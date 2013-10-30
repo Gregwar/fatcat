@@ -12,13 +12,13 @@ Homepage: https://github.com/Gregwar/fatcat
 Description: FAT32 explore, extract, repair, and forensic tool
  fatcat is a tool to explore, extract, repair and forensic FAT32 filesystem.
  Its features:
- - Get information about FAT32 filesystem;
- - Explore FAT32 file system;
- - Read file or extract directories;
- - Retrieve file & directories that are deleted;
- - Backup & restore the FAT tables;
- - Hack the FAT table by writing on it;
- - Hack the entries by changing clusters and file sizes;
- - Perform a search for orphaned files & directories;
- - Compare and merge the FAT tables;
- - Repair unallocated directories &  files
+     - Get information about FAT32 filesystem;
+     - Explore FAT32 file system;
+     - Read file or extract directories;
+     - Retrieve file & directories that are deleted;
+     - Backup & restore the FAT tables;
+     - Hack the FAT table by writing on it;
+     - Hack the entries by changing clusters and file sizes;
+     - Perform a search for orphaned files & directories;
+     - Compare and merge the FAT tables;
+     - Repair unallocated directories &  files

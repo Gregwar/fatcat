@@ -1,11 +1,11 @@
-fatcat (1.0.1) UNRELEASED; urgency=low
+fatcat (1.0.1-1) UNRELEASED; urgency=low
 
   * Adding a man page
-  * Opening ITP (Closes #728125)
+  * Opening ITP (Closes: #728125)
 
  -- Grégoire Passault <g.passault@gmail.com>  Tue, 29 Oct 2013 12:42:41 +0100
 
-fatcat (1.0-1) UNRELEASED; urgency=low
+fatcat (1.0-1-1) UNRELEASED; urgency=low
 
   * Initial release.
 

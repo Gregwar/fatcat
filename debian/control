@@ -1,6 +1,6 @@
 Source: fatcat
 Maintainer: Grégoire Passault <g.passault@gmail.com>
-Section: misc
+Section: utils
 Priority: optional
 Standards-Version: 3.9.3
 Build-Depends: debhelper (>= 8), cmake
@@ -10,7 +10,7 @@ Vcs-Git: git://github.com/Gregwar/fatcat.git
 
 Package: fatcat
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${utils:Depends}
 Description: FAT32 explore, extract, repair, and forensic tool
  fatcat is a tool to explore, extract, repair and forensic FAT32 filesystem.
  Its features:

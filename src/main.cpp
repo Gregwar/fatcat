@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     // -s, specify the size to be read
     unsigned int size = -1;
 
-    // -i, display informations about the disk
+    // -i, display information about the disk
     bool infoFlag = false;
 
     // -l, list directories in the given path

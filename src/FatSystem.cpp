@@ -467,7 +467,7 @@ bool FatSystem::init()
         
 void FatSystem::infos()
 {
-    cout << "FAT Filesystem informations" << endl << endl;
+    cout << "FAT Filesystem information" << endl << endl;
 
     cout << "Filesystem type: " << fsType << endl;
     cout << "OEM name: " << oemName << endl;

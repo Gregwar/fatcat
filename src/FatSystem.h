@@ -99,11 +99,6 @@ class FatSystem
         unsigned long long clusterAddress(unsigned int cluster, bool isRoot = false);
 
         /**
-         * Return the number of bytes for the current type
-         */
-        unsigned int bytes();
-
-        /**
          * Enable the FAT caching
          */
         void enableCache();
@@ -128,6 +123,7 @@ class FatSystem
         unsigned long long rootDirectory;
         unsigned long long reserved;
         unsigned long long strange;
+        unsigned int bytes;
 
         // Specific to FAT16
         unsigned long long rootEntries;

@@ -141,6 +141,7 @@ void FatSystem::parseHeader()
 
     if (sectorsPerFat != 0) {
         type = FAT16;
+        bytes = 2;
         diskLabel = string(buffer+FAT16_DISK_LABEL, FAT16_DISK_LABEL_SIZE);
         fsType = string(buffer+FAT16_DISK_FS, FAT16_DISK_FS_SIZE);
         rootEntries = FAT_READ_SHORT(buffer, FAT16_ROOT_ENTRIES)&0xffff;
@@ -151,6 +152,8 @@ void FatSystem::parseHeader()
             totalSectors = FAT_READ_LONG(buffer, FAT_TOTAL_SECTORS)&0xffffffff;
         }
     } else {
+        type = FAT32;
+        bytes = 4;
         sectorsPerFat = FAT_READ_LONG(buffer, FAT_SECTORS_PER_FAT)&0xffffffff;
         totalSectors = FAT_READ_LONG(buffer, FAT_TOTAL_SECTORS)&0xffffffff;
         diskLabel = string(buffer+FAT_DISK_LABEL, FAT_DISK_LABEL_SIZE);
@@ -179,22 +182,12 @@ void FatSystem::parseHeader()
     }
 }
 
-unsigned int FatSystem::bytes()
-{
-    switch (type) {
-        case FAT32:
-            return 4;
-        case FAT16:
-            return 2;
-    }
-}
-
 /**
  * Returns the 32-bit fat value for the given cluster number
  */
 unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 {
-    char buffer[bytes()];
+    char buffer[bytes];
     
     if (!validCluster(cluster)) {
         return 0;
@@ -204,7 +197,7 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
         return cache[cluster];
     }
 
-    readData(fatStart+fatSize*fat+bytes()*cluster, buffer, sizeof(buffer));
+    readData(fatStart+fatSize*fat+bytes*cluster, buffer, sizeof(buffer));
 
     unsigned int next;
     
@@ -232,17 +225,17 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
  */
 bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fat)
 {
-    char buffer[bytes()];
+    char buffer[bytes];
 
     if (!validCluster(cluster)) {
         throw string("Trying to access a cluster outside bounds");
     }
 
-    for (int i=0; i<bytes(); i++) {
+    for (int i=0; i<bytes; i++) {
         buffer[i] = (next>>(8*i))&0xff;
     }
 
-    return writeData(fatStart+fatSize*fat+bytes()*cluster, buffer, sizeof(buffer))==bytes();
+    return writeData(fatStart+fatSize*fat+bytes*cluster, buffer, sizeof(buffer))==bytes;
 }
         
 bool FatSystem::validCluster(unsigned int cluster)
@@ -517,7 +510,7 @@ bool FatSystem::init()
     bytesPerCluster = bytesPerSector*sectorsPerCluster;
     totalSize = totalSectors*bytesPerSector;
     fatSize = sectorsPerFat*bytesPerSector;
-    totalClusters = fatSize/bytes();
+    totalClusters = fatSize/bytes;
     dataSize = totalClusters*bytesPerCluster;
 
     if (type == FAT16) {

@@ -283,12 +283,14 @@ int main(int argc, char *argv[])
                 FatDiff diff(fat);
                 diff.compare();
             } else if (address) {
-                cout << "Cluster " << cluster << " address:" << endl;
-                long long addr = fat.clusterAddress(cluster);
+                if (cluster >= 2) {
+                    cout << "Cluster " << cluster << " address:" << endl;
+                    long long addr = fat.clusterAddress(cluster);
+                    printf("%llu (%016llx)\n", addr, addr);
+                    cout << "Next cluster:" << endl;
+                }
                 int next1 = fat.nextCluster(cluster, 0);
                 int next2 = fat.nextCluster(cluster, 1);
-                printf("%llu (%016llx)\n", addr, addr);
-                cout << "Next cluster:" << endl;
                 printf("FAT1: %u (%08x)\n", next1, next1);
                 printf("FAT2: %u (%08x)\n", next2, next2);
                 bool isContiguous = false;

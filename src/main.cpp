@@ -283,12 +283,10 @@ int main(int argc, char *argv[])
                 FatDiff diff(fat);
                 diff.compare();
             } else if (address) {
-                if (cluster >= 2) {
-                    cout << "Cluster " << cluster << " address:" << endl;
-                    long long addr = fat.clusterAddress(cluster);
-                    printf("%llu (%016llx)\n", addr, addr);
-                    cout << "Next cluster:" << endl;
-                }
+                cout << "Cluster " << cluster << " address:" << endl;
+                long long addr = fat.clusterAddress(cluster);
+                printf("%llu (%016llx)\n", addr, addr);
+                cout << "Next cluster:" << endl;
                 int next1 = fat.nextCluster(cluster, 0);
                 int next2 = fat.nextCluster(cluster, 1);
                 printf("FAT1: %u (%08x)\n", next1, next1);

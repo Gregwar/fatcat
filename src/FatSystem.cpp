@@ -29,7 +29,9 @@ FatSystem::FatSystem(string filename_, unsigned long long globalOffset_)
     listDeleted(false),
     statsComputed(false),
     freeClusters(0),
-    cacheEnabled(false)
+    cacheEnabled(false),
+    type(FAT32),
+    rootEntries(0)
 {
     fd = open(filename.c_str(), O_RDONLY|O_LARGEFILE);
     writeMode = false;
@@ -132,13 +134,29 @@ void FatSystem::parseHeader()
     bytesPerSector = FAT_READ_SHORT(buffer, FAT_BYTES_PER_SECTOR)&0xffff;
     sectorsPerCluster = buffer[FAT_SECTORS_PER_CLUSTER];
     reservedSectors = FAT_READ_SHORT(buffer, FAT_RESERVED_SECTORS)&0xffff;
-    fats = buffer[FAT_FATS];
-    sectorsPerFat = FAT_READ_LONG(buffer, FAT_SECTORS_PER_FAT)&0xffffffff;
-    rootDirectory = FAT_READ_LONG(buffer, FAT_ROOT_DIRECTORY)&0xffffffff;
-    totalSectors = FAT_READ_LONG(buffer, FAT_TOTAL_SECTORS)&0xffffffff;
-    diskLabel = string(buffer+FAT_DISK_LABEL, FAT_DISK_LABEL_SIZE);
     oemName = string(buffer+FAT_DISK_OEM, FAT_DISK_OEM_SIZE);
-    fsType = string(buffer+FAT_DISK_FS, FAT_DISK_FS_SIZE);
+    fats = buffer[FAT_FATS];
+    
+    sectorsPerFat = FAT_READ_SHORT(buffer, FAT16_SECTORS_PER_FAT)&0xffff;
+
+    if (sectorsPerFat != 0) {
+        type = FAT16;
+        diskLabel = string(buffer+FAT16_DISK_LABEL, FAT16_DISK_LABEL_SIZE);
+        fsType = string(buffer+FAT16_DISK_FS, FAT16_DISK_FS_SIZE);
+        rootEntries = FAT_READ_SHORT(buffer, FAT16_ROOT_ENTRIES)&0xffff;
+        rootDirectory = 2;
+
+        totalSectors = FAT_READ_SHORT(buffer, FAT16_TOTAL_SECTORS)&0xffff;
+        if (!totalSectors) {
+            totalSectors = FAT_READ_LONG(buffer, FAT_TOTAL_SECTORS)&0xffffffff;
+        }
+    } else {
+        sectorsPerFat = FAT_READ_LONG(buffer, FAT_SECTORS_PER_FAT)&0xffffffff;
+        totalSectors = FAT_READ_LONG(buffer, FAT_TOTAL_SECTORS)&0xffffffff;
+        diskLabel = string(buffer+FAT_DISK_LABEL, FAT_DISK_LABEL_SIZE);
+        rootDirectory = FAT_READ_LONG(buffer, FAT_ROOT_DIRECTORY)&0xffffffff;
+        fsType = string(buffer+FAT_DISK_FS, FAT_DISK_FS_SIZE);
+    }
 
     if (bytesPerSector != 512) {
         printf("WARNING: Bytes per sector is not 512 (%llu)\n", bytesPerSector);
@@ -155,9 +173,19 @@ void FatSystem::parseHeader()
         strange++;
     }
 
-    if (rootDirectory != 2) {
+    if (rootDirectory != 2 && type == FAT32) {
         printf("WARNING: Root directory is not 2 (%llu)\n", rootDirectory);
         strange++;
+    }
+}
+
+unsigned int FatSystem::bytes()
+{
+    switch (type) {
+        case FAT32:
+            return 4;
+        case FAT16:
+            return 2;
     }
 }
 
@@ -166,7 +194,7 @@ void FatSystem::parseHeader()
  */
 unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 {
-    char buffer[4];
+    char buffer[bytes()];
     
     if (!validCluster(cluster)) {
         return 0;
@@ -176,14 +204,26 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
         return cache[cluster];
     }
 
-    readData(fatStart+fatSize*fat+4*cluster, buffer, sizeof(buffer));
+    readData(fatStart+fatSize*fat+bytes()*cluster, buffer, sizeof(buffer));
 
-    unsigned int next = FAT_READ_LONG(buffer, 0)&0x0fffffff;
+    unsigned int next;
+    
+    if (type == FAT32) {
+        next = FAT_READ_LONG(buffer, 0)&0x0fffffff;
 
-    if (next >= 0x0ffffff0) {
-        return FAT_LAST;
+        if (next >= 0x0ffffff0) {
+            return FAT_LAST;
+        } else {
+            return next;
+        }
     } else {
-        return next;
+        next = FAT_READ_SHORT(buffer,0)&0xffff;
+
+        if (next >= 0xfff0) {
+            return FAT_LAST;
+        } else {
+            return next;
+        }
     }
 }
     
@@ -192,18 +232,17 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
  */
 bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fat)
 {
-    char buffer[4];
+    char buffer[bytes()];
 
     if (!validCluster(cluster)) {
         throw string("Trying to access a cluster outside bounds");
     }
 
-    buffer[0] = (next>>0)&0xff;
-    buffer[1] = (next>>8)&0xff;
-    buffer[2] = (next>>16)&0xff;
-    buffer[3] = (next>>24)&0xff;
+    for (int i=0; i<bytes(); i++) {
+        buffer[i] = (next>>(8*i))&0xff;
+    }
 
-    return writeData(fatStart+fatSize*fat+4*cluster, buffer, sizeof(buffer))==4;
+    return writeData(fatStart+fatSize*fat+bytes()*cluster, buffer, sizeof(buffer))==bytes();
 }
         
 bool FatSystem::validCluster(unsigned int cluster)
@@ -211,13 +250,19 @@ bool FatSystem::validCluster(unsigned int cluster)
     return cluster < totalClusters;
 }
 
-unsigned long long FatSystem::clusterAddress(unsigned int cluster)
+unsigned long long FatSystem::clusterAddress(unsigned int cluster, bool isRoot)
 {
-    return (dataStart + bytesPerSector*sectorsPerCluster*(cluster-2));
+    cluster -= 2;
+    if (type == FAT16 && !isRoot) {
+        cluster += (rootEntries*32)/bytesPerCluster;
+    }
+
+    return (dataStart + bytesPerSector*sectorsPerCluster*cluster);
 }
 
 vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool *hasFree)
 {
+    bool isRoot = false;
     bool contiguous = false;
     int foundEntries = 0;
     int badEntries = 0;
@@ -238,6 +283,8 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
         cluster = rootDirectory;
     }
 
+    isRoot = (type==FAT16 && cluster==rootDirectory);
+
     if (cluster == rootDirectory) {
         isValid = true;
     }
@@ -250,7 +297,7 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
         bool localZero = false;
         int localFound = 0;
         int localBadEntries = 0;
-        unsigned long long address = clusterAddress(cluster);
+        unsigned long long address = clusterAddress(cluster, isRoot);
         char buffer[FAT_ENTRY_SIZE];
         if (visited.find(cluster) != visited.end()) {
             cerr << "! Looping directory" << endl;
@@ -306,7 +353,15 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
 
         int previousCluster = cluster;
 
-        cluster = nextCluster(cluster);
+        if (isRoot) {
+            if (cluster < maxRootCluster) {
+                cluster++;
+            } else {
+                cluster = FAT_LAST;
+            }
+        } else {
+            cluster = nextCluster(cluster);
+        }
         
         if (clusters) {
             (*clusters)++;
@@ -459,8 +514,12 @@ bool FatSystem::init()
     bytesPerCluster = bytesPerSector*sectorsPerCluster;
     totalSize = totalSectors*bytesPerSector;
     fatSize = sectorsPerFat*bytesPerSector;
-    totalClusters = fatSize/4;
+    totalClusters = fatSize/bytes();
     dataSize = totalClusters*bytesPerCluster;
+
+    if (type == FAT16) {
+        maxRootCluster = rootDirectory+(rootEntries*32)/bytesPerCluster;
+    }
 
     return strange == 0;
 }

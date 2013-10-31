@@ -29,6 +29,17 @@ using namespace std;
 #define FAT_CREATION_DATE           0x10
 #define FAT_CHANGE_DATE             0x16
 
+#define FAT16_SECTORS_PER_FAT       0x16
+#define FAT16_DISK_FS               0x36
+#define FAT16_DISK_FS_SIZE          8
+#define FAT16_DISK_LABEL            0x2b
+#define FAT16_DISK_LABEL_SIZE       11
+#define FAT16_TOTAL_SECTORS         0x13
+#define FAT16_ROOT_ENTRIES          0x11
+
+#define FAT32 0
+#define FAT16 1
+
 /**
  * A FAT fileSystem
  */
@@ -85,7 +96,12 @@ class FatSystem
         /**
          * Returns the cluster offset in the filesystem
          */
-        unsigned long long clusterAddress(unsigned int cluster);
+        unsigned long long clusterAddress(unsigned int cluster, bool isRoot = false);
+
+        /**
+         * Return the number of bytes for the current type
+         */
+        unsigned int bytes();
 
         /**
          * Enable the FAT caching
@@ -99,6 +115,7 @@ class FatSystem
         bool writeMode;
 
         // Header values
+        int type;
         string diskLabel;
         string oemName;
         string fsType;
@@ -111,6 +128,10 @@ class FatSystem
         unsigned long long rootDirectory;
         unsigned long long reserved;
         unsigned long long strange;
+
+        // Specific to FAT16
+        unsigned long long rootEntries;
+        unsigned long long maxRootCluster;
 
         // Computed values
         unsigned long long fatStart;

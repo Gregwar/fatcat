@@ -144,7 +144,7 @@ void FatSystem::parseHeader()
         diskLabel = string(buffer+FAT16_DISK_LABEL, FAT16_DISK_LABEL_SIZE);
         fsType = string(buffer+FAT16_DISK_FS, FAT16_DISK_FS_SIZE);
         rootEntries = FAT_READ_SHORT(buffer, FAT16_ROOT_ENTRIES)&0xffff;
-        rootDirectory = 2;
+        rootDirectory = 0;
 
         totalSectors = FAT_READ_SHORT(buffer, FAT16_TOTAL_SECTORS)&0xffff;
         if (!totalSectors) {
@@ -252,7 +252,10 @@ bool FatSystem::validCluster(unsigned int cluster)
 
 unsigned long long FatSystem::clusterAddress(unsigned int cluster, bool isRoot)
 {
-    cluster -= 2;
+    if (type == FAT32 || !isRoot) {
+        cluster -= 2;
+    }
+
     if (type == FAT16 && !isRoot) {
         cluster += (rootEntries*32)/bytesPerCluster;
     }
@@ -279,7 +282,7 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
         *hasFree = false;
     }
 
-    if (cluster == 0) {
+    if (cluster == 0 && type == FAT32) {
         cluster = rootDirectory;
     }
 
@@ -354,7 +357,8 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
         int previousCluster = cluster;
 
         if (isRoot) {
-            if (cluster < maxRootCluster) {
+            int countEntries = ((cluster+1)*bytesPerCluster)/32;
+            if (countEntries < rootEntries) {
                 cluster++;
             } else {
                 cluster = FAT_LAST;
@@ -517,10 +521,6 @@ bool FatSystem::init()
     totalClusters = fatSize/bytes();
     dataSize = totalClusters*bytesPerCluster;
 
-    if (type == FAT16) {
-        maxRootCluster = rootDirectory+(rootEntries*32)/bytesPerCluster;
-    }
-
     return strange == 0;
 }
         
@@ -538,6 +538,9 @@ void FatSystem::infos()
     cout << "Sectors per cluster: " << sectorsPerCluster << endl;
     cout << "Bytes per cluster: " << bytesPerCluster << endl;
     cout << "Reserved sectors: " << reservedSectors << endl;
+    if (type == FAT16) {
+        cout << "Root entries: " << rootEntries << endl;
+    }
     cout << "Sectors per FAT: " << sectorsPerFat << endl;
     cout << "Fat size: " << fatSize << " (" << prettySize(fatSize) << ")" << endl;
     printf("FAT1 start address: %016llx\n", fatStart);

@@ -1,6 +1,7 @@
 #include "FatFilename.h"
 #include "FatEntry.h"
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -30,7 +31,7 @@ void FatFilename::append(char *buffer)
         return;
     }
 
-    if (buffer[0]&FAT_LONG_NAME_LAST) {
+    if (buffer[0]&FAT_LONG_NAME_LAST && (buffer[0]&0xff)!=FAT_ERASED) {
         letters.clear();
     }
 

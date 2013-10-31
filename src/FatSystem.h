@@ -131,7 +131,6 @@ class FatSystem
 
         // Specific to FAT16
         unsigned long long rootEntries;
-        unsigned long long maxRootCluster;
 
         // Computed values
         unsigned long long fatStart;

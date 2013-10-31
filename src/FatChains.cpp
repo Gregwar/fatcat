@@ -33,7 +33,7 @@ void FatChains::chainsAnalysis()
     /*
     map<int, FatChain>::iterator mit;
     for (mit=chains.begin(); mit!=chains.end(); mit++) {
-        cout << mit->first << endl;
+        cout << mit->first << "~>" << mit->second.endCluster << endl;
     } 
     */
 
@@ -44,8 +44,8 @@ void FatChains::chainsAnalysis()
     set<int> visited;
     saveEntries = false;
     exploreDamaged = false;
-    recursiveExploration(chains, visited, system.rootDirectory);
     visited.insert(0);
+    recursiveExploration(chains, visited, system.rootDirectory);
     cout << endl;
 
     cout << "Having a look at the chains..." << endl;
@@ -240,7 +240,7 @@ list<FatChain> FatChains::getOrphaned(map<int, FatChain> &chains)
     for (it=chains.begin(); it!=chains.end(); it++) {
         FatChain &chain = it->second;
 
-        if (chain.startCluster == 0) {
+        if (chain.startCluster < 2) {
             chain.orphaned = false;
         }
 

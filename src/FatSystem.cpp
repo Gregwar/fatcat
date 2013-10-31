@@ -257,7 +257,7 @@ unsigned long long FatSystem::clusterAddress(unsigned int cluster, bool isRoot)
     }
 
     if (type == FAT16 && !isRoot) {
-        cluster += (rootEntries*32)/bytesPerCluster;
+        cluster += rootClusters;
     }
 
     return (dataStart + bytesPerSector*sectorsPerCluster*cluster);
@@ -357,8 +357,7 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
         int previousCluster = cluster;
 
         if (isRoot) {
-            int countEntries = ((cluster+1)*bytesPerCluster)/32;
-            if (countEntries < rootEntries) {
+            if (cluster+1 < rootClusters) {
                 cluster++;
             } else {
                 cluster = FAT_LAST;
@@ -521,6 +520,11 @@ bool FatSystem::init()
     totalClusters = fatSize/bytes();
     dataSize = totalClusters*bytesPerCluster;
 
+    if (type == FAT16) {
+        int rootBytes = rootEntries*32;
+        rootClusters = rootBytes/bytesPerCluster + ((rootBytes%bytesPerCluster) ? 1 : 0);
+    }
+
     return strange == 0;
 }
         
@@ -540,6 +544,7 @@ void FatSystem::infos()
     cout << "Reserved sectors: " << reservedSectors << endl;
     if (type == FAT16) {
         cout << "Root entries: " << rootEntries << endl;
+        cout << "Root clusters: " << rootClusters << endl;
     }
     cout << "Sectors per FAT: " << sectorsPerFat << endl;
     cout << "Fat size: " << fatSize << " (" << prettySize(fatSize) << ")" << endl;

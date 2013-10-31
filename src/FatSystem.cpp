@@ -647,10 +647,7 @@ FatEntry FatSystem::rootEntry()
 
 bool FatSystem::freeCluster(unsigned int cluster)
 {
-    unsigned int next = nextCluster(cluster);
-
-    return next == 0 
-        || next == 0xf0000000;
+    return nextCluster(cluster) == 0;
 }
         
 void FatSystem::computeStats()

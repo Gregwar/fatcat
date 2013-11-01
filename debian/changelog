@@ -1,3 +1,9 @@
+fatcat (1.0.2-1) UNRELEASED; urgency=low
+
+  * Supporting FAT12 and FAT16
+
+ -- Grégoire Passault <g.passault@gmail.com>  Fri, 01 Nov 2013 20:09:11 +0100
+
 fatcat (1.0.1-1) UNRELEASED; urgency=low
 
   * Adding a man page

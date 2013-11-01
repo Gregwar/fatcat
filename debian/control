@@ -11,11 +11,11 @@ Vcs-Git: git://github.com/Gregwar/fatcat.git
 Package: fatcat
 Architecture: any
 Depends: ${shlibs:Depends}, ${utils:Depends}
-Description: FAT32 explore, extract, repair, and forensic tool
- fatcat is a tool to explore, extract, repair and forensic FAT32 filesystem.
+Description: FAT filesystemm explore, extract, repair, and forensic tool
+ fatcat is a tool to explore, extract, repair and forensic FAT filesystem.
  Its features:
-     - Get information about FAT32 filesystem;
-     - Explore FAT32 file system;
+     - Get information about FAT filesystem;
+     - Explore FAT file system;
      - Read file or extract directories;
      - Retrieve file & directories that are deleted;
      - Backup & restore the FAT tables;
@@ -24,3 +24,4 @@ Description: FAT32 explore, extract, repair, and forensic tool
      - Perform a search for orphaned files & directories;
      - Compare and merge the FAT tables;
      - Repair unallocated directories &  files
+     - Supports FAT12, FAT16 and FAT32

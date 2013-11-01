@@ -305,3 +305,34 @@ void FatChains::displayOrphaned(list<FatChain> orphanedChains)
     }
     cout << endl;
 }
+
+int FatChains::chainSize(int cluster, bool *isContiguous)
+{
+    set<int> visited;
+    int length = 0;
+    bool stop;
+
+    if (isContiguous != NULL) {
+        *isContiguous = true;
+    }
+
+    do {
+        stop = true;
+        int currentCluster = cluster;
+        visited.insert(cluster);
+        length++;
+        cluster = system.nextCluster(cluster);
+        if (system.validCluster(cluster) && cluster!=FAT_LAST) {
+            if (currentCluster+1 != cluster && isContiguous != NULL) {
+                *isContiguous = false;
+            }
+            if (visited.find(cluster) != visited.end()) {
+                cerr << "! Loop detected, " << currentCluster << " points to " << cluster << " that I already met" << endl;
+            } else {
+                stop = false;
+            }
+        }
+    } while (!stop);
+
+    return length;
+}

@@ -52,6 +52,11 @@ class FatChains : public FatModule
          */
         void displayOrphaned(list<FatChain> orphanedChains);
 
+        /**
+         * Size of a chain in the FAT
+         */
+        int chainSize(int cluster, bool *isContiguous);
+
     protected:
         bool saveEntries;
         bool exploreDamaged;

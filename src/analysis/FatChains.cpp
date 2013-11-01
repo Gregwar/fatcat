@@ -45,8 +45,8 @@ void FatChains::chainsAnalysis()
     set<int> visited;
     saveEntries = false;
     exploreDamaged = false;
-    visited.insert(0);
     recursiveExploration(chains, visited, system.rootDirectory);
+    visited.insert(0);
     cout << endl;
 
     cout << "Having a look at the chains..." << endl;

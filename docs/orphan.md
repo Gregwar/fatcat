@@ -1,10 +1,10 @@
-# FAT32 Orphan tutorial: how to recover lost files and directories
+# FAT Orphan tutorial: how to recover lost files and directories
 
 Back to [documentation index](index.md)
 
 First, [create a valid disk](disk.md), let's call it `disk.img`.
 
-We'll here explain the problem of orphan files in the FAT32 filesystems.
+We'll here explain the problem of orphan files in the FAT filesystems.
 
 Sometimes, your disk may crash. It means that some sectors can be corrupted,
 and thus unusable. Some parts of data are then broken.
@@ -18,7 +18,7 @@ same way, when the parent directory entry is corrupted.
 We can also call it "lost files" or "lost directories", because they are still there,
 but not reachable.
 
-However, in FAT32 filesystems, the allocation table is stored in another place and
+However, in FAT filesystems, the allocation table is stored in another place and
 could remain intact. This mean that orphan files are perfectly readable, even more
 than [deleted ones](undelete.md), because the cluster chains is still there.
 

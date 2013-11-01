@@ -8,7 +8,7 @@ Note: have a look at the [prebuilt images](index.md)
 
 ### The directory loop
 
-In FAT32, directories are just a list of entries which can point to files or
+In FAT, directories are just a list of entries which can point to files or
 other directories.
 
 Other directories are referenced using their cluster. With `fatcat`, you can

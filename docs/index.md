@@ -1,10 +1,10 @@
 # fatcat tutorials & examples
 
-Here is a documentation that will inform you about FAT32 filesystems,
+Here is a documentation that will inform you about FAT filesystems,
 and explain how you can use the `fatcat` tool to forensic, repair,
-undelete and hack FAT32:
+undelete and hack FAT:
 
-* [FAT32 repair guide](repair.md)
+* [FAT repair guide](repair.md)
 * [Use fatcat with a partitionned disk](partition.md)
 * [Undelete tutorial: how to revive deleted files](undelete.md)
 * [FAT table tutorial: how to fix damaged table](fat.md)

@@ -2,8 +2,9 @@
 
 ![fatcat](docs/fatcat.jpg)
 
-This tool is designed to manipulate FAT32 filesystems, in order to
-explore, extract, repair, recover and forensic them.
+This tool is designed to manipulate FAT filesystems, in order to
+explore, extract, repair, recover and forensic them. It currently
+supports FAT12, FAT16 and FAT32.
 
 [Tutorials & examples](docs/index.md)
 
@@ -89,7 +90,7 @@ Using `-R`, you can provide a cluster number instead of a path, but the file siz
 information will be lost and the file will be rounded to the number of clusters
 it fits, unless you provide the `-s` option to specify the file size to read.
 
-You can use `-x` to extract the FAT32 system to a directory:
+You can use `-x` to extract the FAT filesystem directories to a directory:
 
 ```
 fatcat disk.img -x output/
@@ -140,7 +141,7 @@ to another one or into a sane file.
 When sectors are broken, their bytes will be replaced with `0`s in the `ddrescue` image.
 
 A first way to go is trying to explore your image using `-l` as above and check `-i` to
-find out if `fatcat` recognizes the disk as a FAT32 system.
+find out if `fatcat` recognizes the disk as a FAT system.
 
 Then, you can try to have a look at `-2`, to check if the file allocation tables differs,
 and if it looks mergeable. It is very likely that is will be mergeable, in this case, you
@@ -180,7 +181,7 @@ See also: [orphaned files tutorial](docs/orphan.md)
 
 ## Hacking
 
-You can use `fatcat` to hack your FAT32 filesystem
+You can use `fatcat` to hack your FAT filesystem
 
 ### Informations
 

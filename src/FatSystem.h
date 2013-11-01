@@ -123,7 +123,7 @@ class FatSystem
         unsigned long long rootDirectory;
         unsigned long long reserved;
         unsigned long long strange;
-        unsigned int bytes;
+        unsigned int bits;
 
         // Specific to FAT16
         unsigned long long rootEntries;

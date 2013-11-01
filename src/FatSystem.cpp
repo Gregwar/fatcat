@@ -141,11 +141,15 @@ void FatSystem::parseHeader()
 
     if (sectorsPerFat != 0) {
         type = FAT16;
-        bytes = 2;
+        bits = 16;
         diskLabel = string(buffer+FAT16_DISK_LABEL, FAT16_DISK_LABEL_SIZE);
         fsType = string(buffer+FAT16_DISK_FS, FAT16_DISK_FS_SIZE);
         rootEntries = FAT_READ_SHORT(buffer, FAT16_ROOT_ENTRIES)&0xffff;
         rootDirectory = 0;
+
+        if (trim(fsType) == "FAT12") {
+            bits = 12;
+        }
 
         totalSectors = FAT_READ_SHORT(buffer, FAT16_TOTAL_SECTORS)&0xffff;
         if (!totalSectors) {
@@ -153,7 +157,7 @@ void FatSystem::parseHeader()
         }
     } else {
         type = FAT32;
-        bytes = 4;
+        bits = 32;
         sectorsPerFat = FAT_READ_LONG(buffer, FAT_SECTORS_PER_FAT)&0xffffffff;
         totalSectors = FAT_READ_LONG(buffer, FAT_TOTAL_SECTORS)&0xffffffff;
         diskLabel = string(buffer+FAT_DISK_LABEL, FAT_DISK_LABEL_SIZE);
@@ -187,6 +191,7 @@ void FatSystem::parseHeader()
  */
 unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 {
+    int bytes = (bits == 32 ? 4 : 2);
     char buffer[bytes];
     
     if (!validCluster(cluster)) {
@@ -197,7 +202,7 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
         return cache[cluster];
     }
 
-    readData(fatStart+fatSize*fat+bytes*cluster, buffer, sizeof(buffer));
+    readData(fatStart+fatSize*fat+(bits*cluster)/8, buffer, sizeof(buffer));
 
     unsigned int next;
     
@@ -212,10 +217,23 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
     } else {
         next = FAT_READ_SHORT(buffer,0)&0xffff;
 
-        if (next >= 0xfff0) {
-            return FAT_LAST;
+        if (bits == 12) {
+            int bit = cluster*bits;
+            if (bit%8 != 0) {
+                next = next >> 4;
+            }
+            next &= 0xfff;
+            if (next >= 0xff0) {
+                return FAT_LAST;
+            } else {
+                return next;
+            }
         } else {
-            return next;
+            if (next >= 0xfff0) {
+                return FAT_LAST;
+            } else {
+                return next;
+            }
         }
     }
 }
@@ -225,17 +243,33 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
  */
 bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fat)
 {
+    int bytes = (bits == 32 ? 4 : 2);
     char buffer[bytes];
 
     if (!validCluster(cluster)) {
         throw string("Trying to access a cluster outside bounds");
     }
 
-    for (int i=0; i<bytes; i++) {
-        buffer[i] = (next>>(8*i))&0xff;
+    int offset = fatStart+fatSize*fat+(bits*cluster)/8;
+    
+    if (bits == 12) {
+        readData(offset, buffer, bytes);
+        int bit = cluster*bits;
+
+        if (bit%8 != 0) {
+            buffer[0] = ((next&0x0f)<<4)|(buffer[0]&0x0f);
+            buffer[1] = (next>>4)&0xff;
+        } else {
+            buffer[0] = next&0xff;
+            buffer[1] = (buffer[1]&0xf0)|((next>>8)&0x0f);
+        }
+    } else {
+        for (int i=0; i<(bits/8); i++) {
+            buffer[i] = (next>>(8*i))&0xff;
+        }
     }
 
-    return writeData(fatStart+fatSize*fat+bytes*cluster, buffer, sizeof(buffer))==bytes;
+    return writeData(offset, buffer, bytes) == bytes;
 }
         
 bool FatSystem::validCluster(unsigned int cluster)
@@ -510,7 +544,7 @@ bool FatSystem::init()
     bytesPerCluster = bytesPerSector*sectorsPerCluster;
     totalSize = totalSectors*bytesPerSector;
     fatSize = sectorsPerFat*bytesPerSector;
-    totalClusters = fatSize/bytes;
+    totalClusters = (fatSize*8)/bits;
     dataSize = totalClusters*bytesPerCluster;
 
     if (type == FAT16) {

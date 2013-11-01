@@ -4,10 +4,11 @@
 #include <set>
 #include <vector>
 #include <iostream>
+
+#include <FatUtils.h>
+#include <core/FatEntry.h>
 #include "FatChains.h"
 #include "FatChain.h"
-#include "FatEntry.h"
-#include "utils.h"
 
 using namespace std;
 
@@ -33,7 +34,7 @@ void FatChains::chainsAnalysis()
     /*
     map<int, FatChain>::iterator mit;
     for (mit=chains.begin(); mit!=chains.end(); mit++) {
-        cout << mit->first << endl;
+        cout << mit->first << "~>" << mit->second.endCluster << endl;
     } 
     */
 
@@ -44,8 +45,8 @@ void FatChains::chainsAnalysis()
     set<int> visited;
     saveEntries = false;
     exploreDamaged = false;
-    recursiveExploration(chains, visited, system.rootDirectory);
     visited.insert(0);
+    recursiveExploration(chains, visited, system.rootDirectory);
     cout << endl;
 
     cout << "Having a look at the chains..." << endl;
@@ -240,7 +241,7 @@ list<FatChain> FatChains::getOrphaned(map<int, FatChain> &chains)
     for (it=chains.begin(); it!=chains.end(); it++) {
         FatChain &chain = it->second;
 
-        if (chain.startCluster == 0) {
+        if (chain.startCluster < 2) {
             chain.orphaned = false;
         }
 
@@ -303,4 +304,35 @@ void FatChains::displayOrphaned(list<FatChain> orphanedChains)
         cout << "There is no orphaned chains, disk seems clean!" << endl;
     }
     cout << endl;
+}
+
+int FatChains::chainSize(int cluster, bool *isContiguous)
+{
+    set<int> visited;
+    int length = 0;
+    bool stop;
+
+    if (isContiguous != NULL) {
+        *isContiguous = true;
+    }
+
+    do {
+        stop = true;
+        int currentCluster = cluster;
+        visited.insert(cluster);
+        length++;
+        cluster = system.nextCluster(cluster);
+        if (system.validCluster(cluster) && cluster!=FAT_LAST) {
+            if (currentCluster+1 != cluster && isContiguous != NULL) {
+                *isContiguous = false;
+            }
+            if (visited.find(cluster) != visited.end()) {
+                cerr << "! Loop detected, " << currentCluster << " points to " << cluster << " that I already met" << endl;
+            } else {
+                stop = false;
+            }
+        }
+    } while (!stop);
+
+    return length;
 }

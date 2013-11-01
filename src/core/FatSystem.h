@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <string>
+
 #include "FatEntry.h"
 #include "FatPath.h"
 
@@ -28,6 +29,17 @@ using namespace std;
 #define FAT_DISK_FS_SIZE            8
 #define FAT_CREATION_DATE           0x10
 #define FAT_CHANGE_DATE             0x16
+
+#define FAT16_SECTORS_PER_FAT       0x16
+#define FAT16_DISK_FS               0x36
+#define FAT16_DISK_FS_SIZE          8
+#define FAT16_DISK_LABEL            0x2b
+#define FAT16_DISK_LABEL_SIZE       11
+#define FAT16_TOTAL_SECTORS         0x13
+#define FAT16_ROOT_ENTRIES          0x11
+
+#define FAT32 0
+#define FAT16 1
 
 /**
  * A FAT fileSystem
@@ -73,11 +85,6 @@ class FatSystem
         void setListDeleted(bool listDeleted);
 
         /**
-         * Extract all the files to the given directory
-         */
-        void extract(unsigned int cluster, string directory);
-
-        /**
          * Is the n-th cluster free?
          */
         bool freeCluster(unsigned int cluster);
@@ -85,7 +92,7 @@ class FatSystem
         /**
          * Returns the cluster offset in the filesystem
          */
-        unsigned long long clusterAddress(unsigned int cluster);
+        unsigned long long clusterAddress(unsigned int cluster, bool isRoot = false);
 
         /**
          * Enable the FAT caching
@@ -99,6 +106,7 @@ class FatSystem
         bool writeMode;
 
         // Header values
+        int type;
         string diskLabel;
         string oemName;
         string fsType;
@@ -111,6 +119,11 @@ class FatSystem
         unsigned long long rootDirectory;
         unsigned long long reserved;
         unsigned long long strange;
+        unsigned int bits;
+
+        // Specific to FAT16
+        unsigned long long rootEntries;
+        unsigned long long rootClusters;
 
         // Computed values
         unsigned long long fatStart;
@@ -185,11 +198,6 @@ class FatSystem
     
     protected:
         void parseHeader();
-
-        /**
-         * Extract an entry
-         */
-        void extractEntry(FatEntry &entry, string directory);
 
         /**
          * Compute the free clusters stats

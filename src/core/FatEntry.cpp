@@ -3,8 +3,9 @@
 #include <cstdlib>
 #include <iostream>
 #include <string.h>
+
+#include <FatUtils.h>
 #include "FatEntry.h"
-#include "utils.h"
 
 using namespace std;
 

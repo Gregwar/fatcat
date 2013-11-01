@@ -1,8 +1,8 @@
-# FAT32 repair guide
+# FAT repair guide
 
 Back to [documentation index](index.md)
 
-This guide try to describe the steps you can follow to try to fix a FAT32
+This guide try to describe the steps you can follow to try to fix a FAT
 filesystem that is damaged.
 
 Note: you can try all this with the image `repair.img`, this image contains:

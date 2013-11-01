@@ -1,4 +1,4 @@
-# FAT32 Undelete tutorial
+# FAT Undelete tutorial
 
 Back to [documentation index](index.md)
 

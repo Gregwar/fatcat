@@ -6,9 +6,17 @@ FatWalk::FatWalk(FatSystem &system)
 {
 }
 
-void FatWalk::walk()
+void FatWalk::walk(int cluster)
 {
-    FatEntry root = system.rootEntry();
+    FatEntry root;
+
+    if (cluster == system.rootDirectory) {
+        root = system.rootEntry();
+    } else {
+        root.cluster = cluster;
+        root.attributes = FAT_ATTRIBUTES_DIR;
+        root.longName = "/";
+    }
     set<int> visited;
     onEntry(root, root, "/");
     doWalk(visited, root, "/");
@@ -37,13 +45,14 @@ void FatWalk::doWalk(set<int> &visited, FatEntry &currentEntry, string name)
         if (entry.getFilename() != "." && entry.getFilename() != "..") {
             string subname = name;
             
-            if (subname != "") {
+            if (subname != "" && subname != "/") {
                 subname += "/";
             }
 
             subname += entry.getFilename();
 
             if (entry.isDirectory()) {
+                onDirectory(currentEntry, entry, subname);
                 doWalk(visited, entry, subname);
             }
             
@@ -53,5 +62,9 @@ void FatWalk::doWalk(set<int> &visited, FatEntry &currentEntry, string name)
 }
         
 void FatWalk::onEntry(FatEntry &parent, FatEntry &entry, string name)
+{
+}
+        
+void FatWalk::onDirectory(FatEntry &parent, FatEntry &entr, string name)
 {
 }

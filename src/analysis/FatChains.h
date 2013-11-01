@@ -7,8 +7,9 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include "FatSystem.h"
-#include "FatModule.h"
+
+#include <core/FatSystem.h>
+#include <core/FatModule.h>
 #include "FatChain.h"
 
 using namespace std;
@@ -50,6 +51,11 @@ class FatChains : public FatModule
          * Display the orphaned chains
          */
         void displayOrphaned(list<FatChain> orphanedChains);
+
+        /**
+         * Size of a chain in the FAT
+         */
+        int chainSize(int cluster, bool *isContiguous);
 
     protected:
         bool saveEntries;

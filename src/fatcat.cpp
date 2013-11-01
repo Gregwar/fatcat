@@ -3,14 +3,16 @@
 #include <stdio.h>
 #include <string>
 #include <iostream>
-#include "FatSystem.h"
-#include "FatPath.h"
-#include "FatChains.h"
-#include "FatBackup.h"
-#include "FatDiff.h"
-#include "FatFix.h"
-#include "FatSearch.h"
-#include "utils.h"
+
+#include <FatUtils.h>
+#include <core/FatSystem.h>
+#include <core/FatPath.h>
+#include <table/FatBackup.h>
+#include <table/FatDiff.h>
+#include <analysis/FatChains.h>
+#include <analysis/FatExtract.h>
+#include <analysis/FatFix.h>
+#include <analysis/FatSearch.h>
 
 #define ATOU(i) ((unsigned int)atoi(i))
 
@@ -278,21 +280,24 @@ int main(int argc, char *argv[])
             } else if (clusterRead) {
                 fat.readFile(cluster, size);
             } else if (extract) {
-                fat.extract(cluster, extractDirectory);
+                FatExtract extract(fat);
+                extract.extract(cluster, extractDirectory, listDeleted);
             } else if (compare) {
                 FatDiff diff(fat);
                 diff.compare();
             } else if (address) {
                 cout << "Cluster " << cluster << " address:" << endl;
                 long long addr = fat.clusterAddress(cluster);
-                int next1 = fat.nextCluster(cluster, 0);
-                int next2 = fat.nextCluster(cluster, 1);
                 printf("%llu (%016llx)\n", addr, addr);
                 cout << "Next cluster:" << endl;
+                int next1 = fat.nextCluster(cluster, 0);
+                int next2 = fat.nextCluster(cluster, 1);
                 printf("FAT1: %u (%08x)\n", next1, next1);
                 printf("FAT2: %u (%08x)\n", next2, next2);
                 bool isContiguous = false;
-                unsigned long long size = fat.chainSize(cluster, &isContiguous);
+
+                FatChains chains(fat);
+                unsigned long long size = chains.chainSize(cluster, &isContiguous);
                 printf("Chain size: %llu (%llu / %s)\n", size, size*fat.bytesPerCluster, prettySize(size*fat.bytesPerCluster).c_str());
                 if (isContiguous) {
                     printf("Chain is contiguous\n");

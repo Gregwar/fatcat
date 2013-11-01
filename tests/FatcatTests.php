@@ -86,4 +86,22 @@ class FatcatTests extends \PHPUnit_Framework_TestCase
         $diff = `fatcat /tmp/repair.img -2`;
         $this->assertContains('FATs are exactly equals', $diff);
     }
+
+    /**
+     * Testing reading deleted files & dir
+     */
+    public function testDeleted()
+    {
+        $listing = `fatcat /tmp/deleted.img -l /`;
+        $this->assertNotContains('deleted', $listing);
+        
+        $listing = `fatcat /tmp/deleted.img -l / -d`;
+        $this->assertContains('deleted', $listing);
+        
+        $listing = `fatcat /tmp/deleted.img -l /deleted -d`;
+        $this->assertContains('file.txt', $listing);
+
+        $file = `fatcat /tmp/deleted.img -r /deleted/file.txt 2>/dev/null`;
+        $this->assertEquals("This file was deleted!\n", $file);
+    }
 }

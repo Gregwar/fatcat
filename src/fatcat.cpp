@@ -10,6 +10,7 @@
 #include <table/FatBackup.h>
 #include <table/FatDiff.h>
 #include <analysis/FatChains.h>
+#include <analysis/FatExtract.h>
 #include <analysis/FatFix.h>
 #include <analysis/FatSearch.h>
 
@@ -279,7 +280,8 @@ int main(int argc, char *argv[])
             } else if (clusterRead) {
                 fat.readFile(cluster, size);
             } else if (extract) {
-                fat.extract(cluster, extractDirectory);
+                FatExtract extract(fat);
+                extract.extract(cluster, extractDirectory, listDeleted);
             } else if (compare) {
                 FatDiff diff(fat);
                 diff.compare();

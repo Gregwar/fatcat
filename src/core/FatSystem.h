@@ -85,11 +85,6 @@ class FatSystem
         void setListDeleted(bool listDeleted);
 
         /**
-         * Extract all the files to the given directory
-         */
-        void extract(unsigned int cluster, string directory);
-
-        /**
          * Is the n-th cluster free?
          */
         bool freeCluster(unsigned int cluster);
@@ -203,11 +198,6 @@ class FatSystem
     
     protected:
         void parseHeader();
-
-        /**
-         * Extract an entry
-         */
-        void extractEntry(FatEntry &entry, string directory);
 
         /**
          * Compute the free clusters stats

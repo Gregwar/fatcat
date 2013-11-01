@@ -20,12 +20,13 @@ class FatWalk : public FatModule
     public:
         FatWalk(FatSystem &system);
 
-        void walk();
+        void walk(int cluster = 0);
         void doWalk(set<int> &visited, FatEntry &entry, string name);
 
     protected:
         bool walkErased;
         
+        virtual void onDirectory(FatEntry &parent, FatEntry &entr, string name);
         virtual void onEntry(FatEntry &parent, FatEntry &entry, string name);
 };
 

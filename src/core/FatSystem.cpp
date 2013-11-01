@@ -675,66 +675,6 @@ void FatSystem::setListDeleted(bool listDeleted_)
     listDeleted = listDeleted_;
 }
         
-void FatSystem::extractEntry(FatEntry &entry, string directory)
-{
-    vector<FatEntry> entries = getEntries(entry.cluster);
-    vector<FatEntry>::iterator it;
-
-    mkdir(directory.c_str(), 0755);
-
-    for (it=entries.begin(); it!=entries.end(); it++) {
-        FatEntry &entry = (*it);
-
-        if (listDeleted || (!entry.isErased())) {
-            string name = entry.getFilename();
-
-            if (name == "." || name == ".." || entry.cluster == 0) {
-                continue;
-            }
-                
-            string fullname = directory;
-            
-            if (fullname != "/") {
-                fullname += "/";
-            }
-            
-            fullname += name;
-
-            if (entry.isDirectory()) {
-                cout << "Entering " << fullname << endl;
-                extractEntry(entry, fullname);
-            } else {
-                cout << "Extracting " << fullname << endl;
-                FILE *output = fopen(fullname.c_str(), "w+");
-                if (output != NULL) {
-                    bool contiguous = false;
-                    if (entry.isErased() && freeCluster(entry.cluster)) {
-                        fprintf(stderr, "! Trying to read a deleted file, auto-enabling contiguous mode\n");
-                        contiguous = true;
-                    }
-                    readFile(entry.cluster, entry.size, output);
-                    fclose(output);
-                } else {
-                    fprintf(stderr, "! Unable to open %s\n", fullname.c_str());
-                }
-            }
-        }
-    }
-}
-        
-void FatSystem::extract(unsigned int cluster, string directory)
-{
-    FatEntry entry;
-    if (cluster == 0) {
-        entry = rootEntry();
-    } else {
-        entry.longName = "/";
-        entry.attributes = FAT_ATTRIBUTES_DIR;
-        entry.cluster = cluster;
-    }
-    extractEntry(entry, directory);
-}
-        
 FatEntry FatSystem::rootEntry()
 {
     FatEntry entry;

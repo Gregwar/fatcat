@@ -12,6 +12,7 @@ set(SOURCES
     table/FatBackup.cpp
     table/FatDiff.cpp
 
+    analysis/FatExtract.cpp
     analysis/FatFix.cpp
     analysis/FatChain.cpp
     analysis/FatChains.cpp

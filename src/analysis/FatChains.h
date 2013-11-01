@@ -7,8 +7,9 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include "FatSystem.h"
-#include "FatModule.h"
+
+#include <core/FatSystem.h>
+#include <core/FatModule.h>
 #include "FatChain.h"
 
 using namespace std;

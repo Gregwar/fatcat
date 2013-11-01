@@ -1,7 +1,7 @@
 #ifndef _FATCAT_FATDIFF_H
 #define _FATCAT_FATDIFF_H
 
-#include "FatModule.h"
+#include <core/FatModule.h>
 
 class FatDiff : public FatModule
 {

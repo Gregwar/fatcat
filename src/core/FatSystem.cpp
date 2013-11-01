@@ -10,11 +10,11 @@
 #include <sys/types.h>
 #include <set>
 
-#include "FatSystem.h"
+#include <FatUtils.h>
 #include "FatFilename.h"
 #include "FatEntry.h"
 #include "FatDate.h"
-#include "utils.h"
+#include "FatSystem.h"
 
 using namespace std;
 
@@ -692,7 +692,13 @@ void FatSystem::extractEntry(FatEntry &entry, string directory)
                 continue;
             }
                 
-            string fullname = directory + "/" + name;
+            string fullname = directory;
+            
+            if (fullname != "/") {
+                fullname += "/";
+            }
+            
+            fullname += name;
 
             if (entry.isDirectory()) {
                 cout << "Entering " << fullname << endl;

@@ -4,10 +4,11 @@
 #include <set>
 #include <vector>
 #include <iostream>
+
+#include <FatUtils.h>
+#include <core/FatEntry.h>
 #include "FatChains.h"
 #include "FatChain.h"
-#include "FatEntry.h"
-#include "utils.h"
 
 using namespace std;
 

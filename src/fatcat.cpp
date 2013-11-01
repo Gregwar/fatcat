@@ -3,14 +3,15 @@
 #include <stdio.h>
 #include <string>
 #include <iostream>
-#include "FatSystem.h"
-#include "FatPath.h"
-#include "FatChains.h"
-#include "FatBackup.h"
-#include "FatDiff.h"
-#include "FatFix.h"
-#include "FatSearch.h"
-#include "utils.h"
+
+#include <FatUtils.h>
+#include <core/FatSystem.h>
+#include <core/FatPath.h>
+#include <table/FatBackup.h>
+#include <table/FatDiff.h>
+#include <analysis/FatChains.h>
+#include <analysis/FatFix.h>
+#include <analysis/FatSearch.h>
 
 #define ATOU(i) ((unsigned int)atoi(i))
 

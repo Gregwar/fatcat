@@ -3,8 +3,8 @@
 
 #include <string>
 #include <set>
+#include <core/FatSystem.h>
 #include "FatWalk.h"
-#include "FatSystem.h"
 
 using namespace std;
 

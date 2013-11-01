@@ -3,8 +3,8 @@
 
 #include <string>
 #include <set>
-#include "FatSystem.h"
-#include "FatModule.h"
+#include <core/FatSystem.h>
+#include <core/FatModule.h>
 
 using namespace std;
 

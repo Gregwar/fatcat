@@ -55,9 +55,11 @@ void FatFix::fixChain(int cluster, int size)
         for (int i=0; i<size; i++) {
             if (system.freeCluster(cluster+i)) {
                 if (i == size-1) {
-                    system.writeNextCluster(cluster+i, FAT_LAST);
+                    system.writeNextCluster(cluster+i, FAT_LAST, 0);
+                    system.writeNextCluster(cluster+i, FAT_LAST, 1);
                 } else {
-                    system.writeNextCluster(cluster+i, cluster+i+1);
+                    system.writeNextCluster(cluster+i, cluster+i+1, 0);
+                    system.writeNextCluster(cluster+i, cluster+i+1, 1);
                 }
             }
         }

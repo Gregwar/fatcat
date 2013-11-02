@@ -37,6 +37,11 @@ void FatFix::fixChain(int cluster, int size)
 {
     bool fixIt = true;
 
+    if (!size) {
+        cout << "Size is zero, not fixing" << endl;
+        return;
+    }
+
     cout << "Fixing the FAT (" << size << " clusters)" << endl;
 
     for (int i=0; i<size; i++) {

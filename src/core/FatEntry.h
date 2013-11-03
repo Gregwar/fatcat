@@ -52,6 +52,8 @@ class FatEntry
 
         bool isCorrect();
         bool isZero();
+
+        bool printable(unsigned char c);
 };
 
 #endif // _FATCAT_FATENTRY_H

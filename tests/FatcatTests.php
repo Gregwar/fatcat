@@ -104,4 +104,29 @@ class FatcatTests extends \PHPUnit_Framework_TestCase
         $file = `fatcat /tmp/deleted.img -r /deleted/file.txt 2>/dev/null`;
         $this->assertEquals("This file was deleted!\n", $file);
     }
+
+    /**
+     * Testing backuping & restoring FAT
+     */
+    public function testBackupFAT()
+    {
+        $sum = md5_file('/tmp/hello-world.img');
+
+        `fatcat /tmp/hello-world.img -b /tmp/hello-world.fat`;
+
+        $this->assertTrue(file_exists('/tmp/hello-world.fat'));
+
+        $fat = md5_file('/tmp/hello-world.fat');
+        $this->assertEquals('c1eefa66f9da00f542f224dcb68c90c4', $fat);
+
+        `fatcat /tmp/hello-world.img -p /dev/zero`;
+
+        $sum2 = md5_file('/tmp/hello-world.img');
+        $this->assertNotEquals($sum, $sum2);
+        
+        `fatcat /tmp/hello-world.img -p /tmp/hello-world.fat`;
+        
+        $sum3 = md5_file('/tmp/hello-world.img');
+        $this->assertEquals($sum, $sum3);
+    }
 }

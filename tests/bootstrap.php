@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copying the testing images to /tmp
  */

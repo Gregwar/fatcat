@@ -1,3 +1,9 @@
+fatcat (1.0.4-1) UNRELEASED; urgency=low
+
+  * Better handling of files undelete
+
+ -- Grégoire Passault <g.passault@gmail.com>  Mon, 11 Nov 2013 20:09:11 +0100
+
 fatcat (1.0.3-1) UNRELEASED; urgency=low
 
   * Reorganisation

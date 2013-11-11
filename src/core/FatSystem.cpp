@@ -488,8 +488,10 @@ void FatSystem::list(vector<FatEntry> &entries)
     }
 }
 
-void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool contiguous)
+void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool deleted)
 {
+    bool contiguous = deleted;
+
     if (f == NULL) {
         f = stdout;
     }
@@ -512,13 +514,19 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
         fflush(f);
 
         if (contiguous) {
-            if (!freeCluster(cluster)) {
-                fprintf(stderr, "! Contiguous file contains cluster that seems allocated\n");
-                fprintf(stderr, "! Trying to disable contiguous mode\n");
-                contiguous = false;
-                cluster = nextCluster(cluster);
+            if (deleted) {
+                do {
+                    cluster++;
+                } while (!freeCluster(cluster));
             } else {
-                cluster++;
+                if (!freeCluster(cluster)) {
+                    fprintf(stderr, "! Contiguous file contains cluster that seems allocated\n");
+                    fprintf(stderr, "! Trying to disable contiguous mode\n");
+                    contiguous = false;
+                    cluster = nextCluster(cluster);
+                } else {
+                    cluster++;
+                }
             }
         } else {
             cluster = nextCluster(currentCluster);
@@ -663,7 +671,7 @@ void FatSystem::readFile(FatPath &path, FILE *f)
     if (findFile(path, entry)) {
         bool contiguous = false;
         if (entry.isErased() && freeCluster(entry.cluster)) {
-            fprintf(stderr, "! Trying to read a deleted file, auto-enabling contiguous mode\n");
+            fprintf(stderr, "! Trying to read a deleted file, enabling deleted mode\n");
             contiguous = true;
         }
         readFile(entry.cluster, entry.size, f, contiguous);

@@ -77,21 +77,26 @@ bool FatEntry::isZero()
     return true;
 }
 
+bool FatEntry::printable(unsigned char c)
+{
+    return isprint(c);
+}
+
 bool FatEntry::isCorrect()
 {
     if (attributes && !(attributes&FAT_ATTRIBUTES_DIR) && !(attributes&FAT_ATTRIBUTES_FILE)) {
         return false;
     }
 
-    for (int i=1; i<11; i++) {
-        if (!isprint(data[i])) {
-            return false;
-        }
-    }
-
     if (isDirectory() && cluster == 0 && getFilename()!="..") {
         return false;
     }
 
-    return true;
+    for (int i=1; i<11; i++) {
+        if (printable(data[i])) {
+            return true;
+        }
+    }
+
+    return false;
 }

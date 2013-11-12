@@ -92,6 +92,10 @@ bool FatEntry::isCorrect()
         return false;
     }
 
+    if (isDirectory() && size != 0) {
+        return false;
+    }
+
     for (int i=1; i<11; i++) {
         if (printable(data[i])) {
             return true;

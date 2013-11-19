@@ -132,7 +132,7 @@ void FatSystem::parseHeader()
 
     readData(0x0, buffer, sizeof(buffer));
     bytesPerSector = FAT_READ_SHORT(buffer, FAT_BYTES_PER_SECTOR)&0xffff;
-    sectorsPerCluster = buffer[FAT_SECTORS_PER_CLUSTER];
+    sectorsPerCluster = buffer[FAT_SECTORS_PER_CLUSTER]&0xff;
     reservedSectors = FAT_READ_SHORT(buffer, FAT_RESERVED_SECTORS)&0xffff;
     oemName = string(buffer+FAT_DISK_OEM, FAT_DISK_OEM_SIZE);
     fats = buffer[FAT_FATS];

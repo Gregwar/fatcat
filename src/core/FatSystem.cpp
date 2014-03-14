@@ -283,11 +283,13 @@ unsigned long long FatSystem::clusterAddress(unsigned int cluster, bool isRoot)
         cluster -= 2;
     }
 
+    int addr = (dataStart + bytesPerSector*sectorsPerCluster*cluster);
+
     if (type == FAT16 && !isRoot) {
-        cluster += rootClusters;
+        addr += rootEntries * FAT_ENTRY_SIZE;
     }
 
-    return (dataStart + bytesPerSector*sectorsPerCluster*cluster);
+    return addr;
 }
 
 vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool *hasFree)
@@ -420,7 +422,7 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
           }
         }
     } while (cluster != FAT_LAST);
-
+    
     return entries;
 }
         

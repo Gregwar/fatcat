@@ -23,6 +23,7 @@ void FatEntry::setData(string data_)
         
 void FatEntry::updateData()
 {
+    data[FAT_ATTRIBUTES] = attributes&0xff;
     FAT_WRITE_LONG(data, FAT_FILESIZE, size&0xffffffff);
     FAT_WRITE_SHORT(data, FAT_CLUSTER_LOW, cluster&0xffff);
     FAT_WRITE_SHORT(data, FAT_CLUSTER_HIGH, (cluster>>16)&0xffff);

@@ -52,7 +52,8 @@ void usage()
     cout << "Entries hacking" << endl;
     cout << "  -e [path]: sets the entry to hack, combined with:" << endl;
     cout << "* -c [cluster]: sets the entry cluster" << endl;
-    cout << "* -s [cluster]: sets the entry size" << endl;
+    cout << "* -s [size]: sets the entry size" << endl;
+    cout << "* -a [attributes]: sets the entry attributes" << endl;
     cout << "  -k [cluster]: try to find an entry that point to that cluster" << endl;
 
     cout << endl;
@@ -137,13 +138,19 @@ int main(int argc, char *argv[])
     string entryPath;
     bool clusterProvided = false;
     bool sizeProvided = false;
+    int attributes = 0;
+    bool attributesProvided = false;
 
     // -k: entry finder
     bool findEntry = false;
 
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:Sze:O:fk:")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:Sze:O:fk:a:")) != -1) {
         switch (index) {
+            case 'a':
+                attributesProvided = true;
+                attributes = atoi(optarg);
+                break;
             case 'k':
                 findEntry = true;
                 cluster = atoi(optarg);
@@ -353,6 +360,7 @@ int main(int argc, char *argv[])
                 FatEntry entry;
                 if (fat.findFile(path, entry)) {
                     printf("Entry address %016llx\n", entry.address);
+                    printf("Attributes %02X\n", entry.attributes);
                     cout << "Found entry, cluster=" << entry.cluster;
                     if (entry.isDirectory()) {
                         cout << ", directory";
@@ -369,7 +377,11 @@ int main(int argc, char *argv[])
                         cout << "Setting the size to " << size << endl;
                         entry.size = size&0xffffffff;
                     }
-                    if (clusterProvided || sizeProvided) {
+                    if (attributesProvided) {
+                        cout << "Setting attributes to " << attributes << endl;
+                        entry.attributes = attributes;
+                    }
+                    if (clusterProvided || sizeProvided || attributesProvided) {
                         entry.updateData();
                         fat.enableWrite();
                         string data = entry.data;

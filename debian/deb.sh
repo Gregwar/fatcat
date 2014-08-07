@@ -22,7 +22,7 @@ cd $NAME &&
 tar zxvf $UPSTREAM &&
 
 # Run the debian packaging
-dpkg-buildpackage -us -uc && # -ai386 &&
+dpkg-buildpackage  && # -uc && # -ai386 &&
 
 cd $WORKDIR &&
 scp fatcat_$VERSION* root@gregwar.com:/home/www/gregwar/fatcat/

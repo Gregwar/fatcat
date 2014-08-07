@@ -1,6 +1,6 @@
 Source: fatcat
 Maintainer: Grégoire Passault <g.passault@gmail.com>
-Section: contrib/misc
+Section: utils
 Priority: optional
 Standards-Version: 3.9.5
 Build-Depends: debhelper (>= 9), cmake

@@ -3,7 +3,7 @@ Maintainer: Grégoire Passault <g.passault@gmail.com>
 Section: contrib/utils
 Priority: optional
 Standards-Version: 3.9.5
-Build-Depends: debhelper (>= 8), cmake
+Build-Depends: debhelper (>= 9), cmake
 Homepage: https://github.com/Gregwar/fatcat
 Vcs-Browser: https://www.github.com/Gregwar/fatcat
 Vcs-Git: git://github.com/Gregwar/fatcat.git

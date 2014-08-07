@@ -23,5 +23,5 @@ Description: FAT filesystem explore, extract, repair, and forensic tool
      - Hack the entries by changing clusters and file sizes;
      - Perform a search for orphaned files & directories;
      - Compare and merge the FAT tables;
-     - Repair unallocated directories &  files
-     - Supports FAT12, FAT16 and FAT32
+     - Repair unallocated directories &  files;
+     - Supports FAT12, FAT16 and FAT32.

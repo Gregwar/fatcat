@@ -2,8 +2,14 @@ Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: fatcat
 Source: https://github.com/Gregwar/fatcat
 
-Files: debian/* src/* docs/*
-Copyright: 2013-2014 Grégoire Passault <g.passault@gmail.com>
+Files: *
+Copyright: 2013 Grégoire Passault <g.passault@gmail.com>
+License: MIT
+
+Files: debian/*
+Copyright: 2014 Grégoire Passault <g.passault@gmail.com>
+License: MIT
+
 License: MIT
  Copyright (c) <2013> Grégoire Passault
  .

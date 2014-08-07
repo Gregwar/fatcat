@@ -132,7 +132,7 @@ void FatSystem::parseHeader()
 
     readData(0x0, buffer, sizeof(buffer));
     bytesPerSector = FAT_READ_SHORT(buffer, FAT_BYTES_PER_SECTOR)&0xffff;
-    sectorsPerCluster = buffer[FAT_SECTORS_PER_CLUSTER];
+    sectorsPerCluster = buffer[FAT_SECTORS_PER_CLUSTER]&0xff;
     reservedSectors = FAT_READ_SHORT(buffer, FAT_RESERVED_SECTORS)&0xffff;
     oemName = string(buffer+FAT_DISK_OEM, FAT_DISK_OEM_SIZE);
     fats = buffer[FAT_FATS];
@@ -283,11 +283,13 @@ unsigned long long FatSystem::clusterAddress(unsigned int cluster, bool isRoot)
         cluster -= 2;
     }
 
+    int addr = (dataStart + bytesPerSector*sectorsPerCluster*cluster);
+
     if (type == FAT16 && !isRoot) {
-        cluster += rootClusters;
+        addr += rootEntries * FAT_ENTRY_SIZE;
     }
 
-    return (dataStart + bytesPerSector*sectorsPerCluster*cluster);
+    return addr;
 }
 
 vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool *hasFree)
@@ -420,7 +422,7 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
           }
         }
     } while (cluster != FAT_LAST);
-
+    
     return entries;
 }
         
@@ -488,8 +490,10 @@ void FatSystem::list(vector<FatEntry> &entries)
     }
 }
 
-void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool contiguous)
+void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool deleted)
 {
+    bool contiguous = deleted;
+
     if (f == NULL) {
         f = stdout;
     }
@@ -512,13 +516,19 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
         fflush(f);
 
         if (contiguous) {
-            if (!freeCluster(cluster)) {
-                fprintf(stderr, "! Contiguous file contains cluster that seems allocated\n");
-                fprintf(stderr, "! Trying to disable contiguous mode\n");
-                contiguous = false;
-                cluster = nextCluster(cluster);
+            if (deleted) {
+                do {
+                    cluster++;
+                } while (!freeCluster(cluster));
             } else {
-                cluster++;
+                if (!freeCluster(cluster)) {
+                    fprintf(stderr, "! Contiguous file contains cluster that seems allocated\n");
+                    fprintf(stderr, "! Trying to disable contiguous mode\n");
+                    contiguous = false;
+                    cluster = nextCluster(cluster);
+                } else {
+                    cluster++;
+                }
             }
         } else {
             cluster = nextCluster(currentCluster);
@@ -663,7 +673,7 @@ void FatSystem::readFile(FatPath &path, FILE *f)
     if (findFile(path, entry)) {
         bool contiguous = false;
         if (entry.isErased() && freeCluster(entry.cluster)) {
-            fprintf(stderr, "! Trying to read a deleted file, auto-enabling contiguous mode\n");
+            fprintf(stderr, "! Trying to read a deleted file, enabling deleted mode\n");
             contiguous = true;
         }
         readFile(entry.cluster, entry.size, f, contiguous);

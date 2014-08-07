@@ -77,7 +77,7 @@ class FatSystem
          * File reading
          */
         void readFile(FatPath &path, FILE *f = NULL);
-        void readFile(unsigned int cluster, unsigned int size, FILE * f = NULL, bool contiguous = false);
+        void readFile(unsigned int cluster, unsigned int size, FILE * f = NULL, bool deleted = false);
 
         /**
          * Showing deleted file in listing

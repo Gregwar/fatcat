@@ -3,7 +3,7 @@ Upstream-Name: fatcat
 Source: https://github.com/Gregwar/fatcat
 
 Files: *
-Copyright: 2013-1024 Grégoire Passault <g.passault@gmail.com>
+Copyright: 2013-2014 Grégoire Passault <g.passault@gmail.com>
 License: MIT
 
 Files: debian/*

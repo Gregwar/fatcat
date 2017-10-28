@@ -51,7 +51,7 @@ void FatSystem::enableCache()
         for (int cluster=0; cluster<totalClusters; cluster++) {
             cache[cluster] = nextCluster(cluster);
         }
-        
+
         cacheEnabled = true;
     }
 }
@@ -67,7 +67,7 @@ void FatSystem::enableWrite()
 
         throw oss.str();
     }
-    
+
     writeMode = true;
 }
 
@@ -136,7 +136,7 @@ void FatSystem::parseHeader()
     reservedSectors = FAT_READ_SHORT(buffer, FAT_RESERVED_SECTORS)&0xffff;
     oemName = string(buffer+FAT_DISK_OEM, FAT_DISK_OEM_SIZE);
     fats = buffer[FAT_FATS];
-    
+
     sectorsPerFat = FAT_READ_SHORT(buffer, FAT16_SECTORS_PER_FAT)&0xffff;
 
     if (sectorsPerFat != 0) {
@@ -193,7 +193,7 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 {
     int bytes = (bits == 32 ? 4 : 2);
     char buffer[bytes];
-    
+
     if (!validCluster(cluster)) {
         return 0;
     }
@@ -205,7 +205,7 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
     readData(fatStart+fatSize*fat+(bits*cluster)/8, buffer, sizeof(buffer));
 
     unsigned int next;
-    
+
     if (type == FAT32) {
         next = FAT_READ_LONG(buffer, 0)&0x0fffffff;
 
@@ -237,7 +237,7 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
         }
     }
 }
-    
+
 /**
  * Changes the next cluster in a file
  */
@@ -251,7 +251,7 @@ bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fa
     }
 
     int offset = fatStart+fatSize*fat+(bits*cluster)/8;
-    
+
     if (bits == 12) {
         readData(offset, buffer, bytes);
         int bit = cluster*bits;
@@ -271,7 +271,7 @@ bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fa
 
     return writeData(offset, buffer, bytes) == bytes;
 }
-        
+
 bool FatSystem::validCluster(unsigned int cluster)
 {
     return cluster < totalClusters;
@@ -283,7 +283,7 @@ unsigned long long FatSystem::clusterAddress(unsigned int cluster, bool isRoot)
         cluster -= 2;
     }
 
-    int addr = (dataStart + bytesPerSector*sectorsPerCluster*cluster);
+    unsigned long long addr = (dataStart + bytesPerSector*sectorsPerCluster*cluster);
 
     if (type == FAT16 && !isRoot) {
         addr += rootEntries * FAT_ENTRY_SIZE;
@@ -394,7 +394,7 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
         } else {
             cluster = nextCluster(cluster);
         }
-        
+
         if (clusters) {
             (*clusters)++;
         }
@@ -422,10 +422,10 @@ vector<FatEntry> FatSystem::getEntries(unsigned int cluster, int *clusters, bool
           }
         }
     } while (cluster != FAT_LAST);
-    
+
     return entries;
 }
-        
+
 void FatSystem::list(FatPath &path)
 {
     FatEntry entry;
@@ -445,7 +445,7 @@ void FatSystem::list(unsigned int cluster)
     }
     list(entries);
 }
-            
+
 void FatSystem::list(vector<FatEntry> &entries)
 {
     vector<FatEntry>::iterator it;
@@ -472,7 +472,7 @@ void FatSystem::list(vector<FatEntry> &entries)
         printf(" %-30s", name.c_str());
 
         printf(" c=%u", entry.cluster);
-        
+
         if (!entry.isDirectory()) {
             string pretty = prettySize(entry.size);
             printf(" s=%llu (%s)", entry.size, pretty.c_str());
@@ -564,7 +564,7 @@ bool FatSystem::init()
 
     return strange == 0;
 }
-        
+
 void FatSystem::infos()
 {
     cout << "FAT Filesystem information" << endl << endl;
@@ -595,13 +595,13 @@ void FatSystem::infos()
     computeStats();
     cout << "Free clusters: " << freeClusters << "/" << totalClusters;
     cout << " (" << (100*freeClusters/(double)totalClusters) << "%)" << endl;
-    cout << "Free space: " << (freeClusters*bytesPerCluster) << 
+    cout << "Free space: " << (freeClusters*bytesPerCluster) <<
         " (" << prettySize(freeClusters*bytesPerCluster) << ")" << endl;
-    cout << "Used space: " << ((totalClusters-freeClusters)*bytesPerCluster) << 
+    cout << "Used space: " << ((totalClusters-freeClusters)*bytesPerCluster) <<
         " (" << prettySize((totalClusters-freeClusters)*bytesPerCluster) << ")" << endl;
     cout << endl;
 }
-        
+
 bool FatSystem::findDirectory(FatPath &path, FatEntry &outputEntry)
 {
     int cluster;
@@ -665,11 +665,11 @@ bool FatSystem::findFile(FatPath &path, FatEntry &outputEntry)
 
     return found;
 }
-        
+
 void FatSystem::readFile(FatPath &path, FILE *f)
 {
     FatEntry entry;
-    
+
     if (findFile(path, entry)) {
         bool contiguous = false;
         if (entry.isErased() && freeCluster(entry.cluster)) {
@@ -679,12 +679,12 @@ void FatSystem::readFile(FatPath &path, FILE *f)
         readFile(entry.cluster, entry.size, f, contiguous);
     }
 }
-        
+
 void FatSystem::setListDeleted(bool listDeleted_)
 {
     listDeleted = listDeleted_;
 }
-        
+
 FatEntry FatSystem::rootEntry()
 {
     FatEntry entry;
@@ -699,7 +699,7 @@ bool FatSystem::freeCluster(unsigned int cluster)
 {
     return nextCluster(cluster) == 0;
 }
-        
+
 void FatSystem::computeStats()
 {
     if (statsComputed) {

@@ -154,9 +154,11 @@ $ fatcat disk.img \-l /some/dir/
 
 You can read a file using \fB\-R\fP:
 
-$ fatcat disk.img \-r /hello.txt
-Hello world!
-$ fatcat disk.img \-r /picture.png > out.png
+.Vb 5
+\&$ fatcat disk.img \-r /hello.txt 
+\&Hello world!
+\&$ fatcat disk.img \-r /picture.png > out.png
+.Ve
 
 You can also read files, including deleted ones:
 
@@ -164,38 +166,40 @@ $ fatat disk.img \-l / \-d
 
 And extract all the files to a target directory:
 
-$ mkdir output/
-$ fatcat disk.img \-x output/
+.Vb 5
+\&$ mkdir output/
+\&$ fatcat disk.img \-x output/
+.Ve
 
 Let's have a look at the listing:
 
 .Vb 5
-\& $ fatcat hello-world.img \-l /
-\& Listing path /
-\& Directory cluster: 2
-\& f 25/10/2013 13:30:06  hello.txt                      c=3 s=13 (13B)
-\& d 25/10/2013 13:30:46  files/                         c=4
+\&$ fatcat hello-world.img \-l /
+\&Listing path /
+\&Directory cluster: 2
+\&f 25/10/2013 13:30:06  hello.txt                      c=3 s=13 (13B)
+\&d 25/10/2013 13:30:46  files/                         c=4
 .Ve
 
 The cluster of the \fBfiles\fP directory is \fB4\fP, this means that we
 can list it with \fB\-L 4\fP:
 
 .Vb 5
-\& $ fatcat hello-world.img \-L 4
-\& Listing cluster 4
-\& Directory cluster: 4
-\& d 25/10/2013 13:30:22  ./                             c=4
-\& d 25/10/2013 13:30:22  ../                            c=0
-\& f 25/10/2013 13:30:46  other_file.txt                 c=5 s=29 (29B)
+\&$ fatcat hello-world.img \-L 4
+\&Listing cluster 4
+\&Directory cluster: 4
+\&d 25/10/2013 13:30:22  ./                             c=4
+\&d 25/10/2013 13:30:22  ../                            c=0
+\&f 25/10/2013 13:30:46  other_file.txt                 c=5 s=29 (29B)
 .Ve
 
 The cluster of the \fBother_file.txt\fP file is 5, and its size is 29bytes,
 we can then read it using \fB\-R 5 \-s 29\fP:
 
 .Vb 5
-\& $ fatcat hello-world.img \-R 5 \-s 29
-\& Hello!
-\& This is another file!
+\&$ fatcat hello-world.img \-R 5 \-s 29
+\&Hello!
+\&This is another file!
 .Ve
 
 For more examples and tutorials, have a look at the \fBfatcat\fP tutorial and examples

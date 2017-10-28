@@ -3,7 +3,7 @@ fatcat (1.0.6) UNRELEASED; urgency=medium
   * Fixing line breaks in man page
   * Fixing possible cluster truncating (see #879930)
 
- -- gregwar <gregwar@hyperion>  Sat, 28 Oct 2017 11:24:47 +0200
+ -- gregwar <g.passault@gmail.com>  Sat, 28 Oct 2017 11:24:47 +0200
 
 fatcat (1.0.5-1) unstable; urgency=low
 

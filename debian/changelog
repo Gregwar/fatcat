@@ -1,3 +1,8 @@
+fatcat (1.0.6) unstable; urgency=low
+
+    * Fixing line breaks in manual page
+    * Fixing possible truncation in cluster address calculation
+
 fatcat (1.0.5-1) unstable; urgency=low
 
     * Initial release. (Closes: #728125).

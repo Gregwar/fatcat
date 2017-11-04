@@ -1,4 +1,4 @@
-fatcat (1.0.7-1) unstable; urgency=medium
+fatcat (1.0.7-1) UNRELEASED; urgency=medium
 
   * Fixing line breaks in man page
   * Fixing possible cluster truncating (see #879930)

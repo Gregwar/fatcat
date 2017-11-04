@@ -22,7 +22,10 @@ cd $NAME &&
 tar zxvf $UPSTREAM &&
 
 # Run the debian packaging
-dpkg-buildpackage  && # -uc && # -ai386 &&
+dpkg-buildpackage --force-sign && # -uc && # -ai386 &&
 
 cd $WORKDIR &&
 scp fatcat_$VERSION* root@gregwar.com:/home/www/gregwar/fatcat/
+
+# Using:
+# dput mentors [file.changes]

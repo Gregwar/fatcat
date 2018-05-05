@@ -1,7 +1,10 @@
+#include <errno.h>
 #include <iostream>
 #include <stdio.h>
+#include <string.h>
 #include <string>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include "FatExtract.h"
 
@@ -33,6 +36,28 @@ void FatExtract::onEntry(FatEntry &parent, FatEntry &entry, string name)
         FILE *output = fopen(target.c_str(), "w+");
         system.readFile(entry.cluster, entry.size, output, contiguous);
         fclose(output);
+
+        time_t mtime = entry.changeDate.timestamp();
+        if (mtime == (time_t)-1) {
+            // Files on FAT can have dates up to 2107 year inclusive (which is
+            // more than 2038), so it's theoretically possible that on a dated
+            // system with 4-byte time_t some dates cannot be represented.
+            // Too bad.
+            cerr << "! Unable to set file timestamps for " << name
+                 << ": value cannot be represented" << endl;
+        } else {
+            struct timeval times[2];
+            // Modification time
+            times[1].tv_sec = mtime;
+            times[1].tv_usec = 0;
+            // Access time
+            times[0] = times[1];
+
+            if (utimes(target.c_str(), times) != 0) {
+                cerr << "! Unable to set file timestamps for " << name
+                     << ": " << strerror(errno) << endl;
+            }
+        }
     }
 }
         

@@ -85,10 +85,6 @@ bool FatEntry::printable(unsigned char c)
 
 bool FatEntry::isCorrect()
 {
-    if (attributes && !(attributes&FAT_ATTRIBUTES_DIR) && !(attributes&FAT_ATTRIBUTES_FILE)) {
-        return false;
-    }
-
     if (isDirectory() && cluster == 0 && getFilename()!="..") {
         return false;
     }

@@ -8,6 +8,11 @@
 #include "FatEntry.h"
 #include "FatPath.h"
 
+#ifdef __APPLE__
+#define O_LARGEFILE 0
+#define lseek64 lseek
+#endif
+
 using namespace std;
 
 // Last cluster

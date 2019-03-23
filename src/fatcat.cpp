@@ -1,5 +1,11 @@
 #include <stdlib.h>
+
+#ifdef __APPLE__
+#include <unistd.h>
+#else
 #include <argp.h>
+#endif
+
 #include <stdio.h>
 #include <string>
 #include <iostream>

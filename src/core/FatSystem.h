@@ -7,6 +7,7 @@
 
 #include "FatEntry.h"
 #include "FatPath.h"
+#include "OutputType.h"
 
 #ifdef __APPLE__
 #define O_LARGEFILE 0
@@ -52,7 +53,7 @@ using namespace std;
 class FatSystem
 {
     public:
-        FatSystem(string filename, unsigned long long globalOffset = 0);
+        FatSystem(string filename, unsigned long long globalOffset = 0, OutputType outputFormat = (OutputType)0);
         ~FatSystem();
 
         /**
@@ -208,6 +209,8 @@ class FatSystem
          * Compute the free clusters stats
          */
         void computeStats();
+
+        OutputType _outputFormat;
 };
 
 #endif // _FATCAT_FATSYSTEM_H

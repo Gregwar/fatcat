@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
 
     try {
         // Openning the image
-        FatSystem fat(image, globalOffset);
+        FatSystem fat(image, globalOffset, output);
 
         fat.setListDeleted(listDeleted);
 

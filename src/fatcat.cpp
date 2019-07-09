@@ -1,5 +1,5 @@
 #include <stdlib.h>
-
+#include<string.h>
 #ifdef __APPLE__
 #include <unistd.h>
 #else
@@ -31,6 +31,7 @@ void usage()
     cout << "Usage: fatcat disk.img [options]" << endl;
     cout << "  -i: display information about disk" << endl;
     cout << "  -O [offset]: global offset (may be partition place)" << endl;
+    cout << "  -F [format]: output format (default, json)" << endl;
     cout << endl;
     cout << "Browsing & extracting:" << endl;
     cout << "  -l [dir]: list files and directories in the given path" << endl;
@@ -149,9 +150,10 @@ int main(int argc, char *argv[])
 
     // -k: entry finder
     bool findEntry = false;
+    OutputType output = Default;
 
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:Sze:O:fk:a:")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:Sze:O:fk:a:F:")) != -1) {
         switch (index) {
             case 'a':
                 attributesProvided = true;
@@ -245,6 +247,16 @@ int main(int argc, char *argv[])
                 break;
             case 'h':
                 usage();
+                break;
+            case 'F':
+                if (strcmp(optarg, "json") == 0)
+                        output = Json;
+                else if (strcmp(optarg, "default") == 0)
+                        output = Default;
+                else
+                {
+                    usage();
+                }
                 break;
         }
     }

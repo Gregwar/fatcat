@@ -21,7 +21,7 @@ using namespace std;
 /**
  * Opens the FAT resource
  */
-FatSystem::FatSystem(string filename_, unsigned long long globalOffset_, OutputType outputFormat_)
+FatSystem::FatSystem(string filename_, unsigned long long globalOffset_, OutputFormatType outputFormat_)
     : strange(0),
     filename(filename_),
     globalOffset(globalOffset_),
@@ -31,7 +31,7 @@ FatSystem::FatSystem(string filename_, unsigned long long globalOffset_, OutputT
     freeClusters(0),
     cacheEnabled(false),
     type(FAT32),
-    rootEntries(0),
+    rootEntries(0)
 {
     this->_outputFormat = outputFormat_;
     fd = open(filename.c_str(), O_RDONLY|O_LARGEFILE);

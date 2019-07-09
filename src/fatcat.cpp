@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 
     // -k: entry finder
     bool findEntry = false;
-    OutputType output = Default;
+    OutputFormatType outputFormat = Default;
 
     // Parsing command line
     while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:Sze:O:fk:a:F:")) != -1) {
@@ -250,9 +250,9 @@ int main(int argc, char *argv[])
                 break;
             case 'F':
                 if (strcmp(optarg, "json") == 0)
-                        output = Json;
+                        outputFormat = Json;
                 else if (strcmp(optarg, "default") == 0)
-                        output = Default;
+                        outputFormat = Default;
                 else
                 {
                     usage();
@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
 
     try {
         // Openning the image
-        FatSystem fat(image, globalOffset, output);
+        FatSystem fat(image, globalOffset, outputFormat);
 
         fat.setListDeleted(listDeleted);
 

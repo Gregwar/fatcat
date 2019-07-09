@@ -440,54 +440,111 @@ void FatSystem::list(unsigned int cluster)
 {
     bool hasFree = false;
     vector<FatEntry> entries = getEntries(cluster, NULL, &hasFree);
-    printf("Directory cluster: %u\n", cluster);
-    if (hasFree) {
+    if(this->_outputFormat == Json)
+        cout << "{\"Cluster\":" << cluster << ",";
+    else
+        printf("Directory cluster: %u\n", cluster);
+    if (hasFree && this->_outputFormat != Json) {
         printf("Warning: this directory has free clusters that was read contiguously\n");
     }
+    if(this->_outputFormat == Json)
+        cout << "\"Entries\":";
     list(entries);
+    if(this->_outputFormat == Json)
+        cout << "}";
 }
 
 void FatSystem::list(vector<FatEntry> &entries)
 {
     vector<FatEntry>::iterator it;
+    if(this->_outputFormat ==  Json){
+        cout << "[";
+        it = entries.begin();
+        FatEntry &first = *it;
+        for (; it!=entries.end(); it++) {
+            FatEntry &entry = *it;
 
-    for (it=entries.begin(); it!=entries.end(); it++) {
-        FatEntry &entry = *it;
+            if (entry.isErased() && !listDeleted) {
+                continue;
+            }
+            if(&entry != &first) {
+                cout << ",";
+            }
+            cout << "{\"EntryType\":";
+            if (entry.isDirectory()) {
+                cout << "\"Directory\",";
+            } else {
+                cout << "\"File\",";
+            }
 
-        if (entry.isErased() && !listDeleted) {
-            continue;
+            string name = entry.getFilename();
+
+            cout << "\"EditDate\":\"" << entry.changeDate.isoFormat() << "\",";
+            cout << "\"Name\":\"" << name << "\",";
+            cout << "\"Cluster\":" << entry.cluster << ",";
+
+            if (!entry.isDirectory()) {
+                string pretty = prettySize(entry.size);
+                cout << "\"Size\":" << entry.size << ",";
+                cout << "\"PrettySize\":\"" << pretty << "\",";
+            }
+
+            if (entry.isHidden()) {
+                cout << "\"IsHidden\":true,";
+            }
+            else {
+                cout << "\"IsHidden\":false,";
+            }
+            if (entry.isErased()) {
+                cout << "\"IsDeleted\":true";
+            }
+            else {
+                cout << "\"IsDeleted\":false";
+            }
+            cout << "}";            
+            fflush(stdout);
         }
+        cout << "]";
+    }
+    else {
+        for (it=entries.begin(); it!=entries.end(); it++) {
+            FatEntry &entry = *it;
 
-        if (entry.isDirectory()) {
-            printf("d");
-        } else {
-            printf("f");
+            if (entry.isErased() && !listDeleted) {
+                continue;
+            }
+
+            if (entry.isDirectory()) {
+                printf("d");
+            } else {
+                printf("f");
+            }
+
+            string name = entry.getFilename();
+            if (entry.isDirectory()) {
+                name += "/";
+            }
+
+            printf(" %s ", entry.changeDate.pretty().c_str());
+            printf(" %-30s", name.c_str());
+
+            printf(" c=%u", entry.cluster);
+
+            if (!entry.isDirectory()) {
+                string pretty = prettySize(entry.size);
+                printf(" s=%llu (%s)", entry.size, pretty.c_str());
+            }
+
+            if (entry.isHidden()) {
+                printf(" h");
+            }
+            if (entry.isErased()) {
+                printf(" d");
+            }
+
+            printf("\n");
+            fflush(stdout);
         }
-
-        string name = entry.getFilename();
-        if (entry.isDirectory()) {
-            name += "/";
-        }
-
-        printf(" %s ", entry.changeDate.pretty().c_str());
-        printf(" %-30s", name.c_str());
-
-        printf(" c=%u", entry.cluster);
-
-        if (!entry.isDirectory()) {
-            string pretty = prettySize(entry.size);
-            printf(" s=%llu (%s)", entry.size, pretty.c_str());
-        }
-
-        if (entry.isHidden()) {
-            printf(" h");
-        }
-        if (entry.isErased()) {
-            printf(" d");
-        }
-
-        printf("\n");
-        fflush(stdout);
     }
 }
 

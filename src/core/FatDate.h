@@ -15,6 +15,8 @@ class FatDate
         int y, m, d;
 
         string pretty();
+
+        string isoFormat();
 };
 
 #endif // _FATCAT_FATDATE_H

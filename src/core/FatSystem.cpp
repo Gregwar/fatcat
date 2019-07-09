@@ -577,7 +577,7 @@ void FatSystem::infos()
             cout << "\"DataSize\":" << dataSize << ",";
             cout << "\"PrettyDataSize\":\"" << prettySize(dataSize) << "\",";
             cout << "\"DiskSize\":" << totalSize << ",";
-            cout << "\"DiskSize\":\"" << prettySize(totalSize) << "\",";
+            cout << "\"PrettyDiskSize\":\"" << prettySize(totalSize) << "\",";
             cout << "\"BytesPerSector\":" << bytesPerSector << ",";
             cout << "\"SectorsPerCluster\":" << sectorsPerCluster << ",";
             cout << "\"BytesPerCluster\":" << bytesPerCluster << ",";

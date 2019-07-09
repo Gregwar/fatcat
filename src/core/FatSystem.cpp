@@ -568,39 +568,80 @@ bool FatSystem::init()
 
 void FatSystem::infos()
 {
-    cout << "FAT Filesystem information" << endl << endl;
+    switch (this->_outputFormat) {
+        case Json: {
+            cout << "{\"FileSystemType\":\"" << trim(fsType) << "\",";
+            cout << "\"OemName\":\"" << oemName  << "\",";
+            cout << "\"TotalSectors\":" << totalSectors << ",";
+            cout << "\"TotalDataClusters\":" << totalClusters << ",";
+            cout << "\"DataSize\":" << dataSize << ",";
+            cout << "\"PrettyDataSize\":\"" << prettySize(dataSize) << "\",";
+            cout << "\"DiskSize\":" << totalSize << ",";
+            cout << "\"DiskSize\":\"" << prettySize(totalSize) << "\",";
+            cout << "\"BytesPerSector\":" << bytesPerSector << ",";
+            cout << "\"SectorsPerCluster\":" << sectorsPerCluster << ",";
+            cout << "\"BytesPerCluster\":" << bytesPerCluster << ",";
+            cout << "\"ReservedSectors\":" << reservedSectors << ",";
+            if (type == FAT16) {
+                cout << "\"RootEntries\":" << rootEntries << ",";
+                cout << "\"RootClusters\":" << rootClusters << ",";
+            }
+            cout << "\"SectorsPerFat\":" << sectorsPerFat << ",";
+            cout << "\"FatSize\":" << fatSize << ",";
+            cout << "\"PrettyFatSize\":\"" << prettySize(fatSize) << "\",";
+            cout << "\"Fat1StartAddress\":" << fatStart << ",";
+            cout << "\"Fat2StartAddress\":" << fatStart+fatSize << ",";
+            cout << "\"DataStartAddress\":" << dataStart << ",";
+            cout << "\"RootDirectoryCluster\":" << rootDirectory << ",";
+            cout << "\"DiskLabel\":\"" << trim(diskLabel) << "\",";
 
-    cout << "Filesystem type: " << fsType << endl;
-    cout << "OEM name: " << oemName << endl;
-    cout << "Total sectors: " << totalSectors << endl;
-    cout << "Total data clusters: " << totalClusters << endl;
-    cout << "Data size: " << dataSize << " (" << prettySize(dataSize) << ")" << endl;
-    cout << "Disk size: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
-    cout << "Bytes per sector: " << bytesPerSector << endl;
-    cout << "Sectors per cluster: " << sectorsPerCluster << endl;
-    cout << "Bytes per cluster: " << bytesPerCluster << endl;
-    cout << "Reserved sectors: " << reservedSectors << endl;
-    if (type == FAT16) {
-        cout << "Root entries: " << rootEntries << endl;
-        cout << "Root clusters: " << rootClusters << endl;
-    }
-    cout << "Sectors per FAT: " << sectorsPerFat << endl;
-    cout << "Fat size: " << fatSize << " (" << prettySize(fatSize) << ")" << endl;
-    printf("FAT1 start address: %016llx\n", fatStart);
-    printf("FAT2 start address: %016llx\n", fatStart+fatSize);
-    printf("Data start address: %016llx\n", dataStart);
-    cout << "Root directory cluster: " << rootDirectory << endl;
-    cout << "Disk label: " << diskLabel << endl;
-    cout << endl;
+            computeStats();
+            cout << "\"FreeClusters\":" << freeClusters << ",\"TotalClusters\":" << totalClusters << ",";
+            cout << "\"FreeClustersPercent\":" << (100*freeClusters/(double)totalClusters) << ",";
+            cout << "\"FreeSpace\":" << (freeClusters*bytesPerCluster) << ",";
+            cout << "\"PrettyFreeSpace\":\"" << prettySize(freeClusters*bytesPerCluster) << "\",";
+            cout << "\"UsedSpace\":" << ((totalClusters-freeClusters)*bytesPerCluster) << ",";
+            cout << "\"PrettyUsedSpace\":\"" << prettySize((totalClusters-freeClusters)*bytesPerCluster) << "\"}";
+            cout << endl;
+            break;
+        }
+        default: {
+            cout << "FAT Filesystem information" << endl << endl;
 
-    computeStats();
-    cout << "Free clusters: " << freeClusters << "/" << totalClusters;
-    cout << " (" << (100*freeClusters/(double)totalClusters) << "%)" << endl;
-    cout << "Free space: " << (freeClusters*bytesPerCluster) <<
-        " (" << prettySize(freeClusters*bytesPerCluster) << ")" << endl;
-    cout << "Used space: " << ((totalClusters-freeClusters)*bytesPerCluster) <<
-        " (" << prettySize((totalClusters-freeClusters)*bytesPerCluster) << ")" << endl;
-    cout << endl;
+            cout << "Filesystem type: " << fsType << endl;
+            cout << "OEM name: " << oemName << endl;
+            cout << "Total sectors: " << totalSectors << endl;
+            cout << "Total data clusters: " << totalClusters << endl;
+            cout << "Data size: " << dataSize << " (" << prettySize(dataSize) << ")" << endl;
+            cout << "Disk size: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
+            cout << "Bytes per sector: " << bytesPerSector << endl;
+            cout << "Sectors per cluster: " << sectorsPerCluster << endl;
+            cout << "Bytes per cluster: " << bytesPerCluster << endl;
+            cout << "Reserved sectors: " << reservedSectors << endl;
+            if (type == FAT16) {
+                cout << "Root entries: " << rootEntries << endl;
+                cout << "Root clusters: " << rootClusters << endl;
+            }
+            cout << "Sectors per FAT: " << sectorsPerFat << endl;
+            cout << "Fat size: " << fatSize << " (" << prettySize(fatSize) << ")" << endl;
+            printf("FAT1 start address: %016llx\n", fatStart);
+            printf("FAT2 start address: %016llx\n", fatStart+fatSize);
+            printf("Data start address: %016llx\n", dataStart);
+            cout << "Root directory cluster: " << rootDirectory << endl;
+            cout << "Disk label: " << diskLabel << endl;
+            cout << endl;
+
+            computeStats();
+            cout << "Free clusters: " << freeClusters << "/" << totalClusters;
+            cout << " (" << (100*freeClusters/(double)totalClusters) << "%)" << endl;
+            cout << "Free space: " << (freeClusters*bytesPerCluster) <<
+                " (" << prettySize(freeClusters*bytesPerCluster) << ")" << endl;
+            cout << "Used space: " << ((totalClusters-freeClusters)*bytesPerCluster) <<
+                " (" << prettySize((totalClusters-freeClusters)*bytesPerCluster) << ")" << endl;
+            cout << endl;
+            break;
+        }
+    }    
 }
 
 bool FatSystem::findDirectory(FatPath &path, FatEntry &outputEntry)

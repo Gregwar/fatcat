@@ -298,7 +298,8 @@ int main(int argc, char *argv[])
                 FatPath path(listPath);
                 fat.list(path);
             } else if (listClusterFlag) {
-                cout << "Listing cluster " << listCluster << endl;
+                if (outputFormat != Json)
+                    cout << "Listing cluster " << listCluster << endl;
                 fat.list(listCluster);
             } else if (readFlag) {
                 FatPath path(readPath);

@@ -3,7 +3,12 @@
 #ifdef __APPLE__
 #include <unistd.h>
 #else
+#ifdef __WIN__
+#include <ctype.h>
+#include "xgetopt/xgetopt.h"
+#else
 #include <argp.h>
+#endif
 #endif
 
 #include <stdio.h>
@@ -155,109 +160,109 @@ int main(int argc, char *argv[])
     // Parsing command line
     while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:Sze:O:fk:a:F:")) != -1) {
         switch (index) {
-            case 'a':
-                attributesProvided = true;
-                attributes = atoi(optarg);
-                break;
-            case 'k':
-                findEntry = true;
-                cluster = atoi(optarg);
-                break;
-            case 'f':
-                fixReachable = true;
-                break;
-            case 'O':
-                globalOffset = atoll(optarg);
-                break;
-            case 'e':
-                entry = true;
-                entryPath = string(optarg);
-                break;
-            case 'z':
-                zero = true;
-                break;
-            case 'S':
-                scramble = true;
-                break;
-            case 't':
-                table = ATOU(optarg);
-                break;
-            case 'm':
-                merge = true;
-                break;
-            case 'v':
-                hasValue = true;
-                value = ATOU(optarg);
-                break;
-            case 'w':
-                writeNext = true;
-                cluster = ATOU(optarg);
-                break;
-            case '@':
-                address = true;
-                cluster = ATOU(optarg);
-                break;
-            case 'o':
-                chains = true;
-                break;
-            case 'i':
-                infoFlag = true;
-                break;
-            case 'l':
-                listFlag = true;
-                listPath = string(optarg);
-                break;
-            case 'L':
-                listClusterFlag = true;
-                listCluster = ATOU(optarg);
-                break;
-            case 'r':
-                readFlag = true;
-                readPath = string(optarg);
-                break;
-            case 'R':
-                clusterRead = true;
-                cluster = ATOU(optarg);
-                break;
-            case 's':
-                size = ATOU(optarg);
-                sizeProvided = true;
-                break;
-            case 'd':
-                listDeleted = true;
-                break;
-            case 'c':
-                cluster = ATOU(optarg);
-                clusterProvided = true;
-                break;
-            case 'x':
-                extract = true;
-                extractDirectory = string(optarg);
-                break;
-            case '2':
-                compare = true;
-                break;
-            case 'b':
-                backup = true;
-                backupFile = string(optarg);
-                break;
-            case 'p':
-                patch = true;
-                backupFile = string(optarg);
-                break;
-            case 'h':
+        case 'a':
+            attributesProvided = true;
+            attributes = atoi(optarg);
+            break;
+        case 'k':
+            findEntry = true;
+            cluster = atoi(optarg);
+            break;
+        case 'f':
+            fixReachable = true;
+            break;
+        case 'O':
+            globalOffset = atoll(optarg);
+            break;
+        case 'e':
+            entry = true;
+            entryPath = string(optarg);
+            break;
+        case 'z':
+            zero = true;
+            break;
+        case 'S':
+            scramble = true;
+            break;
+        case 't':
+            table = ATOU(optarg);
+            break;
+        case 'm':
+            merge = true;
+            break;
+        case 'v':
+            hasValue = true;
+            value = ATOU(optarg);
+            break;
+        case 'w':
+            writeNext = true;
+            cluster = ATOU(optarg);
+            break;
+        case '@':
+            address = true;
+            cluster = ATOU(optarg);
+            break;
+        case 'o':
+            chains = true;
+            break;
+        case 'i':
+            infoFlag = true;
+            break;
+        case 'l':
+            listFlag = true;
+            listPath = string(optarg);
+            break;
+        case 'L':
+            listClusterFlag = true;
+            listCluster = ATOU(optarg);
+            break;
+        case 'r':
+            readFlag = true;
+            readPath = string(optarg);
+            break;
+        case 'R':
+            clusterRead = true;
+            cluster = ATOU(optarg);
+            break;
+        case 's':
+            size = ATOU(optarg);
+            sizeProvided = true;
+            break;
+        case 'd':
+            listDeleted = true;
+            break;
+        case 'c':
+            cluster = ATOU(optarg);
+            clusterProvided = true;
+            break;
+        case 'x':
+            extract = true;
+            extractDirectory = string(optarg);
+            break;
+        case '2':
+            compare = true;
+            break;
+        case 'b':
+            backup = true;
+            backupFile = string(optarg);
+            break;
+        case 'p':
+            patch = true;
+            backupFile = string(optarg);
+            break;
+        case 'h':
+            usage();
+            break;
+        case 'F':
+            if (strcmp(optarg, "json") == 0)
+                outputFormat = Json;
+            else if (strcmp(optarg, "default") == 0)
+                outputFormat = Default;
+            else
+            {
                 usage();
-                break;
-            case 'F':
-                if (strcmp(optarg, "json") == 0)
-                        outputFormat = Json;
-                else if (strcmp(optarg, "default") == 0)
-                        outputFormat = Default;
-                else
-                {
-                    usage();
-                }
-                break;
+            }
+            break;
         }
     }
 

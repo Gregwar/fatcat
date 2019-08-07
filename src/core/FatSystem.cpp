@@ -1,4 +1,8 @@
+#ifdef __WIN__
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include <time.h>
 #include <string>
 #include <iostream>
@@ -23,14 +27,14 @@ using namespace std;
  */
 FatSystem::FatSystem(string filename_, unsigned long long globalOffset_, OutputFormatType outputFormat_)
     : strange(0),
-    filename(filename_),
-    globalOffset(globalOffset_),
-    totalSize(-1),
-    listDeleted(false),
-    statsComputed(false),
-    freeClusters(0),
-    cacheEnabled(false),
-    type(FAT32),
+      filename(filename_),
+      globalOffset(globalOffset_),
+      totalSize(-1),
+      listDeleted(false),
+      statsComputed(false),
+      freeClusters(0),
+      cacheEnabled(false),
+      type(FAT32),
     rootEntries(0)
 {
     this->_outputFormat = outputFormat_;
@@ -193,7 +197,13 @@ void FatSystem::parseHeader()
 unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 {
     int bytes = (bits == 32 ? 4 : 2);
+#ifndef __WIN__
     char buffer[bytes];
+#else
+    char *buffer = new char[bytes];
+    __try
+    {
+#endif
 
     if (!validCluster(cluster)) {
         return 0;
@@ -237,6 +247,13 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
             }
         }
     }
+#ifdef __WIN__
+}
+__finally
+{
+    delete[] buffer;
+}
+#endif
 }
 
 /**
@@ -245,7 +262,13 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fat)
 {
     int bytes = (bits == 32 ? 4 : 2);
+#ifndef __WIN__
     char buffer[bytes];
+#else
+        char *buffer = new char[bytes];
+        __try
+        {
+#endif
 
     if (!validCluster(cluster)) {
         throw string("Trying to access a cluster outside bounds");
@@ -271,6 +294,13 @@ bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fa
     }
 
     return writeData(offset, buffer, bytes) == bytes;
+#ifdef __WIN__
+}
+__finally
+{
+    delete[] buffer;
+}
+#endif
 }
 
 bool FatSystem::validCluster(unsigned int cluster)
@@ -562,7 +592,13 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
         if (toRead > bytesPerCluster || size < 0) {
             toRead = bytesPerCluster;
         }
+#ifndef __WIN__
         char buffer[bytesPerCluster];
+#else
+                char *buffer = new char[bytesPerCluster];
+                __try
+                {
+#endif
         readData(clusterAddress(cluster), buffer, toRead);
 
         if (size != -1) {
@@ -598,7 +634,13 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
                 cluster = currentCluster+1;
             }
         }
+#ifdef __WIN__
     }
+    __finally
+    {
+        delete[] buffer;
+    }
+#endif
 }
 
 bool FatSystem::init()
@@ -632,10 +674,10 @@ void FatSystem::infos()
             cout << "\"TotalSectors\":" << totalSectors << ",";
             cout << "\"TotalDataClusters\":" << totalClusters << ",";
             cout << "\"DataSize\":" << dataSize << ",";
-            cout << "\"PrettyDataSize\":\"" << prettySize(dataSize) << "\",";
-            cout << "\"DiskSize\":" << totalSize << ",";
-            cout << "\"PrettyDiskSize\":\"" << prettySize(totalSize) << "\",";
-            cout << "\"BytesPerSector\":" << bytesPerSector << ",";
+        cout << "\"PrettyDataSize\":\"" << prettySize(dataSize) << "\",";
+        cout << "\"DiskSize\":" << totalSize << ",";
+        cout << "\"PrettyDiskSize\":\"" << prettySize(totalSize) << "\",";
+        cout << "\"BytesPerSector\":" << bytesPerSector << ",";
             cout << "\"SectorsPerCluster\":" << sectorsPerCluster << ",";
             cout << "\"BytesPerCluster\":" << bytesPerCluster << ",";
             cout << "\"ReservedSectors\":" << reservedSectors << ",";
@@ -643,7 +685,7 @@ void FatSystem::infos()
                 cout << "\"RootEntries\":" << rootEntries << ",";
                 cout << "\"RootClusters\":" << rootClusters << ",";
             }
-            cout << "\"SectorsPerFat\":" << sectorsPerFat << ",";
+        cout << "\"SectorsPerFat\":" << sectorsPerFat << ",";
             cout << "\"FatSize\":" << fatSize << ",";
             cout << "\"PrettyFatSize\":\"" << prettySize(fatSize) << "\",";
             cout << "\"Fat1StartAddress\":" << fatStart << ",";
@@ -667,11 +709,11 @@ void FatSystem::infos()
 
             cout << "Filesystem type: " << fsType << endl;
             cout << "OEM name: " << oemName << endl;
-            cout << "Total sectors: " << totalSectors << endl;
-            cout << "Total data clusters: " << totalClusters << endl;
-            cout << "Data size: " << dataSize << " (" << prettySize(dataSize) << ")" << endl;
-            cout << "Disk size: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
-            cout << "Bytes per sector: " << bytesPerSector << endl;
+        cout << "Total sectors: " << totalSectors << endl;
+        cout << "Total data clusters: " << totalClusters << endl;
+        cout << "Data size: " << dataSize << " (" << prettySize(dataSize) << ")" << endl;
+        cout << "Disk size: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
+        cout << "Bytes per sector: " << bytesPerSector << endl;
             cout << "Sectors per cluster: " << sectorsPerCluster << endl;
             cout << "Bytes per cluster: " << bytesPerCluster << endl;
             cout << "Reserved sectors: " << reservedSectors << endl;
@@ -686,7 +728,7 @@ void FatSystem::infos()
             printf("Data start address: %016llx\n", dataStart);
             cout << "Root directory cluster: " << rootDirectory << endl;
             cout << "Disk label: " << diskLabel << endl;
-            cout << endl;
+        cout << endl;
 
             computeStats();
             cout << "Free clusters: " << freeClusters << "/" << totalClusters;
@@ -698,7 +740,7 @@ void FatSystem::infos()
             cout << endl;
             break;
         }
-    }    
+    }
 }
 
 bool FatSystem::findDirectory(FatPath &path, FatEntry &outputEntry)
@@ -821,7 +863,13 @@ void FatSystem::rewriteUnallocated(bool random)
     srand(time(NULL));
     for (int cluster=0; cluster<totalClusters; cluster++) {
         if (freeCluster(cluster)) {
+#ifndef __WIN__
             char buffer[bytesPerCluster];
+#else
+            char *buffer = new char[bytesPerCluster];
+            __try
+            {
+#endif
             for (int i=0; i<sizeof(buffer); i++) {
                 if (random) {
                     buffer[i] = rand()&0xff;
@@ -831,8 +879,15 @@ void FatSystem::rewriteUnallocated(bool random)
             }
             writeData(clusterAddress(cluster), buffer, sizeof(buffer));
             total++;
-        }
+#ifdef __WIN__
+            }
+            __finally
+            {
+                delete[] buffer;
+            }
+#endif
     }
+}
 
-    cout << "Scrambled " << total << " sectors" << endl;
+cout << "Scrambled " << total << " sectors" << endl;
 }

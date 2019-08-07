@@ -6,6 +6,11 @@
 #include <string>
 #include <algorithm>
 #include <functional>
+#ifdef __WIN__
+#include <ctype.h>
+#else
+
+#endif
 
 using namespace std;
 
@@ -26,20 +31,20 @@ using namespace std;
         buffer[x+3] = ((l)>>24)&0xff;
 
 // trim from start
-static inline std::string ltrim(std::string s) {
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
-        return s;
+static inline string ltrim(string s) {
+  s.erase(s.begin(), find_if(s.begin(), s.end(), not1(ptr_fun<int, int>(isspace))));
+  return s;
 }
 
 // trim from end
-static inline std::string rtrim(std::string s) {
-        s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
-        return s;
+static inline string rtrim(string s) {
+  s.erase(find_if(s.rbegin(), s.rend(), not1(ptr_fun<int, int>(isspace))).base(), s.end());
+  return s;
 }
 
 // trim from both ends
-static inline std::string trim(std::string s) {
-        return ltrim(rtrim(s));
+static inline string trim(string s) {
+  return ltrim(rtrim(s));
 }
 
 // split a string into vector
@@ -65,17 +70,17 @@ static inline string prettySize(unsigned long long bytes)
         n++;
     }
 
-    ostringstream oss;
-    oss << size << units[n];
+  ostringstream oss;
+  oss << size << units[n];
 
-    return oss.str();
+  return oss.str();
 }
 
-static inline std::string strtolower(std::string myString)
+static inline string strtolower(string myString)
 {
   const int length = myString.length();
   for(int i=0; i!=length; ++i) {
-    myString[i] = std::tolower(myString[i]);
+    myString[i] = tolower(myString[i]);
   }
 
   return myString;

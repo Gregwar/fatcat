@@ -18,6 +18,10 @@ set(SOURCES
     analysis/FatChains.cpp
     analysis/FatSearch.cpp
     analysis/FatWalk.cpp
+	
+	xgetopt/xgetopt.cpp
+	xgetopt/stdafx.cpp
+	xgetopt/argcargv.cpp
     )
 
 foreach(SOURCE ${SOURCES})

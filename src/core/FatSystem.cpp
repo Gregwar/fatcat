@@ -641,8 +641,8 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
         delete[] buffer;
     }
 #endif
+    }
 }
-
 bool FatSystem::init()
 {
     // Parsing header

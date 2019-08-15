@@ -28,6 +28,8 @@ foreach(SOURCE ${SOURCES})
     set(ALL_SOURCES ${ALL_SOURCES} src/${SOURCE})
 endforeach()
 
+#add_definitions(-D__WIN__)
+
 include_directories("${CMAKE_SOURCE_DIR}/src")
 
 add_executable(fatcat "src/fatcat.cpp" ${ALL_SOURCES})

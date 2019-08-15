@@ -21,7 +21,7 @@
 // damage or loss of business that this software may cause.
 //
 ///////////////////////////////////////////////////////////////////////////////
-
+#ifdef __WIN__
 ///////////////////////////////////////////////////////////////////////////////
 // if you are using precompiled headers then include this line:
 #include "stdafx.h"
@@ -213,3 +213,4 @@ int getopt(int argc, TCHAR *argv[], TCHAR *optstring)
 
 	return c;
 }
+#endif

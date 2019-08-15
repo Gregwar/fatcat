@@ -7,7 +7,7 @@
 
 // The original source for the LIBCTINY library may be
 // found here:  www.wheaty.net
-
+#ifdef __WIN__
 #include "stdafx.h"
 #include "argcargv.h"
 
@@ -125,3 +125,4 @@ int _ConvertCommandLineToArgcArgv(LPCTSTR lpszSysCmdLine)
 			return argc;
 	}
 }
+#endif

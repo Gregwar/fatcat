@@ -2,6 +2,7 @@
 //
 // Author:  Hans Dietrich
 //          hdietrich2@hotmail.com
+//			url: https://www.codeproject.com/Articles/1940/XGetopt-A-Unix-compatible-getopt-for-MFC-and-Win32
 //
 // Description:
 //     XGetopt.cpp implements getopt(), a function to parse command lines.

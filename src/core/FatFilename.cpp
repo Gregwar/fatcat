@@ -1,5 +1,7 @@
 #include <string>
 #include <iostream>
+#include <locale>
+#include <codecvt>
 #include "FatFilename.h"
 #include "FatEntry.h"
 
@@ -7,22 +9,21 @@ using namespace std;
 
 #define FAT_LONG_NAME_LAST      0x40
 
-// Offset of letters position in a special "long file name" entry
-static unsigned char longFilePos[] = {
-    30, 28, 24, 22, 20, 18, 16, 14, 9, 7, 5, 3, 1
-};
-
 string FatFilename::getFilename()
 {
-    string rfilename;
-    vector<string>::iterator it;
+    string filename;
+    vector<string>::reverse_iterator it;
+    wstring_convert<std::codecvt_utf8_utf16<char16_t>,char16_t> convert;
 
-    for (it=letters.begin(); it!=letters.end(); it++) {
-        rfilename += *it;
+    for (it=letters.rbegin(); it!=letters.rend(); it++) {
+        filename += *it;
     }
     letters.clear();
 
-    return string(rfilename.rbegin(), rfilename.rend());
+    if (!filename.length()) {
+        return {};
+    }
+    return convert.to_bytes((char16_t *)filename.c_str());
 }
 
 void FatFilename::append(char *buffer)
@@ -35,18 +36,10 @@ void FatFilename::append(char *buffer)
         letters.clear();
     }
 
-    int i;
-    for (i=0; i<sizeof(longFilePos); i++) {
-        unsigned char c = buffer[longFilePos[i]];
-        unsigned char d = buffer[longFilePos[i]+1];
-        if (c != 0 && c != 0xff) {
-            string letter;
-            if (d != 0x00) {
-                letter += d;
-            }
-            letter += c;
-            letters.push_back(letter);
-        }
-    }
+    string letter;
+    letter.append(buffer + 1, 5 * 2);
+    letter.append(buffer + 14, 6 * 2);
+    letter.append(buffer + 28, 2 * 2);
+    letters.push_back(letter);
 }
 

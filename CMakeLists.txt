@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(fatcat)
 
+set(CMAKE_CXX_STANDARD 11)
 set(SOURCES
     core/FatEntry.cpp
     core/FatFilename.cpp

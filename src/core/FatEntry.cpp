@@ -57,6 +57,11 @@ bool FatEntry::isDirectory()
     return attributes&FAT_ATTRIBUTES_DIR;
 }
 
+bool FatEntry::isVolumeId()
+{
+    return attributes&FAT_ATTRIBUTES_VOLUME_ID;
+}
+
 bool FatEntry::isHidden()
 {
     return attributes&FAT_ATTRIBUTES_HIDE;

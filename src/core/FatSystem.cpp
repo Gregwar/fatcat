@@ -459,6 +459,8 @@ void FatSystem::list(vector<FatEntry> &entries)
 
         if (entry.isDirectory()) {
             printf("d");
+        } else if (entry.isVolumeId()) {
+            printf("v");
         } else {
             printf("f");
         }

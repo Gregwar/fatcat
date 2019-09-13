@@ -19,6 +19,7 @@ using namespace std;
 // Attributes
 #define FAT_ATTRIBUTES_HIDE     (1<<1)
 #define FAT_ATTRIBUTES_DIR      (1<<4)
+#define FAT_ATTRIBUTES_VOLUME_ID 0x8
 #define FAT_ATTRIBUTES_LONGFILE (0xf)
 #define FAT_ATTRIBUTES_FILE     (0x20)
 
@@ -32,6 +33,7 @@ class FatEntry
 
         string getFilename();
         bool isDirectory();
+        bool isVolumeId();
         bool isHidden();
         bool isErased();
 

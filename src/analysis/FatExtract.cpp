@@ -4,6 +4,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "FatExtract.h"
+#ifdef __WIN__
+#include <windows.h>
+#endif
 
 using namespace std;
 
@@ -11,11 +14,15 @@ FatExtract::FatExtract(FatSystem &system)
     : FatWalk(system)
 {
 }
-        
+
 void FatExtract::onDirectory(FatEntry &parent, FatEntry &entry, string name)
 {
     string directory = targetDirectory + "/" + name;
+#ifdef __WIN__
+    CreateDirectory(directory.c_str(), NULL);
+#else
     mkdir(directory.c_str(), 0755);
+#endif
 }
 
 void FatExtract::onEntry(FatEntry &parent, FatEntry &entry, string name)
@@ -35,7 +42,7 @@ void FatExtract::onEntry(FatEntry &parent, FatEntry &entry, string name)
         fclose(output);
     }
 }
-        
+
 void FatExtract::extract(unsigned int cluster, string directory, bool erased)
 {
     walkErased = erased;

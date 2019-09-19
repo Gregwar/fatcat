@@ -33,3 +33,11 @@ string FatDate::pretty()
 
     return string(buffer);
 }
+
+string FatDate::isoFormat()
+{
+    char buffer[128];
+    sprintf(buffer, "%04d-%02d-%02dT%02d:%02d:%02d", y, m, d, h, i, s);
+
+    return string(buffer);
+}

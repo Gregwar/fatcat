@@ -394,14 +394,17 @@ int main(int argc, char *argv[])
                         fat.writeData(entry.address, data.c_str(), entry.data.size());
                     }
                 } else {
-                    cout << "Entry not found." << endl;
+                    cerr << "Entry not found." << endl;
+                    exit(EXIT_FAILURE);
                 }
             }
         } else {
-            cout << "! Failed to init the FAT filesystem" << endl;
+            cerr << "! Failed to init the FAT filesystem" << endl;
+            exit(EXIT_FAILURE);
         }
     } catch (string error) {
         cerr << "Error: " << error << endl;
+        exit(EXIT_FAILURE);
     }
 
     exit(EXIT_SUCCESS);

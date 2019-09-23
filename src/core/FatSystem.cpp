@@ -146,20 +146,22 @@ void FatSystem::parseHeader()
 
     if (sectorsPerFat != 0) {
         type = FAT16;
-        bits = 16;
         diskLabel = string(buffer+FAT16_DISK_LABEL, FAT16_DISK_LABEL_SIZE);
         fsType = string(buffer+FAT16_DISK_FS, FAT16_DISK_FS_SIZE);
         rootEntries = FAT_READ_SHORT(buffer, FAT16_ROOT_ENTRIES)&0xffff;
         rootDirectory = 0;
 
-        if (trim(fsType) == "FAT12") {
-            bits = 12;
-        }
-
         totalSectors = FAT_READ_SHORT(buffer, FAT16_TOTAL_SECTORS)&0xffff;
         if (!totalSectors) {
             totalSectors = FAT_READ_LONG(buffer, FAT_TOTAL_SECTORS)&0xffffffff;
         }
+
+        unsigned int rootDirSectors =
+            (rootEntries*FAT_ENTRY_SIZE + bytesPerSector-1)/bytesPerSector;
+        unsigned long dataSectors = totalSectors -
+            (reservedSectors + fats*sectorsPerFat + rootDirSectors);
+        unsigned long totalClusters = dataSectors/sectorsPerCluster;
+        bits = (totalClusters > MAX_FAT12) ? 16 : 12;
     } else {
         type = FAT32;
         bits = 32;

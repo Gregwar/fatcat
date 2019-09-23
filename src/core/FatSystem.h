@@ -22,6 +22,9 @@ using namespace std;
 // Last cluster
 #define FAT_LAST (-1)
 
+// Maximum number of clusters
+#define MAX_FAT12 0xFF4
+
 // Header offsets
 #define FAT_BYTES_PER_SECTOR        0x0b
 #define FAT_SECTORS_PER_CLUSTER     0x0d

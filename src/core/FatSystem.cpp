@@ -676,10 +676,10 @@ void FatSystem::infos()
             cout << "\"TotalSectors\":" << totalSectors << ",";
             cout << "\"TotalDataClusters\":" << totalClusters << ",";
             cout << "\"DataSize\":" << dataSize << ",";
-        cout << "\"PrettyDataSize\":\"" << prettySize(dataSize) << "\",";
-        cout << "\"DiskSize\":" << totalSize << ",";
-        cout << "\"PrettyDiskSize\":\"" << prettySize(totalSize) << "\",";
-        cout << "\"BytesPerSector\":" << bytesPerSector << ",";
+            cout << "\"PrettyDataSize\":\"" << prettySize(dataSize) << "\",";
+            cout << "\"DiskSize\":" << totalSize << ",";
+            cout << "\"PrettyDiskSize\":\"" << prettySize(totalSize) << "\",";
+            cout << "\"BytesPerSector\":" << bytesPerSector << ",";
             cout << "\"SectorsPerCluster\":" << sectorsPerCluster << ",";
             cout << "\"BytesPerCluster\":" << bytesPerCluster << ",";
             cout << "\"ReservedSectors\":" << reservedSectors << ",";
@@ -711,11 +711,11 @@ void FatSystem::infos()
 
             cout << "Filesystem type: " << fsType << endl;
             cout << "OEM name: " << oemName << endl;
-        cout << "Total sectors: " << totalSectors << endl;
-        cout << "Total data clusters: " << totalClusters << endl;
-        cout << "Data size: " << dataSize << " (" << prettySize(dataSize) << ")" << endl;
-        cout << "Disk size: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
-        cout << "Bytes per sector: " << bytesPerSector << endl;
+            cout << "Total sectors: " << totalSectors << endl;
+            cout << "Total data clusters: " << totalClusters << endl;
+            cout << "Data size: " << dataSize << " (" << prettySize(dataSize) << ")" << endl;
+            cout << "Disk size: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
+            cout << "Bytes per sector: " << bytesPerSector << endl;
             cout << "Sectors per cluster: " << sectorsPerCluster << endl;
             cout << "Bytes per cluster: " << bytesPerCluster << endl;
             cout << "Reserved sectors: " << reservedSectors << endl;

@@ -4,9 +4,14 @@
 #include <string.h>
 #include <string>
 #include <sys/stat.h>
+#ifndef __WIN__
 #include <sys/time.h>
+#endif
 #include <sys/types.h>
 #include "FatExtract.h"
+#ifdef __WIN__
+#include <windows.h>
+#endif
 
 using namespace std;
 
@@ -14,11 +19,15 @@ FatExtract::FatExtract(FatSystem &system)
     : FatWalk(system)
 {
 }
-        
+
 void FatExtract::onDirectory(FatEntry &parent, FatEntry &entry, string name)
 {
     string directory = targetDirectory + "/" + name;
+#ifdef __WIN__
+    CreateDirectory(directory.c_str(), NULL);
+#else
     mkdir(directory.c_str(), 0755);
+#endif
 }
 
 void FatExtract::onEntry(FatEntry &parent, FatEntry &entry, string name)
@@ -37,6 +46,7 @@ void FatExtract::onEntry(FatEntry &parent, FatEntry &entry, string name)
         system.readFile(entry.cluster, entry.size, output, contiguous);
         fclose(output);
 
+#ifndef __WIN__
         time_t mtime = entry.changeDate.timestamp();
         if (mtime == (time_t)-1) {
             // Files on FAT can have dates up to 2107 year inclusive (which is
@@ -58,9 +68,10 @@ void FatExtract::onEntry(FatEntry &parent, FatEntry &entry, string name)
                      << ": " << strerror(errno) << endl;
             }
         }
+#endif
     }
 }
-        
+
 void FatExtract::extract(unsigned int cluster, string directory, bool erased)
 {
     walkErased = erased;

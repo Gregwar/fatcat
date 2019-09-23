@@ -2,7 +2,9 @@
 #define _FATCAT_FATDATE_H
 
 #include <string>
+#ifndef __WIN__
 #include <time.h>
+#endif
 
 using namespace std;
 
@@ -16,7 +18,11 @@ class FatDate
         int y, m, d;
 
         string pretty();
+        #ifndef __WIN__
         time_t timestamp() const;
+        #endif
+
+        string isoFormat();
 };
 
 #endif // _FATCAT_FATDATE_H

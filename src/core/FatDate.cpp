@@ -35,6 +35,7 @@ string FatDate::pretty()
     return string(buffer);
 }
 
+#ifndef __WIN__
 /**
  * Returns date as a number of seconds elapsed since the Epoch,
  * 1970-01-01 00:00:00 +0000 (UTC). FAT dates are considered to be in the
@@ -57,4 +58,13 @@ time_t FatDate::timestamp() const
     tm.tm_isdst = -1;      // Daylight saving time
 
     return mktime(&tm);
+}
+#endif
+
+string FatDate::isoFormat()
+{
+    char buffer[128];
+    sprintf(buffer, "%04d-%02d-%02dT%02d:%02d:%02d", y, m, d, h, i, s);
+
+    return string(buffer);
 }

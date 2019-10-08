@@ -1,4 +1,8 @@
+#ifdef __WIN__
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include <time.h>
 #include <string>
 #include <iostream>
@@ -21,18 +25,19 @@ using namespace std;
 /**
  * Opens the FAT resource
  */
-FatSystem::FatSystem(string filename_, unsigned long long globalOffset_)
+FatSystem::FatSystem(string filename_, unsigned long long globalOffset_, OutputFormatType outputFormat_)
     : strange(0),
-    filename(filename_),
-    globalOffset(globalOffset_),
-    totalSize(-1),
-    listDeleted(false),
-    statsComputed(false),
-    freeClusters(0),
-    cacheEnabled(false),
-    type(FAT32),
+      filename(filename_),
+      globalOffset(globalOffset_),
+      totalSize(-1),
+      listDeleted(false),
+      statsComputed(false),
+      freeClusters(0),
+      cacheEnabled(false),
+      type(FAT32),
     rootEntries(0)
 {
+    this->_outputFormat = outputFormat_;
     fd = open(filename.c_str(), O_RDONLY|O_LARGEFILE);
     writeMode = false;
 
@@ -141,20 +146,22 @@ void FatSystem::parseHeader()
 
     if (sectorsPerFat != 0) {
         type = FAT16;
-        bits = 16;
         diskLabel = string(buffer+FAT16_DISK_LABEL, FAT16_DISK_LABEL_SIZE);
         fsType = string(buffer+FAT16_DISK_FS, FAT16_DISK_FS_SIZE);
         rootEntries = FAT_READ_SHORT(buffer, FAT16_ROOT_ENTRIES)&0xffff;
         rootDirectory = 0;
 
-        if (trim(fsType) == "FAT12") {
-            bits = 12;
-        }
-
         totalSectors = FAT_READ_SHORT(buffer, FAT16_TOTAL_SECTORS)&0xffff;
         if (!totalSectors) {
             totalSectors = FAT_READ_LONG(buffer, FAT_TOTAL_SECTORS)&0xffffffff;
         }
+
+        unsigned int rootDirSectors =
+            (rootEntries*FAT_ENTRY_SIZE + bytesPerSector-1)/bytesPerSector;
+        unsigned long dataSectors = totalSectors -
+            (reservedSectors + fats*sectorsPerFat + rootDirSectors);
+        unsigned long totalClusters = dataSectors/sectorsPerCluster;
+        bits = (totalClusters > MAX_FAT12) ? 16 : 12;
     } else {
         type = FAT32;
         bits = 32;
@@ -192,7 +199,13 @@ void FatSystem::parseHeader()
 unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 {
     int bytes = (bits == 32 ? 4 : 2);
+#ifndef __WIN__
     char buffer[bytes];
+#else
+    char *buffer = new char[bytes];
+    __try
+    {
+#endif
 
     if (!validCluster(cluster)) {
         return 0;
@@ -236,6 +249,13 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
             }
         }
     }
+#ifdef __WIN__
+}
+__finally
+{
+    delete[] buffer;
+}
+#endif
 }
 
 /**
@@ -244,7 +264,13 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fat)
 {
     int bytes = (bits == 32 ? 4 : 2);
+#ifndef __WIN__
     char buffer[bytes];
+#else
+        char *buffer = new char[bytes];
+        __try
+        {
+#endif
 
     if (!validCluster(cluster)) {
         throw string("Trying to access a cluster outside bounds");
@@ -270,6 +296,13 @@ bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fa
     }
 
     return writeData(offset, buffer, bytes) == bytes;
+#ifdef __WIN__
+}
+__finally
+{
+    delete[] buffer;
+}
+#endif
 }
 
 bool FatSystem::validCluster(unsigned int cluster)
@@ -439,54 +472,111 @@ void FatSystem::list(unsigned int cluster)
 {
     bool hasFree = false;
     vector<FatEntry> entries = getEntries(cluster, NULL, &hasFree);
-    printf("Directory cluster: %u\n", cluster);
-    if (hasFree) {
+    if(this->_outputFormat == Json)
+        cout << "{\"Cluster\":" << cluster << ",";
+    else
+        printf("Directory cluster: %u\n", cluster);
+    if (hasFree && this->_outputFormat != Json) {
         printf("Warning: this directory has free clusters that was read contiguously\n");
     }
+    if(this->_outputFormat == Json)
+        cout << "\"Entries\":";
     list(entries);
+    if(this->_outputFormat == Json)
+        cout << "}";
 }
 
 void FatSystem::list(vector<FatEntry> &entries)
 {
     vector<FatEntry>::iterator it;
+    if(this->_outputFormat ==  Json){
+        cout << "[";
+        it = entries.begin();
+        FatEntry &first = *it;
+        for (; it!=entries.end(); it++) {
+            FatEntry &entry = *it;
 
-    for (it=entries.begin(); it!=entries.end(); it++) {
-        FatEntry &entry = *it;
+            if (entry.isErased() && !listDeleted) {
+                continue;
+            }
+            if(&entry != &first) {
+                cout << ",";
+            }
+            cout << "{\"EntryType\":";
+            if (entry.isDirectory()) {
+                cout << "\"Directory\",";
+            } else {
+                cout << "\"File\",";
+            }
 
-        if (entry.isErased() && !listDeleted) {
-            continue;
+            string name = entry.getFilename();
+
+            cout << "\"EditDate\":\"" << entry.changeDate.isoFormat() << "\",";
+            cout << "\"Name\":\"" << name << "\",";
+            cout << "\"Cluster\":" << entry.cluster << ",";
+
+            if (!entry.isDirectory()) {
+                string pretty = prettySize(entry.size);
+                cout << "\"Size\":" << entry.size << ",";
+                cout << "\"PrettySize\":\"" << pretty << "\",";
+            }
+
+            if (entry.isHidden()) {
+                cout << "\"IsHidden\":true,";
+            }
+            else {
+                cout << "\"IsHidden\":false,";
+            }
+            if (entry.isErased()) {
+                cout << "\"IsDeleted\":true";
+            }
+            else {
+                cout << "\"IsDeleted\":false";
+            }
+            cout << "}";            
+            fflush(stdout);
         }
+        cout << "]";
+    }
+    else {
+        for (it=entries.begin(); it!=entries.end(); it++) {
+            FatEntry &entry = *it;
 
-        if (entry.isDirectory()) {
-            printf("d");
-        } else {
-            printf("f");
+            if (entry.isErased() && !listDeleted) {
+                continue;
+            }
+
+            if (entry.isDirectory()) {
+                printf("d");
+            } else {
+                printf("f");
+            }
+
+            string name = entry.getFilename();
+            if (entry.isDirectory()) {
+                name += "/";
+            }
+
+            printf(" %s ", entry.changeDate.pretty().c_str());
+            printf(" %-30s", name.c_str());
+
+            printf(" c=%u", entry.cluster);
+
+            if (!entry.isDirectory()) {
+                string pretty = prettySize(entry.size);
+                printf(" s=%llu (%s)", entry.size, pretty.c_str());
+            }
+
+            if (entry.isHidden()) {
+                printf(" h");
+            }
+            if (entry.isErased()) {
+                printf(" d");
+            }
+
+            printf("\n");
+            fflush(stdout);
         }
-
-        string name = entry.getFilename();
-        if (entry.isDirectory()) {
-            name += "/";
-        }
-
-        printf(" %s ", entry.changeDate.pretty().c_str());
-        printf(" %-30s", name.c_str());
-
-        printf(" c=%u", entry.cluster);
-
-        if (!entry.isDirectory()) {
-            string pretty = prettySize(entry.size);
-            printf(" s=%llu (%s)", entry.size, pretty.c_str());
-        }
-
-        if (entry.isHidden()) {
-            printf(" h");
-        }
-        if (entry.isErased()) {
-            printf(" d");
-        }
-
-        printf("\n");
-        fflush(stdout);
     }
 }
 
@@ -504,7 +594,13 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
         if (toRead > bytesPerCluster || size < 0) {
             toRead = bytesPerCluster;
         }
+#ifndef __WIN__
         char buffer[bytesPerCluster];
+#else
+                char *buffer = new char[bytesPerCluster];
+                __try
+                {
+#endif
         readData(clusterAddress(cluster), buffer, toRead);
 
         if (size != -1) {
@@ -540,9 +636,15 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
                 cluster = currentCluster+1;
             }
         }
+#ifdef __WIN__
+    }
+    __finally
+    {
+        delete[] buffer;
+    }
+#endif
     }
 }
-
 bool FatSystem::init()
 {
     // Parsing header
@@ -567,39 +669,80 @@ bool FatSystem::init()
 
 void FatSystem::infos()
 {
-    cout << "FAT Filesystem information" << endl << endl;
+    switch (this->_outputFormat) {
+        case Json: {
+            cout << "{\"FileSystemType\":\"" << trim(fsType) << "\",";
+            cout << "\"OemName\":\"" << oemName  << "\",";
+            cout << "\"TotalSectors\":" << totalSectors << ",";
+            cout << "\"TotalDataClusters\":" << totalClusters << ",";
+            cout << "\"DataSize\":" << dataSize << ",";
+            cout << "\"PrettyDataSize\":\"" << prettySize(dataSize) << "\",";
+            cout << "\"DiskSize\":" << totalSize << ",";
+            cout << "\"PrettyDiskSize\":\"" << prettySize(totalSize) << "\",";
+            cout << "\"BytesPerSector\":" << bytesPerSector << ",";
+            cout << "\"SectorsPerCluster\":" << sectorsPerCluster << ",";
+            cout << "\"BytesPerCluster\":" << bytesPerCluster << ",";
+            cout << "\"ReservedSectors\":" << reservedSectors << ",";
+            if (type == FAT16) {
+                cout << "\"RootEntries\":" << rootEntries << ",";
+                cout << "\"RootClusters\":" << rootClusters << ",";
+            }
+        cout << "\"SectorsPerFat\":" << sectorsPerFat << ",";
+            cout << "\"FatSize\":" << fatSize << ",";
+            cout << "\"PrettyFatSize\":\"" << prettySize(fatSize) << "\",";
+            cout << "\"Fat1StartAddress\":" << fatStart << ",";
+            cout << "\"Fat2StartAddress\":" << fatStart+fatSize << ",";
+            cout << "\"DataStartAddress\":" << dataStart << ",";
+            cout << "\"RootDirectoryCluster\":" << rootDirectory << ",";
+            cout << "\"DiskLabel\":\"" << trim(diskLabel) << "\",";
 
-    cout << "Filesystem type: " << fsType << endl;
-    cout << "OEM name: " << oemName << endl;
-    cout << "Total sectors: " << totalSectors << endl;
-    cout << "Total data clusters: " << totalClusters << endl;
-    cout << "Data size: " << dataSize << " (" << prettySize(dataSize) << ")" << endl;
-    cout << "Disk size: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
-    cout << "Bytes per sector: " << bytesPerSector << endl;
-    cout << "Sectors per cluster: " << sectorsPerCluster << endl;
-    cout << "Bytes per cluster: " << bytesPerCluster << endl;
-    cout << "Reserved sectors: " << reservedSectors << endl;
-    if (type == FAT16) {
-        cout << "Root entries: " << rootEntries << endl;
-        cout << "Root clusters: " << rootClusters << endl;
+            computeStats();
+            cout << "\"FreeClusters\":" << freeClusters << ",\"TotalClusters\":" << totalClusters << ",";
+            cout << "\"FreeClustersPercent\":" << (100*freeClusters/(double)totalClusters) << ",";
+            cout << "\"FreeSpace\":" << (freeClusters*bytesPerCluster) << ",";
+            cout << "\"PrettyFreeSpace\":\"" << prettySize(freeClusters*bytesPerCluster) << "\",";
+            cout << "\"UsedSpace\":" << ((totalClusters-freeClusters)*bytesPerCluster) << ",";
+            cout << "\"PrettyUsedSpace\":\"" << prettySize((totalClusters-freeClusters)*bytesPerCluster) << "\"}";
+            cout << endl;
+            break;
+        }
+        default: {
+            cout << "FAT Filesystem information" << endl << endl;
+
+            cout << "Filesystem type: " << fsType << endl;
+            cout << "OEM name: " << oemName << endl;
+            cout << "Total sectors: " << totalSectors << endl;
+            cout << "Total data clusters: " << totalClusters << endl;
+            cout << "Data size: " << dataSize << " (" << prettySize(dataSize) << ")" << endl;
+            cout << "Disk size: " << totalSize << " (" << prettySize(totalSize) << ")" << endl;
+            cout << "Bytes per sector: " << bytesPerSector << endl;
+            cout << "Sectors per cluster: " << sectorsPerCluster << endl;
+            cout << "Bytes per cluster: " << bytesPerCluster << endl;
+            cout << "Reserved sectors: " << reservedSectors << endl;
+            if (type == FAT16) {
+                cout << "Root entries: " << rootEntries << endl;
+                cout << "Root clusters: " << rootClusters << endl;
+            }
+            cout << "Sectors per FAT: " << sectorsPerFat << endl;
+            cout << "Fat size: " << fatSize << " (" << prettySize(fatSize) << ")" << endl;
+            printf("FAT1 start address: %016llx\n", fatStart);
+            printf("FAT2 start address: %016llx\n", fatStart+fatSize);
+            printf("Data start address: %016llx\n", dataStart);
+            cout << "Root directory cluster: " << rootDirectory << endl;
+            cout << "Disk label: " << diskLabel << endl;
+        cout << endl;
+
+            computeStats();
+            cout << "Free clusters: " << freeClusters << "/" << totalClusters;
+            cout << " (" << (100*freeClusters/(double)totalClusters) << "%)" << endl;
+            cout << "Free space: " << (freeClusters*bytesPerCluster) <<
+                " (" << prettySize(freeClusters*bytesPerCluster) << ")" << endl;
+            cout << "Used space: " << ((totalClusters-freeClusters)*bytesPerCluster) <<
+                " (" << prettySize((totalClusters-freeClusters)*bytesPerCluster) << ")" << endl;
+            cout << endl;
+            break;
+        }
     }
-    cout << "Sectors per FAT: " << sectorsPerFat << endl;
-    cout << "Fat size: " << fatSize << " (" << prettySize(fatSize) << ")" << endl;
-    printf("FAT1 start address: %016llx\n", fatStart);
-    printf("FAT2 start address: %016llx\n", fatStart+fatSize);
-    printf("Data start address: %016llx\n", dataStart);
-    cout << "Root directory cluster: " << rootDirectory << endl;
-    cout << "Disk label: " << diskLabel << endl;
-    cout << endl;
-
-    computeStats();
-    cout << "Free clusters: " << freeClusters << "/" << totalClusters;
-    cout << " (" << (100*freeClusters/(double)totalClusters) << "%)" << endl;
-    cout << "Free space: " << (freeClusters*bytesPerCluster) <<
-        " (" << prettySize(freeClusters*bytesPerCluster) << ")" << endl;
-    cout << "Used space: " << ((totalClusters-freeClusters)*bytesPerCluster) <<
-        " (" << prettySize((totalClusters-freeClusters)*bytesPerCluster) << ")" << endl;
-    cout << endl;
 }
 
 bool FatSystem::findDirectory(FatPath &path, FatEntry &outputEntry)
@@ -722,7 +865,13 @@ void FatSystem::rewriteUnallocated(bool random)
     srand(time(NULL));
     for (int cluster=0; cluster<totalClusters; cluster++) {
         if (freeCluster(cluster)) {
+#ifndef __WIN__
             char buffer[bytesPerCluster];
+#else
+            char *buffer = new char[bytesPerCluster];
+            __try
+            {
+#endif
             for (int i=0; i<sizeof(buffer); i++) {
                 if (random) {
                     buffer[i] = rand()&0xff;
@@ -732,8 +881,15 @@ void FatSystem::rewriteUnallocated(bool random)
             }
             writeData(clusterAddress(cluster), buffer, sizeof(buffer));
             total++;
-        }
+#ifdef __WIN__
+            }
+            __finally
+            {
+                delete[] buffer;
+            }
+#endif
     }
+}
 
-    cout << "Scrambled " << total << " sectors" << endl;
+cout << "Scrambled " << total << " sectors" << endl;
 }

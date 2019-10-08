@@ -175,9 +175,9 @@ void FatSystem::parseHeader()
         strange++;
     }
 
-    if (fats != 2) {
-        printf("WARNING: Fats number different of 2 (%llu)\n", fats);
-        strange++;
+    if (fats == 0) {
+        printf("WARNING: Fats numbner is 0\n");
+         strange++;
     }
 
     if (rootDirectory != 2 && type == FAT32) {

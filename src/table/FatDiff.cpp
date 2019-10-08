@@ -16,6 +16,11 @@ bool FatDiff::compare()
     bool mergeable = true;
     cout << "Comparing the FATs" << endl;
 
+    if (system.fats != 2) {
+        cerr << "ERROR: Compare is only suitable for 2 fats (found " << system.fats << ")" << endl;
+        return;
+    }
+
     for (int cluster=0; cluster<system.totalClusters; cluster++) {
         int A = system.nextCluster(cluster, 0);
         int B = system.nextCluster(cluster, 1);
@@ -49,6 +54,12 @@ void FatDiff::merge()
 {
     int merged = 0;
     cout << "Beginning the merge..." << endl;
+
+    if (system.fats != 2) {
+        cerr << "ERROR: Merge is only suitable for 2 fats (found " << system.fats << ")" << endl;
+        return;
+    }
+
     system.enableWrite();
 
     for (int cluster=0; cluster<system.totalClusters; cluster++) {

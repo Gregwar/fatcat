@@ -18,7 +18,7 @@ bool FatDiff::compare()
 
     if (system.fats != 2) {
         cerr << "ERROR: Compare is only suitable for 2 fats (found " << system.fats << ")" << endl;
-        return;
+        return false;
     }
 
     for (int cluster=0; cluster<system.totalClusters; cluster++) {

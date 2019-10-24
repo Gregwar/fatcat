@@ -6,7 +6,7 @@
 #include <string>
 #include <algorithm>
 #include <functional>
-#ifdef __WIN__
+#ifdef _WIN32
 #include <ctype.h>
 #else
 

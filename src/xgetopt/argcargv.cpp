@@ -7,7 +7,7 @@
 
 // The original source for the LIBCTINY library may be
 // found here:  www.wheaty.net
-#ifdef __WIN__
+#ifdef _MSC_VER
 #include "stdafx.h"
 #include "argcargv.h"
 

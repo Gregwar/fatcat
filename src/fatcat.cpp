@@ -1,14 +1,18 @@
 #include <stdlib.h>
-#include<string.h>
+#include <string.h>
 #ifdef __APPLE__
 #include <unistd.h>
 #else
-#ifdef __WIN__
-#include <ctype.h>
-#include "xgetopt/xgetopt.h"
-#else
-#include <argp.h>
-#endif
+#ifdef _WIN32
+ #include <ctype.h>
+  #ifndef _MSC_VER
+   #include <getopt.h>
+  #else
+   #include "xgetopt/xgetopt.h"
+  #endif
+ #else
+  #include <argp.h>
+ #endif
 #endif
 
 #include <stdio.h>

@@ -4,7 +4,7 @@
 #include <map>
 #include <vector>
 #include <string>
-#ifdef __MINGW32__
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -114,7 +114,7 @@ public:
     // File descriptor
     string filename;
     unsigned long long globalOffset;
-    #ifdef __MINGW32__
+    #ifdef _WIN32
     HANDLE fd;
     #else
     int fd;

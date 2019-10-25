@@ -4,6 +4,8 @@
 #include <unistd.h>
 #elif defined __MINGW32__
 #include "mingw/argp.h"
+#elif defined _MSC_VER
+#include "xgetopt/xgetopt.h"
 #else
 #include <argp.h>
 #endif

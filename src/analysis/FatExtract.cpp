@@ -4,7 +4,7 @@
 #include <string.h>
 #include <string>
 #include <sys/stat.h>
-#ifdef __MINGW32__
+#ifdef _WIN32
 #include <mingw/utimes.h>
 #else
 #include <sys/time.h>
@@ -22,7 +22,7 @@ FatExtract::FatExtract(FatSystem &system)
 void FatExtract::onDirectory(FatEntry &parent, FatEntry &entry, string name)
 {
     string directory = targetDirectory + "/" + name;
-#ifdef __MINGW32__
+#ifdef _WIN32
     CreateDirectory(directory.c_str(), NULL);
 #else
     mkdir(directory.c_str(), 0755);

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <set>
-#ifndef __MINGW32__
+#ifndef _WIN32
 #include <unistd.h>
 #include <time.h>
 #include <string>
@@ -36,14 +36,14 @@ FatSystem::FatSystem(string filename_, unsigned long long globalOffset_, OutputF
     rootEntries(0)
 {
     this->_outputFormat = outputFormat_;
-    #ifdef __MINGW32__
+    #ifdef _WIN32
     fd = CreateFile(filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     #else
     fd = open(filename.c_str(), O_RDONLY|O_LARGEFILE);
     #endif
     writeMode = false;
 
-    #ifdef __MINGW32__
+    #ifdef _WIN32
     if (fd == INVALID_HANDLE_VALUE) {
     #else
     if (fd < 0) {
@@ -69,7 +69,7 @@ void FatSystem::enableCache()
 
 void FatSystem::enableWrite()
 {
-    #ifdef __MINGW32__
+    #ifdef _WIN32
     CloseHandle(fd);
     fd = CreateFile(filename.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -91,7 +91,7 @@ void FatSystem::enableWrite()
 
 FatSystem::~FatSystem()
 {
-    #ifdef __MINGW32__
+    #ifdef _WIN32
     CloseHandle(fd);
     #else
     close(fd);
@@ -107,7 +107,7 @@ int FatSystem::readData(unsigned long long address, char *buffer, int size)
         cerr << "! Trying to read outside the disk" << endl;
     }
 
-    #ifdef __MINGW32__
+    #ifdef _WIN32
     DWORD bytesRead;
 
     LARGE_INTEGER offset;
@@ -140,7 +140,7 @@ int FatSystem::writeData(unsigned long long address, const char *buffer, int siz
         throw string("Trying to write data while write mode is disabled");
     }
 
-    #ifdef __MINGW32__
+    #ifdef _WIN32
     DWORD bytesWritten;
 
     LARGE_INTEGER offset;
@@ -238,7 +238,13 @@ void FatSystem::parseHeader()
 unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 {
     int bytes = (bits == 32 ? 4 : 2);
+#ifndef _MSC_VER
     char buffer[bytes];
+#else
+        char *buffer = new char[bytes];
+        __try
+        {
+#endif
 
     if (!validCluster(cluster)) {
         return 0;
@@ -282,6 +288,13 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
             }
         }
     }
+#ifdef _MSC_VER
+}
+__finally
+{
+    delete[] buffer;
+}
+#endif
 }
 
 /**
@@ -290,7 +303,13 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fat)
 {
     int bytes = (bits == 32 ? 4 : 2);
+#ifndef _MSC_VER
     char buffer[bytes];
+#else
+        char *buffer = new char[bytes];
+        __try
+        {
+#endif
 
     if (!validCluster(cluster)) {
         throw string("Trying to access a cluster outside bounds");
@@ -316,6 +335,13 @@ bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fa
     }
 
     return writeData(offset, buffer, bytes) == bytes;
+#ifdef _MSC_VER
+}
+__finally
+{
+    delete[] buffer;
+}
+#endif
 }
 
 bool FatSystem::validCluster(unsigned int cluster)
@@ -607,7 +633,13 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
         if (toRead > bytesPerCluster || size < 0) {
             toRead = bytesPerCluster;
         }
+#ifndef _MSC_VER
         char buffer[bytesPerCluster];
+#else
+                char *buffer = new char[bytesPerCluster];
+                __try
+                {
+#endif
         readData(clusterAddress(cluster), buffer, toRead);
 
         if (size != -1) {
@@ -643,6 +675,13 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
                 cluster = currentCluster+1;
             }
         }
+#ifdef _MSC_VER
+    }
+    __finally
+    {
+        delete[] buffer;
+    }
+#endif
     }
 }
 bool FatSystem::init()
@@ -865,7 +904,13 @@ void FatSystem::rewriteUnallocated(bool random)
     srand(time(NULL));
     for (int cluster=0; cluster<totalClusters; cluster++) {
         if (freeCluster(cluster)) {
+#ifndef _MSC_VER
             char buffer[bytesPerCluster];
+#else
+            char *buffer = new char[bytesPerCluster];
+            __try
+            {
+#endif
             for (int i=0; i<sizeof(buffer); i++) {
                 if (random) {
                     buffer[i] = rand()&0xff;
@@ -875,6 +920,13 @@ void FatSystem::rewriteUnallocated(bool random)
             }
             writeData(clusterAddress(cluster), buffer, sizeof(buffer));
             total++;
+#ifdef _MSC_VER
+            }
+            __finally
+            {
+                delete[] buffer;
+            }
+#endif
     }
 }
 

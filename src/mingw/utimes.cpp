@@ -15,7 +15,7 @@
    Boston, MA 02110-1301, USA.
 */
 
-#ifdef __MINGW32__
+#ifdef _WIN32
 
 #include "utimes.h"
 

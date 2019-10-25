@@ -23,6 +23,10 @@ set(SOURCES
     analysis/FatSearch.cpp
     analysis/FatWalk.cpp
 
+    xgetopt/xgetopt.cpp
+    xgetopt/stdafx.cpp
+    xgetopt/argcargv.cpp
+
     mingw/utimes.cpp
     )
 

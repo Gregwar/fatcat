@@ -6,6 +6,10 @@
 #include "mingw/argp.h"
 #elif defined _MSC_VER
 #include "xgetopt/xgetopt.h"
+// For older VC++ (prior 2013) add atoll alternative
+#if _MSC_VER < 1800
+#define atoll(arg) _strtoui64(arg, NULL, 10)
+#endif
 #else
 #include <argp.h>
 #endif

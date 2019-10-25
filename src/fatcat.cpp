@@ -2,13 +2,10 @@
 #include<string.h>
 #ifdef __APPLE__
 #include <unistd.h>
-#else
-#ifdef __WIN__
-#include <ctype.h>
-#include "xgetopt/xgetopt.h"
+#elif defined __MINGW32__
+#include "mingw/argp.h"
 #else
 #include <argp.h>
-#endif
 #endif
 
 #include <stdio.h>

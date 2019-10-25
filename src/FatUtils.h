@@ -6,11 +6,6 @@
 #include <string>
 #include <algorithm>
 #include <functional>
-#ifdef __WIN__
-#include <ctype.h>
-#else
-
-#endif
 
 using namespace std;
 

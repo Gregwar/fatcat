@@ -4,6 +4,9 @@
 #include <map>
 #include <vector>
 #include <string>
+#ifdef __MINGW32__
+#include <windows.h>
+#endif
 
 #include "FatEntry.h"
 #include "FatPath.h"
@@ -13,10 +16,7 @@
 #define O_LARGEFILE 0
 #define lseek64 lseek
 #endif
-#ifdef __WIN__
-#define O_LARGEFILE 0
-#define lseek64 lseek
-#endif
+
 using namespace std;
 
 // Last cluster
@@ -114,7 +114,11 @@ public:
     // File descriptor
     string filename;
     unsigned long long globalOffset;
+    #ifdef __MINGW32__
+    HANDLE fd;
+    #else
     int fd;
+    #endif
     bool writeMode;
 
     // Header values

@@ -8,7 +8,7 @@ set MINGW_BIN=C:\MinGW\bin
 if not exist %MINGW_BIN% goto _msvc
 
 set PATH=%MINGW_BIN%;%PATH%
-cmake .. -G "MinGW Makefiles" && mingw32-make
+cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=MINSIZEREL && mingw32-make
 goto _the_end
 
 :_msvc

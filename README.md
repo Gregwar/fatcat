@@ -301,6 +301,10 @@ random data using `-S`.
 
 For instance, deleted files will then become unreadables.
 
+## ACKNOWLEDGMENTS
+
+This program makes use of the [keptopt library](http://attractivechaos.github.io/klib/#Ketopt%3A%20parsing%20command-line%20arguments) from the [attractivechaos's klib](https://github.com/attractivechaos/klib) for cross-platform parsing command-line arguments.
+
 ## LICENSE
 
 This is under MIT license

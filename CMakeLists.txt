@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 project(fatcat)
 
-OPTION(DEFINE_WIN "Compiling windows" OFF)
+if(MINGW)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -s")
+endif()
 
 set(SOURCES
     core/FatEntry.cpp
@@ -20,19 +22,11 @@ set(SOURCES
     analysis/FatChains.cpp
     analysis/FatSearch.cpp
     analysis/FatWalk.cpp
-	
-	xgetopt/xgetopt.cpp
-	xgetopt/stdafx.cpp
-	xgetopt/argcargv.cpp
     )
 
 foreach(SOURCE ${SOURCES})
     set(ALL_SOURCES ${ALL_SOURCES} src/${SOURCE})
 endforeach()
-
-IF(DEFINE_WIN)
-	add_definitions(-D__WIN__)
-ENDIF(DEFINE_WIN)
 
 include_directories("${CMAKE_SOURCE_DIR}/src")
 

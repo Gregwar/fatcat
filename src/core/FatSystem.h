@@ -13,7 +13,7 @@
 #define O_LARGEFILE 0
 #define lseek64 lseek
 #endif
-#ifdef __WIN__
+#ifdef _WIN32
 #define O_LARGEFILE 0
 #define lseek64 lseek
 #endif

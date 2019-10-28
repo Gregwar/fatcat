@@ -1,20 +1,3 @@
-#include <stdlib.h>
-#include<string.h>
-#ifdef __APPLE__
-#include <unistd.h>
-#else
-#ifdef __WIN__
-#include <ctype.h>
-#include "xgetopt/xgetopt.h"
-#else
-#include <argp.h>
-#endif
-#endif
-
-#include <stdio.h>
-#include <string>
-#include <iostream>
-
 #include <FatUtils.h>
 #include <core/FatSystem.h>
 #include <core/FatPath.h>
@@ -25,7 +8,14 @@
 #include <analysis/FatFix.h>
 #include <analysis/FatSearch.h>
 
+#include "ketopt.h"
+
 #define ATOU(i) ((unsigned int)atoi(i))
+
+// For older VC++ (prior 2013) add atoll alternative
+#if defined _MSC_VER && _MSC_VER < 1800
+#define atoll(arg) _strtoui64(arg, NULL, 10)
+#endif
 
 using namespace std;
 
@@ -158,25 +148,27 @@ int main(int argc, char *argv[])
     OutputFormatType outputFormat = Default;
 
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:Sze:O:fk:a:F:")) != -1) {
+    ketopt_t opt = KETOPT_INIT;
+
+    while ((index = ketopt(&opt, argc, argv, 1, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:Sze:O:fk:a:F:", 0)) >= 0) {
         switch (index) {
         case 'a':
             attributesProvided = true;
-            attributes = atoi(optarg);
+            attributes = atoi(opt.arg);
             break;
         case 'k':
             findEntry = true;
-            cluster = atoi(optarg);
+            cluster = atoi(opt.arg);
             break;
         case 'f':
             fixReachable = true;
             break;
         case 'O':
-            globalOffset = atoll(optarg);
+            globalOffset = atoll(opt.arg);
             break;
         case 'e':
             entry = true;
-            entryPath = string(optarg);
+            entryPath = string(opt.arg);
             break;
         case 'z':
             zero = true;
@@ -185,22 +177,22 @@ int main(int argc, char *argv[])
             scramble = true;
             break;
         case 't':
-            table = ATOU(optarg);
+            table = ATOU(opt.arg);
             break;
         case 'm':
             merge = true;
             break;
         case 'v':
             hasValue = true;
-            value = ATOU(optarg);
+            value = ATOU(opt.arg);
             break;
         case 'w':
             writeNext = true;
-            cluster = ATOU(optarg);
+            cluster = ATOU(opt.arg);
             break;
         case '@':
             address = true;
-            cluster = ATOU(optarg);
+            cluster = ATOU(opt.arg);
             break;
         case 'o':
             chains = true;
@@ -210,53 +202,53 @@ int main(int argc, char *argv[])
             break;
         case 'l':
             listFlag = true;
-            listPath = string(optarg);
+            listPath = string(opt.arg);
             break;
         case 'L':
             listClusterFlag = true;
-            listCluster = ATOU(optarg);
+            listCluster = ATOU(opt.arg);
             break;
         case 'r':
             readFlag = true;
-            readPath = string(optarg);
+            readPath = string(opt.arg);
             break;
         case 'R':
             clusterRead = true;
-            cluster = ATOU(optarg);
+            cluster = ATOU(opt.arg);
             break;
         case 's':
-            size = ATOU(optarg);
+            size = ATOU(opt.arg);
             sizeProvided = true;
             break;
         case 'd':
             listDeleted = true;
             break;
         case 'c':
-            cluster = ATOU(optarg);
+            cluster = ATOU(opt.arg);
             clusterProvided = true;
             break;
         case 'x':
             extract = true;
-            extractDirectory = string(optarg);
+            extractDirectory = string(opt.arg);
             break;
         case '2':
             compare = true;
             break;
         case 'b':
             backup = true;
-            backupFile = string(optarg);
+            backupFile = string(opt.arg);
             break;
         case 'p':
             patch = true;
-            backupFile = string(optarg);
+            backupFile = string(opt.arg);
             break;
         case 'h':
             usage();
             break;
         case 'F':
-            if (strcmp(optarg, "json") == 0)
+            if (strcmp(opt.arg, "json") == 0)
                 outputFormat = Json;
-            else if (strcmp(optarg, "default") == 0)
+            else if (strcmp(opt.arg, "default") == 0)
                 outputFormat = Default;
             else
             {
@@ -267,8 +259,8 @@ int main(int argc, char *argv[])
     }
 
     // Trying to get the FAT file or device
-    if (optind != argc) {
-        image = argv[optind];
+    if (opt.ind != argc) {
+        image = argv[opt.ind];
     }
 
     if (!image) {
@@ -276,7 +268,7 @@ int main(int argc, char *argv[])
     }
 
     // Getting extra arguments
-    for (index=optind+1; index<argc; index++) {
+    for (index=opt.ind+1; index<argc; index++) {
         arguments.push_back(argv[index]);
     }
 

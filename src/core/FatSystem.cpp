@@ -1,4 +1,4 @@
-#ifdef __WIN__
+#ifdef _WIN32
 #include <io.h>
 #else
 #include <unistd.h>
@@ -199,7 +199,7 @@ void FatSystem::parseHeader()
 unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 {
     int bytes = (bits == 32 ? 4 : 2);
-#ifndef __WIN__
+#ifndef _MSC_VER
     char buffer[bytes];
 #else
     char *buffer = new char[bytes];
@@ -249,7 +249,7 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
             }
         }
     }
-#ifdef __WIN__
+#ifdef _MSC_VER
 }
 __finally
 {
@@ -264,7 +264,7 @@ __finally
 bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fat)
 {
     int bytes = (bits == 32 ? 4 : 2);
-#ifndef __WIN__
+#ifndef _MSC_VER
     char buffer[bytes];
 #else
         char *buffer = new char[bytes];
@@ -296,7 +296,7 @@ bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fa
     }
 
     return writeData(offset, buffer, bytes) == bytes;
-#ifdef __WIN__
+#ifdef _MSC_VER
 }
 __finally
 {
@@ -594,7 +594,7 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
         if (toRead > bytesPerCluster || size < 0) {
             toRead = bytesPerCluster;
         }
-#ifndef __WIN__
+#ifndef _MSC_VER
         char buffer[bytesPerCluster];
 #else
                 char *buffer = new char[bytesPerCluster];
@@ -636,7 +636,7 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
                 cluster = currentCluster+1;
             }
         }
-#ifdef __WIN__
+#ifdef _MSC_VER
     }
     __finally
     {
@@ -865,7 +865,7 @@ void FatSystem::rewriteUnallocated(bool random)
     srand(time(NULL));
     for (int cluster=0; cluster<totalClusters; cluster++) {
         if (freeCluster(cluster)) {
-#ifndef __WIN__
+#ifndef _MSC_VER
             char buffer[bytesPerCluster];
 #else
             char *buffer = new char[bytesPerCluster];
@@ -881,7 +881,7 @@ void FatSystem::rewriteUnallocated(bool random)
             }
             writeData(clusterAddress(cluster), buffer, sizeof(buffer));
             total++;
-#ifdef __WIN__
+#ifdef _MSC_VER
             }
             __finally
             {

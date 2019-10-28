@@ -42,7 +42,7 @@ void FatExtract::onEntry(FatEntry &parent, FatEntry &entry, string name)
 
         string target = targetDirectory + name;
         cout << "Extracting " << name << " to " << target << endl;
-        FILE *output = fopen(target.c_str(), "w+");
+        FILE *output = fopen(target.c_str(), "wb+");
         system.readFile(entry.cluster, entry.size, output, contiguous);
         fclose(output);
 

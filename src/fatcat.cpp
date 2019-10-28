@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include <FatUtils.h>
 #include <core/FatSystem.h>
 #include <core/FatPath.h>

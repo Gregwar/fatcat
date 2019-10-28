@@ -20,7 +20,7 @@ void FatBackup::backup(string backupFile, int fat)
     int size = system.fatSize;
     int n = 0;
     int offset = 0;
-    FILE *backup = fopen(backupFile.c_str(), "w+");
+    FILE *backup = fopen(backupFile.c_str(), "wb+");
 
     if (fat == 0) {
         size *= 2;
@@ -55,7 +55,7 @@ void FatBackup::patch(string backupFile, int fat)
     char buffer[CHUNKS_SIZES];
 
     // Opening the file
-    FILE *backup = fopen(backupFile.c_str(), "r");
+    FILE *backup = fopen(backupFile.c_str(), "rb");
     if (backup == NULL) {
         ostringstream oss;
         oss << "Unable to open file " << backupFile << " for reading";

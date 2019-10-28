@@ -38,7 +38,7 @@ FatSystem::FatSystem(string filename_, unsigned long long globalOffset_, OutputF
     rootEntries(0)
 {
     this->_outputFormat = outputFormat_;
-    fd = open(filename.c_str(), O_RDONLY|O_LARGEFILE);
+    fd = open(filename.c_str(), O_RDONLY | O_LARGEFILE | O_BINARY);
     writeMode = false;
 
     if (fd < 0) {
@@ -64,7 +64,7 @@ void FatSystem::enableCache()
 void FatSystem::enableWrite()
 {
     close(fd);
-    fd = open(filename.c_str(), O_RDWR|O_LARGEFILE);
+    fd = open(filename.c_str(), O_RDWR | O_LARGEFILE | O_BINARY);
 
     if (fd < 0) {
         ostringstream oss;

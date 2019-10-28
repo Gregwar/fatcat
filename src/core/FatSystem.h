@@ -9,14 +9,15 @@
 #include "FatPath.h"
 #include "OutputFormatType.h"
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(_WIN32)
 #define O_LARGEFILE 0
 #define lseek64 lseek
 #endif
-#ifdef _WIN32
-#define O_LARGEFILE 0
-#define lseek64 lseek
+
+#ifndef O_BINARY
+#define O_BINARY 0
 #endif
+
 using namespace std;
 
 // Last cluster

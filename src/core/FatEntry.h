@@ -31,6 +31,7 @@ class FatEntry
         FatEntry();
 
         string getFilename();
+        string getShortFilename();
         bool isDirectory();
         bool isHidden();
         bool isErased();

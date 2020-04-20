@@ -510,9 +510,11 @@ void FatSystem::list(vector<FatEntry> &entries)
             }
 
             string name = entry.getFilename();
+            string shrtname = entry.getShortFilename();
 
             cout << "\"EditDate\":\"" << entry.changeDate.isoFormat() << "\",";
             cout << "\"Name\":\"" << name << "\",";
+            cout << "\"8DOT3Name\":\"" << shrtname << "\",";
             cout << "\"Cluster\":" << entry.cluster << ",";
 
             if (!entry.isDirectory()) {
@@ -557,8 +559,13 @@ void FatSystem::list(vector<FatEntry> &entries)
                 name += "/";
             }
 
+            string shrtname = entry.getShortFilename();
+            if (name.compare(shrtname)) {
+                name += " (" + shrtname + ")";
+            }
+
             printf(" %s ", entry.changeDate.pretty().c_str());
-            printf(" %-30s", name.c_str());
+            printf(" %-50s", name.c_str());
 
             printf(" c=%u", entry.cluster);
 

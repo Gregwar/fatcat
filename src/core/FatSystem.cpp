@@ -312,14 +312,13 @@ bool FatSystem::validCluster(unsigned int cluster)
 
 unsigned long long FatSystem::clusterAddress(unsigned int cluster, bool isRoot)
 {
-    if (type == FAT32 || !isRoot) {
-        cluster -= 2;
-    }
-
     unsigned long long addr = (dataStart + bytesPerSector*sectorsPerCluster*cluster);
 
     if (type == FAT16 && !isRoot) {
         addr += rootEntries * FAT_ENTRY_SIZE;
+    }
+    if (type == FAT32 || !isRoot) {
+        addr -= bytesPerSector*sectorsPerCluster*2;
     }
 
     return addr;

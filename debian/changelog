@@ -1,4 +1,15 @@
-fatcat (1.0.7-1) UNRELEASED; urgency=medium
+fatcat (1.1.1-1) UNRELEASED; urgency=medium
+
+  * Output 8DOT3 short filenames whenever possible
+  * Fix FAT12 determination
+  * Writing error to stderr and exiting with error code
+  * Added support for json output when listing entries
+  * Fixing clusterAddress using temporary 32bit sized int (see debian bug
+    879930)
+
+ -- Grégoire Passault <g.passault@gmail.com>  Sat, 18 Jan 2022 09:20:00 +0200
+
+fatcat (1.0.7-1) unstable; urgency=medium
 
   * Fixing line breaks in man page
   * Fixing possible cluster truncating (see #879930)

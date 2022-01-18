@@ -35,6 +35,9 @@ Fatcat takes an image as argument:
 fatcat disk.img [options]
 ```
 
+**NOTE: according to your build, you might have to specify options before ``disk.img``, i.e
+``fatcat [options] disk.img``**
+
 You can specify an offset in the file with `-O`, this could be useful if there is 
 multiple partitions on a block devices, for instance:
 

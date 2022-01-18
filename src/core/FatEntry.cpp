@@ -34,22 +34,27 @@ string FatEntry::getFilename()
     if (longName != "") {
         return longName;
     } else {
-        string name;
-        string ext = trim(shortName.substr(8,3));
-        string base = trim(shortName.substr(0,8));
-
-        if (isErased()) {
-            base = base.substr(1);
-        }
-
-        name = base;
-
-        if (ext != "") {
-            name += "." + ext;
-        }
-
-        return name;
+        return getShortFilename();
     }
+}
+
+string FatEntry::getShortFilename()
+{
+    string name;
+    string ext = trim(shortName.substr(8,3));
+    string base = trim(shortName.substr(0,8));
+
+    if (isErased()) {
+        base = base.substr(1);
+    }
+
+    name = base;
+
+    if (ext != "") {
+        name += "." + ext;
+    }
+
+    return name;
 }
         
 bool FatEntry::isDirectory()

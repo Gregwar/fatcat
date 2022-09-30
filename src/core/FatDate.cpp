@@ -35,7 +35,7 @@ string FatDate::pretty()
     return string(buffer);
 }
 
-#ifndef __WIN__
+#ifndef _WIN32
 /**
  * Returns date as a number of seconds elapsed since the Epoch,
  * 1970-01-01 00:00:00 +0000 (UTC). FAT dates are considered to be in the

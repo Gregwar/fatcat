@@ -1,18 +1,16 @@
-#ifdef __WIN__
-#include <io.h>
-#else
-#include <unistd.h>
-#endif
 #include <time.h>
-#include <string>
 #include <iostream>
+#include <stdio.h>
+#include <set>
+#ifndef _WIN32
+#include <unistd.h>
+#include <string>
 #include <string.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <set>
+#endif
 
 #include <FatUtils.h>
 #include "FatFilename.h"
@@ -38,10 +36,18 @@ FatSystem::FatSystem(string filename_, unsigned long long globalOffset_, OutputF
     rootEntries(0)
 {
     this->_outputFormat = outputFormat_;
+    #ifdef _WIN32
+    fd = CreateFile(filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    #else
     fd = open(filename.c_str(), O_RDONLY|O_LARGEFILE);
+    #endif
     writeMode = false;
 
+    #ifdef _WIN32
+    if (fd == INVALID_HANDLE_VALUE) {
+    #else
     if (fd < 0) {
+    #endif
         ostringstream oss;
         oss << "! Unable to open the input file: " << filename << " for reading";
 
@@ -63,10 +69,17 @@ void FatSystem::enableCache()
 
 void FatSystem::enableWrite()
 {
+    #ifdef _WIN32
+    CloseHandle(fd);
+    fd = CreateFile(filename.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (fd == INVALID_HANDLE_VALUE) {
+    #else
     close(fd);
     fd = open(filename.c_str(), O_RDWR|O_LARGEFILE);
 
     if (fd < 0) {
+    #endif
         ostringstream oss;
         oss << "! Unable to open the input file: " << filename << " for writing";
 
@@ -78,7 +91,11 @@ void FatSystem::enableWrite()
 
 FatSystem::~FatSystem()
 {
+    #ifdef _WIN32
+    CloseHandle(fd);
+    #else
     close(fd);
+    #endif
 }
 
 /**
@@ -90,6 +107,16 @@ int FatSystem::readData(unsigned long long address, char *buffer, int size)
         cerr << "! Trying to read outside the disk" << endl;
     }
 
+    #ifdef _WIN32
+    DWORD bytesRead;
+
+    LARGE_INTEGER offset;
+    offset.QuadPart = globalOffset+address;
+
+    SetFilePointerEx(fd, offset, NULL, FILE_BEGIN);
+    ReadFile(fd, buffer, size, &bytesRead, NULL);
+    return bytesRead;
+    #else
     lseek64(fd, globalOffset+address, SEEK_SET);
 
     int n;
@@ -104,6 +131,7 @@ int FatSystem::readData(unsigned long long address, char *buffer, int size)
     } while ((size>0) && (n>0));
 
     return n;
+    #endif
 }
 
 int FatSystem::writeData(unsigned long long address, const char *buffer, int size)
@@ -112,6 +140,16 @@ int FatSystem::writeData(unsigned long long address, const char *buffer, int siz
         throw string("Trying to write data while write mode is disabled");
     }
 
+    #ifdef _WIN32
+    DWORD bytesWritten;
+
+    LARGE_INTEGER offset;
+    offset.QuadPart = globalOffset+address;
+
+    SetFilePointerEx(fd, offset, NULL, FILE_BEGIN);
+    WriteFile(fd, buffer, size, &bytesWritten, NULL);
+    return bytesWritten;
+    #else
     lseek64(fd, globalOffset+address, SEEK_SET);
 
     int n;
@@ -126,6 +164,7 @@ int FatSystem::writeData(unsigned long long address, const char *buffer, int siz
     } while ((size>0) && (n>0));
 
     return n;
+    #endif
 }
 
 /**
@@ -199,7 +238,7 @@ void FatSystem::parseHeader()
 unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
 {
     int bytes = (bits == 32 ? 4 : 2);
-#ifndef __WIN__
+#ifndef _MSC_VER
     char buffer[bytes];
 #else
     char *buffer = new char[bytes];
@@ -249,7 +288,7 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
             }
         }
     }
-#ifdef __WIN__
+#ifdef _MSC_VER
 }
 __finally
 {
@@ -264,7 +303,7 @@ __finally
 bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fat)
 {
     int bytes = (bits == 32 ? 4 : 2);
-#ifndef __WIN__
+#ifndef _MSC_VER
     char buffer[bytes];
 #else
         char *buffer = new char[bytes];
@@ -296,7 +335,7 @@ bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fa
     }
 
     return writeData(offset, buffer, bytes) == bytes;
-#ifdef __WIN__
+#ifdef _MSC_VER
 }
 __finally
 {
@@ -601,7 +640,7 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
         if (toRead > bytesPerCluster || size < 0) {
             toRead = bytesPerCluster;
         }
-#ifndef __WIN__
+#ifndef _MSC_VER
         char buffer[bytesPerCluster];
 #else
                 char *buffer = new char[bytesPerCluster];
@@ -643,7 +682,7 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
                 cluster = currentCluster+1;
             }
         }
-#ifdef __WIN__
+#ifdef _MSC_VER
     }
     __finally
     {
@@ -872,7 +911,7 @@ void FatSystem::rewriteUnallocated(bool random)
     srand(time(NULL));
     for (int cluster=0; cluster<totalClusters; cluster++) {
         if (freeCluster(cluster)) {
-#ifndef __WIN__
+#ifndef _MSC_VER
             char buffer[bytesPerCluster];
 #else
             char *buffer = new char[bytesPerCluster];
@@ -888,7 +927,7 @@ void FatSystem::rewriteUnallocated(bool random)
             }
             writeData(clusterAddress(cluster), buffer, sizeof(buffer));
             total++;
-#ifdef __WIN__
+#ifdef _MSC_VER
             }
             __finally
             {

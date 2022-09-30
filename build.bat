@@ -1,5 +1,19 @@
-if not exist build md build
-cd build
-git clean -fdx && cmake .. -DDEFINE_WIN=ON && "c:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe" fatcat.sln  /p:OutDir=bin
-cd ..
+@echo off
+
+if exist build rmdir /S /Q build
+mkdir build
+pushd build
+
+set MINGW_BIN=C:\MinGW\bin
+if not exist %MINGW_BIN% goto _msvc
+
+set PATH=%MINGW_BIN%;%PATH%
+cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=MINSIZEREL && mingw32-make
+goto _the_end
+
+:_msvc
+cmake .. && start "" fatcat.sln
+
+:_the_end
+popd
 pause

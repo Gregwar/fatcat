@@ -20,7 +20,7 @@ using namespace std;
 #define FAT_ATTRIBUTES_HIDE     (1<<1)
 #define FAT_ATTRIBUTES_DIR      (1<<4)
 #define FAT_ATTRIBUTES_LONGFILE (0xf)
-#define FAT_ATTRIBUTES_FILE     (0x20)
+#define FAT_ATTRIBUTES_ARCHIVE  (0x20)
 
 // Prefix used for erased files
 #define FAT_ERASED                  0xe5

@@ -4,12 +4,12 @@
 #include <string.h>
 #include <string>
 #include <sys/stat.h>
-#ifndef __WIN__
+#ifndef _WIN32
 #include <sys/time.h>
 #endif
 #include <sys/types.h>
 #include "FatExtract.h"
-#ifdef __WIN__
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -23,7 +23,7 @@ FatExtract::FatExtract(FatSystem &system)
 void FatExtract::onDirectory(FatEntry &parent, FatEntry &entry, string name)
 {
     string directory = targetDirectory + "/" + name;
-#ifdef __WIN__
+#ifdef _WIN32
     CreateDirectory(directory.c_str(), NULL);
 #else
     mkdir(directory.c_str(), 0755);
@@ -42,11 +42,11 @@ void FatExtract::onEntry(FatEntry &parent, FatEntry &entry, string name)
 
         string target = targetDirectory + name;
         cout << "Extracting " << name << " to " << target << endl;
-        FILE *output = fopen(target.c_str(), "w+");
+        FILE *output = fopen(target.c_str(), "wb+");
         system.readFile(entry.cluster, entry.size, output, contiguous);
         fclose(output);
 
-#ifndef __WIN__
+#ifndef _WIN32
         time_t mtime = entry.changeDate.timestamp();
         if (mtime == (time_t)-1) {
             // Files on FAT can have dates up to 2107 year inclusive (which is

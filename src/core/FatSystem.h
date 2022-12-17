@@ -11,11 +11,9 @@
 
 #ifdef __APPLE__
 #define O_LARGEFILE 0
-#define lseek64 lseek
 #endif
 #ifdef __WIN__
 #define O_LARGEFILE 0
-#define lseek64 lseek
 #endif
 using namespace std;
 

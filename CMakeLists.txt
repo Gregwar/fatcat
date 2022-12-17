@@ -34,6 +34,8 @@ IF(DEFINE_WIN)
 	add_definitions(-D__WIN__)
 ENDIF(DEFINE_WIN)
 
+add_definitions(-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64)
+
 include_directories("${CMAKE_SOURCE_DIR}/src")
 
 add_executable(fatcat "src/fatcat.cpp" ${ALL_SOURCES})

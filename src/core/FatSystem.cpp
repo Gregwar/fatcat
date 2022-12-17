@@ -90,7 +90,7 @@ int FatSystem::readData(unsigned long long address, char *buffer, int size)
         cerr << "! Trying to read outside the disk" << endl;
     }
 
-    lseek64(fd, globalOffset+address, SEEK_SET);
+    lseek(fd, globalOffset+address, SEEK_SET);
 
     int n;
     int pos = 0;
@@ -112,7 +112,7 @@ int FatSystem::writeData(unsigned long long address, const char *buffer, int siz
         throw string("Trying to write data while write mode is disabled");
     }
 
-    lseek64(fd, globalOffset+address, SEEK_SET);
+    lseek(fd, globalOffset+address, SEEK_SET);
 
     int n;
     int pos = 0;

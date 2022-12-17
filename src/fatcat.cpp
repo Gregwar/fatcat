@@ -1,14 +1,10 @@
 #include <stdlib.h>
-#include<string.h>
-#ifdef __APPLE__
-#include <unistd.h>
-#else
+#include <string.h>
 #ifdef __WIN__
 #include <ctype.h>
 #include "xgetopt/xgetopt.h"
 #else
-#include <argp.h>
-#endif
+#include <unistd.h>
 #endif
 
 #include <stdio.h>

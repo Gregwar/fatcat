@@ -239,7 +239,6 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
                 next = next >> 4;
             }
             next &= 0xfff;
-            cout << next << endl;
             if (next >= 0xff0) {
                 return FAT_LAST;
             } else {

@@ -212,7 +212,6 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
     }
 
     if (cacheEnabled) {
-        cout << "[Debug] Using cache!" << endl;
         return cache[cluster];
     }
 
@@ -605,13 +604,13 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
         int toRead = size;
         if (toRead > bytesPerCluster || size < 0) {
             toRead = bytesPerCluster;
-        }
+    }
 #ifndef __WIN__
-        char buffer[bytesPerCluster];
+    char buffer[bytesPerCluster];
 #else
-                char *buffer = new char[bytesPerCluster];
-                __try
-                {
+    char *buffer = new char[bytesPerCluster];
+    __try
+    {
 #endif
         readData(clusterAddress(cluster), buffer, toRead);
 
@@ -852,11 +851,7 @@ FatEntry FatSystem::rootEntry()
 
 bool FatSystem::freeCluster(unsigned int cluster)
 {
-    __try {
-        return nextCluster(cluster) == 0;
-    } __finally {
-        cout << "[Debug] Yeah This part works lol" << endl;
-    }
+    return nextCluster(cluster) == 0;
 }
 
 void FatSystem::computeStats()
@@ -895,7 +890,11 @@ void FatSystem::rewriteUnallocated(bool random)
                     buffer[i] = 0x0;
                 }
             }
+            #ifndef __WIN__
             writeData(clusterAddress(cluster), buffer, sizeof(buffer));
+            #else
+            writeData(clusterAddress(cluster), buffer, sizeof(*buffer));
+            #endif
             total++;
 #ifdef __WIN__
             }

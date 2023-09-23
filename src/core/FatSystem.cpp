@@ -156,11 +156,11 @@ void FatSystem::parseHeader()
             totalSectors = FAT_READ_LONG(buffer, FAT_TOTAL_SECTORS)&0xffffffff;
         }
 
-        unsigned int rootDirSectors =
+        unsigned long long int rootDirSectors =
             (rootEntries*FAT_ENTRY_SIZE + bytesPerSector-1)/bytesPerSector;
-        unsigned long dataSectors = totalSectors -
+        unsigned long long dataSectors = totalSectors -
             (reservedSectors + fats*sectorsPerFat + rootDirSectors);
-        unsigned long totalClusters = dataSectors/sectorsPerCluster;
+        unsigned long long totalClusters = dataSectors/sectorsPerCluster;
         bits = (totalClusters > MAX_FAT12) ? 16 : 12;
     } else {
         type = FAT32;
@@ -212,10 +212,15 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
     }
 
     if (cacheEnabled) {
+        cout << "[Debug] Using cache!" << endl;
         return cache[cluster];
     }
 
+    #ifdef __WIN__
+    readData(fatStart+fatSize*fat+(bits*cluster)/8, buffer, sizeof(*buffer));
+    #else
     readData(fatStart+fatSize*fat+(bits*cluster)/8, buffer, sizeof(buffer));
+    #endif
 
     unsigned int next;
 
@@ -250,11 +255,11 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
         }
     }
 #ifdef __WIN__
-}
-__finally
-{
-    delete[] buffer;
-}
+    }
+    __finally
+    {
+        delete[] buffer;
+    }
 #endif
 }
 
@@ -290,7 +295,7 @@ bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fa
             buffer[1] = (buffer[1]&0xf0)|((next>>8)&0x0f);
         }
     } else {
-        for (int i=0; i<(bits/8); i++) {
+        for (int i=0; i < (bits/8); i++) {
             buffer[i] = (next>>(8*i))&0xff;
         }
     }
@@ -737,7 +742,7 @@ void FatSystem::infos()
             printf("Data start address: %016llx\n", dataStart);
             cout << "Root directory cluster: " << rootDirectory << endl;
             cout << "Disk label: " << diskLabel << endl;
-        cout << endl;
+            cout << endl;
 
             computeStats();
             cout << "Free clusters: " << freeClusters << "/" << totalClusters;
@@ -847,7 +852,11 @@ FatEntry FatSystem::rootEntry()
 
 bool FatSystem::freeCluster(unsigned int cluster)
 {
-    return nextCluster(cluster) == 0;
+    __try {
+        return nextCluster(cluster) == 0;
+    } __finally {
+        cout << "[Debug] Yeah This part works lol" << endl;
+    }
 }
 
 void FatSystem::computeStats()

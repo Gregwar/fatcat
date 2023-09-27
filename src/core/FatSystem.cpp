@@ -102,7 +102,6 @@ int FatSystem::readData(unsigned long long address, char *buffer, int size)
             size -= n;
         }
     } while ((size>0) && (n>0));
-
     return n;
 }
 
@@ -156,11 +155,11 @@ void FatSystem::parseHeader()
             totalSectors = FAT_READ_LONG(buffer, FAT_TOTAL_SECTORS)&0xffffffff;
         }
 
-        unsigned int rootDirSectors =
+        unsigned long long int rootDirSectors =
             (rootEntries*FAT_ENTRY_SIZE + bytesPerSector-1)/bytesPerSector;
-        unsigned long dataSectors = totalSectors -
+        unsigned long long dataSectors = totalSectors -
             (reservedSectors + fats*sectorsPerFat + rootDirSectors);
-        unsigned long totalClusters = dataSectors/sectorsPerCluster;
+        unsigned long long totalClusters = dataSectors/sectorsPerCluster;
         bits = (totalClusters > MAX_FAT12) ? 16 : 12;
     } else {
         type = FAT32;
@@ -215,7 +214,7 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
         return cache[cluster];
     }
 
-    readData(fatStart+fatSize*fat+(bits*cluster)/8, buffer, sizeof(buffer));
+    readData(fatStart+fatSize*fat+(bits*cluster)/8, buffer, bytes);
 
     unsigned int next;
 
@@ -250,11 +249,11 @@ unsigned int FatSystem::nextCluster(unsigned int cluster, int fat)
         }
     }
 #ifdef __WIN__
-}
-__finally
-{
-    delete[] buffer;
-}
+    }
+    __finally
+    {
+        delete[] buffer;
+    }
 #endif
 }
 
@@ -290,7 +289,7 @@ bool FatSystem::writeNextCluster(unsigned int cluster, unsigned int next, int fa
             buffer[1] = (buffer[1]&0xf0)|((next>>8)&0x0f);
         }
     } else {
-        for (int i=0; i<(bits/8); i++) {
+        for (int i=0; i < (bits/8); i++) {
             buffer[i] = (next>>(8*i))&0xff;
         }
     }
@@ -600,13 +599,13 @@ void FatSystem::readFile(unsigned int cluster, unsigned int size, FILE *f, bool 
         int toRead = size;
         if (toRead > bytesPerCluster || size < 0) {
             toRead = bytesPerCluster;
-        }
+    }
 #ifndef __WIN__
-        char buffer[bytesPerCluster];
+    char buffer[bytesPerCluster];
 #else
-                char *buffer = new char[bytesPerCluster];
-                __try
-                {
+    char *buffer = new char[bytesPerCluster];
+    __try
+    {
 #endif
         readData(clusterAddress(cluster), buffer, toRead);
 
@@ -737,7 +736,7 @@ void FatSystem::infos()
             printf("Data start address: %016llx\n", dataStart);
             cout << "Root directory cluster: " << rootDirectory << endl;
             cout << "Disk label: " << diskLabel << endl;
-        cout << endl;
+            cout << endl;
 
             computeStats();
             cout << "Free clusters: " << freeClusters << "/" << totalClusters;
@@ -886,7 +885,8 @@ void FatSystem::rewriteUnallocated(bool random)
                     buffer[i] = 0x0;
                 }
             }
-            writeData(clusterAddress(cluster), buffer, sizeof(buffer));
+
+            writeData(clusterAddress(cluster), buffer, bytesPerCluster);
             total++;
 #ifdef __WIN__
             }

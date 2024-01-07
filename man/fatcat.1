@@ -76,7 +76,13 @@ be unreadable.
 .RS 4
 This will display information about the given \fBcluster\fP. It will display its address, which
 is the offset of the cluster in the image, and the FAT entries (next cluster, unallocated
-or end of cluster)
+or end of cluster). A list of cluster chains is displayed if \fB-n\fB is used.
+.RE
+
+.PP
+\fB\-n\fP
+.RS 4
+List cluster chains when displaying cluster information.
 .RE
 
 .PP

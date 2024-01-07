@@ -52,6 +52,7 @@ void usage()
     cout << endl;
     cout << "FAT Hacking" << endl;
     cout << "  -@ [cluster]: Get the cluster address and information" << endl;
+    cout << "  -n: enable listing of cluster chains in cluster information" << endl;
     cout << "  -2: analysis & compare the 2 FATs" << endl;
     cout << "  -b [file]: backup the FATs (see -t)" << endl;
     cout << "* -p [file]: restore (patch) the FATs (see -t)" << endl;
@@ -117,6 +118,9 @@ int main(int argc, char *argv[])
     // -@: get the cluster address
     bool address = false;
 
+    // -n: list cluster chains
+    bool showChains = false;
+
     // -k: analysis the chains
     bool chains = false;
 
@@ -158,7 +162,7 @@ int main(int argc, char *argv[])
     OutputFormatType outputFormat = Default;
 
     // Parsing command line
-    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:ob:p:w:v:mt:Sze:O:fk:a:F:")) != -1) {
+    while ((index = getopt(argc, argv, "il:L:r:R:s:dc:hx:2@:nob:p:w:v:mt:Sze:O:fk:a:F:")) != -1) {
         switch (index) {
         case 'a':
             attributesProvided = true;
@@ -201,6 +205,9 @@ int main(int argc, char *argv[])
         case '@':
             address = true;
             cluster = ATOU(optarg);
+            break;
+        case 'n':
+            showChains = true;
             break;
         case 'o':
             chains = true;
@@ -326,15 +333,26 @@ int main(int argc, char *argv[])
                 int next2 = fat.nextCluster(cluster, 1);
                 printf("FAT1: %u (%08x)\n", next1, next1);
                 printf("FAT2: %u (%08x)\n", next2, next2);
-                bool isContiguous = false;
 
                 FatChains chains(fat);
-                unsigned long long size = chains.chainSize(cluster, &isContiguous);
+                list<Segment> segments;
+                unsigned long long size = chains.chainSize(cluster, segments);
                 printf("Chain size: %llu (%llu / %s)\n", size, size*fat.bytesPerCluster, prettySize(size*fat.bytesPerCluster).c_str());
-                if (isContiguous) {
+                if (segments.size() < 2) {
                     printf("Chain is contiguous\n");
                 } else {
                     printf("Chain is not contiguous\n");
+                }
+
+                if (showChains) {
+                    list<Segment>::iterator it;
+                    int num=1;
+                    for (it=segments.begin(); it != segments.end(); num++,it++) {
+                        int start = it->first;
+                        int end = it->second;
+                        int size = end - start + 1;
+                        printf("Chain %d: %d..%d (%d clusters)\n", num, start, end, size);
+                    }
                 }
             } else if (chains) {
                 FatChains chains(fat);

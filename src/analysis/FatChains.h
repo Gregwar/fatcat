@@ -14,6 +14,8 @@
 
 using namespace std;
 
+typedef pair<int, int> Segment;
+
 class FatChains : public FatModule
 {
     public:
@@ -55,7 +57,7 @@ class FatChains : public FatModule
         /**
          * Size of a chain in the FAT
          */
-        int chainSize(int cluster, bool *isContiguous);
+        int chainSize(int cluster, list<Segment>& segments);
 
     protected:
         bool saveEntries;

@@ -57,7 +57,7 @@ class FatChains : public FatModule
         /**
          * Size of a chain in the FAT
          */
-        int chainSize(int cluster, bool *isContiguous, list<Segment>& segments);
+        int chainSize(int cluster, list<Segment>& segments);
 
     protected:
         bool saveEntries;

@@ -333,13 +333,12 @@ int main(int argc, char *argv[])
                 int next2 = fat.nextCluster(cluster, 1);
                 printf("FAT1: %u (%08x)\n", next1, next1);
                 printf("FAT2: %u (%08x)\n", next2, next2);
-                bool isContiguous = false;
 
                 FatChains chains(fat);
                 list<Segment> segments;
-                unsigned long long size = chains.chainSize(cluster, &isContiguous, segments);
+                unsigned long long size = chains.chainSize(cluster, segments);
                 printf("Chain size: %llu (%llu / %s)\n", size, size*fat.bytesPerCluster, prettySize(size*fat.bytesPerCluster).c_str());
-                if (isContiguous) {
+                if (segments.size() < 2) {
                     printf("Chain is contiguous\n");
                 } else {
                     printf("Chain is not contiguous\n");

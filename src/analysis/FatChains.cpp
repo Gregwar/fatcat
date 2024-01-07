@@ -306,16 +306,11 @@ void FatChains::displayOrphaned(list<FatChain> orphanedChains)
     cout << endl;
 }
 
-int FatChains::chainSize(int cluster, bool *isContiguous, list<Segment>& segments)
+int FatChains::chainSize(int cluster, list<Segment>& segments)
 {
     set<int> visited;
     int length = 0;
     bool stop;
-
-    if (isContiguous != NULL) {
-        *isContiguous = true;
-    }
-
     int start = cluster;
 
     do {
@@ -327,8 +322,7 @@ int FatChains::chainSize(int cluster, bool *isContiguous, list<Segment>& segment
         if (cluster==FAT_LAST) {
             segments.push_back(pair(start, currentCluster));
         } else if (system.validCluster(cluster)) {
-            if (currentCluster+1 != cluster && isContiguous != NULL) {
-                *isContiguous = false;
+            if (currentCluster+1 != cluster) {
                 segments.push_back(pair(start, currentCluster));
                 start = cluster;
             }

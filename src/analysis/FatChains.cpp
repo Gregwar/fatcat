@@ -306,7 +306,7 @@ void FatChains::displayOrphaned(list<FatChain> orphanedChains)
     cout << endl;
 }
 
-int FatChains::chainSize(int cluster, bool *isContiguous)
+int FatChains::chainSize(int cluster, bool *isContiguous, list<Segment>& segments)
 {
     set<int> visited;
     int length = 0;
@@ -316,15 +316,21 @@ int FatChains::chainSize(int cluster, bool *isContiguous)
         *isContiguous = true;
     }
 
+    int start = cluster;
+
     do {
         stop = true;
         int currentCluster = cluster;
         visited.insert(cluster);
         length++;
         cluster = system.nextCluster(cluster);
-        if (system.validCluster(cluster) && cluster!=FAT_LAST) {
+        if (cluster==FAT_LAST) {
+            segments.push_back(pair(start, currentCluster));
+        } else if (system.validCluster(cluster)) {
             if (currentCluster+1 != cluster && isContiguous != NULL) {
                 *isContiguous = false;
+                segments.push_back(pair(start, currentCluster));
+                start = cluster;
             }
             if (visited.find(cluster) != visited.end()) {
                 cerr << "! Loop detected, " << currentCluster << " points to " << cluster << " that I already met" << endl;

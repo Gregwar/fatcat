@@ -160,7 +160,7 @@ void FatSystem::parseHeader()
             (rootEntries*FAT_ENTRY_SIZE + bytesPerSector-1)/bytesPerSector;
         unsigned long dataSectors = totalSectors -
             (reservedSectors + fats*sectorsPerFat + rootDirSectors);
-        unsigned long totalClusters = dataSectors/sectorsPerCluster;
+        totalClusters = dataSectors/sectorsPerCluster;
         bits = (totalClusters > MAX_FAT12) ? 16 : 12;
     } else {
         type = FAT32;
@@ -170,6 +170,9 @@ void FatSystem::parseHeader()
         diskLabel = string(buffer+FAT_DISK_LABEL, FAT_DISK_LABEL_SIZE);
         rootDirectory = FAT_READ_LONG(buffer, FAT_ROOT_DIRECTORY)&0xffffffff;
         fsType = string(buffer+FAT_DISK_FS, FAT_DISK_FS_SIZE);
+	unsigned long dataSectors = totalSectors -
+            (reservedSectors + fats*sectorsPerFat);
+        totalClusters = dataSectors/sectorsPerCluster;
     }
 
     if (bytesPerSector != 512) {
@@ -663,7 +666,7 @@ bool FatSystem::init()
     bytesPerCluster = bytesPerSector*sectorsPerCluster;
     totalSize = totalSectors*bytesPerSector;
     fatSize = sectorsPerFat*bytesPerSector;
-    totalClusters = (fatSize*8)/bits;
+    // totalClusters = (fatSize*8)/bits;
     dataSize = totalClusters*bytesPerCluster;
 
     if (type == FAT16) {
@@ -860,7 +863,7 @@ void FatSystem::computeStats()
 
     freeClusters = 0;
     for (unsigned int cluster=0; cluster<totalClusters; cluster++) {
-        if (freeCluster(cluster)) {
+        if (freeCluster(cluster + 2)) {
             freeClusters++;
         }
     }

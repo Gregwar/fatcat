@@ -3,7 +3,7 @@
 /**
  * Unit testing fatcat tool
  */
-class FatcatTests extends \PHPUnit_Framework_TestCase
+class FatcatTests extends \PHPUnit\Framework\TestCase
 {
     /**
      * Testing that the usage appears
@@ -12,9 +12,9 @@ class FatcatTests extends \PHPUnit_Framework_TestCase
     {
         $result = `fatcat`;
 
-        $this->assertContains('fatcat', $result);
-        $this->assertContains('Usage', $result);
-        $this->assertContains('-i', $result);
+        $this->assertStringContainsString('fatcat', $result);
+        $this->assertStringContainsString('Usage', $result);
+        $this->assertStringContainsString('-i', $result);
 
         $this->assertEquals($result, `fatcat -h`);
     }
@@ -26,12 +26,12 @@ class FatcatTests extends \PHPUnit_Framework_TestCase
     {
         $infos = `fatcat /tmp/empty.img -i`;
 
-        $this->assertContains('FAT32', $infos);
-        $this->assertContains('mkdosfs', $infos);
-        $this->assertContains('Bytes per cluster: 512', $infos);
-        $this->assertContains('Fat size: 403456', $infos);
-        $this->assertContains('Data size: 51642368', $infos);
-        $this->assertContains('Disk size: 52428800', $infos);
+        $this->assertStringContainsString('FAT32', $infos);
+        $this->assertStringContainsString('mkdosfs', $infos);
+        $this->assertStringContainsString('Bytes per cluster: 512', $infos);
+        $this->assertStringContainsString('Fat size: 403456', $infos);
+        $this->assertStringContainsString('Data size: 51642368', $infos);
+        $this->assertStringContainsString('Disk size: 52428800', $infos);
     }
 
     /**
@@ -40,14 +40,14 @@ class FatcatTests extends \PHPUnit_Framework_TestCase
     public function testListing()
     {
         $listing = `fatcat /tmp/hello-world.img -l /`;
-        $this->assertContains('hello.txt', $listing);
-        $this->assertContains('files/', $listing);
+        $this->assertStringContainsString('hello.txt', $listing);
+        $this->assertStringContainsString('files/', $listing);
         
         $listing = `fatcat /tmp/hello-world.img -l /files/`;
-        $this->assertContains('other_file.txt', $listing);
+        $this->assertStringContainsString('other_file.txt', $listing);
 
         $listing = `fatcat /tmp/hello-world.img -l /xyz 2>&1`;
-        $this->assertContains('Error', $listing);
+        $this->assertStringContainsString('Error', $listing);
     }
 
     /**
@@ -74,17 +74,17 @@ class FatcatTests extends \PHPUnit_Framework_TestCase
     public function testDiff()
     {
         $diff = `fatcat /tmp/hello-world.img -2`;
-        $this->assertContains('FATs are exactly equals', $diff);
+        $this->assertStringContainsString('FATs are exactly equals', $diff);
 
         $diff = `fatcat /tmp/repair.img -2`;
-        $this->assertContains('FATs differs', $diff);
-        $this->assertContains('It seems mergeable', $diff);
+        $this->assertStringContainsString('FATs differs', $diff);
+        $this->assertStringContainsString('It seems mergeable', $diff);
         
         $merge = `fatcat /tmp/repair.img -m`;
-        $this->assertContains('Merging cluster 32', $merge);
+        $this->assertStringContainsString('Merging cluster 32', $merge);
 
         $diff = `fatcat /tmp/repair.img -2`;
-        $this->assertContains('FATs are exactly equals', $diff);
+        $this->assertStringContainsString('FATs are exactly equals', $diff);
     }
 
     /**
@@ -93,13 +93,13 @@ class FatcatTests extends \PHPUnit_Framework_TestCase
     public function testDeleted()
     {
         $listing = `fatcat /tmp/deleted.img -l /`;
-        $this->assertNotContains('deleted', $listing);
+        $this->assertStringNotContainsString('deleted', $listing);
         
         $listing = `fatcat /tmp/deleted.img -l / -d`;
-        $this->assertContains('deleted', $listing);
+        $this->assertStringContainsString('deleted', $listing);
         
         $listing = `fatcat /tmp/deleted.img -l /deleted -d`;
-        $this->assertContains('file.txt', $listing);
+        $this->assertStringContainsString('file.txt', $listing);
 
         $file = `fatcat /tmp/deleted.img -r /deleted/file.txt 2>/dev/null`;
         $this->assertEquals("This file was deleted!\n", $file);

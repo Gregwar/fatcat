@@ -490,18 +490,21 @@ void FatSystem::list(vector<FatEntry> &entries)
 {
     vector<FatEntry>::iterator it;
     if(this->_outputFormat ==  Json){
+        bool firstEntry = true;
         cout << "[";
         it = entries.begin();
-        FatEntry &first = *it;
         for (; it!=entries.end(); it++) {
             FatEntry &entry = *it;
 
             if (entry.isErased() && !listDeleted) {
                 continue;
             }
-            if(&entry != &first) {
+
+            if (!firstEntry) {
                 cout << ",";
             }
+            firstEntry = false;
+
             cout << "{\"EntryType\":";
             if (entry.isDirectory()) {
                 cout << "\"Directory\",";
@@ -535,7 +538,7 @@ void FatSystem::list(vector<FatEntry> &entries)
             else {
                 cout << "\"IsDeleted\":false";
             }
-            cout << "}";            
+            cout << "}";
             fflush(stdout);
         }
         cout << "]";

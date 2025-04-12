@@ -47,8 +47,8 @@ void usage()
     cout << "  -d: enable listing of deleted files" << endl;
     cout << "  -x [directory]: extract all files to a directory, deleted files included if -d" << endl;
     cout << "                  will start with rootDirectory, unless -c is provided" << endl;
-    cout << "* -S: write scamble data in unallocated sectors" << endl;
-    cout << "* -z: write scamble data in unallocated sectors" << endl;
+    cout << "* -S: write scramble data in unallocated sectors" << endl;
+    cout << "* -z: write zero data in unallocated sectors" << endl;
     cout << endl;
     cout << "FAT Hacking" << endl;
     cout << "  -@ [cluster]: Get the cluster address and information" << endl;
